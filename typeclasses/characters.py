@@ -58,7 +58,9 @@ class Character(LivingMixin, ObjectParent, DefaultCharacter):
         if self.db.is_dead is None:
             self.db.is_dead = False
         if self.db.is_dead:
-            self.cmdset.add(DeadCmdSet, permanent=True)
+            self.at_death()
+        else:
+            self.cmdset.remove(DeadCmdSet)
 
     def at_death(self):
         """Handle character-specific death effects."""
