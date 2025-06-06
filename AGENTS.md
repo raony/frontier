@@ -1,7 +1,7 @@
 - main evennia docs https://www.evennia.com/docs/latest/index.html
   - initial setup: evennia migrate
 - how to create and run unit tests: https://www.evennia.com/docs/latest/Coding/Unit-Testing.html
-  - running test: evennia test evennia
+  - running test: evennia test --settings settings.py .
 - how to run the MUD and test the commands manually:
   - evennia start
   - then telnet to localhost:4000
