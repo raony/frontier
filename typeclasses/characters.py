@@ -13,7 +13,22 @@ from evennia.objects.objects import DefaultCharacter
 from .objects import ObjectParent
 
 
-class Character(ObjectParent, DefaultCharacter):
+class LivingMixin:
+    """Common functionality for all living entities."""
+
+    is_pc = False
+
+    def at_death(self):
+        """Handle death of this entity."""
+        if self.location:
+            self.location.msg_contents(
+                "$You() collapse lifelessly.",
+                from_obj=self,
+            )
+        self.db.is_dead = True
+
+
+class Character(LivingMixin, ObjectParent, DefaultCharacter):
     """Represents the in-game character entity.
 
     Two new persistent Attributes are introduced on all characters:
@@ -22,11 +37,14 @@ class Character(ObjectParent, DefaultCharacter):
     both values.
     """
 
+    is_pc = True
+
     def at_object_creation(self):
         """Called once, when the object is first created."""
         super().at_object_creation()
         self.db.hunger = 0
         self.db.thirst = 0
+        self.db.is_dead = False
 
     def at_init(self):
         """Called whenever the typeclass is cached from memory."""
@@ -35,3 +53,5 @@ class Character(ObjectParent, DefaultCharacter):
             self.db.hunger = 0
         if self.db.thirst is None:
             self.db.thirst = 0
+        if self.db.is_dead is None:
+            self.db.is_dead = False
