@@ -14,13 +14,24 @@ from .objects import ObjectParent
 
 
 class Character(ObjectParent, DefaultCharacter):
+    """Represents the in-game character entity.
+
+    Two new persistent Attributes are introduced on all characters:
+    ``hunger`` and ``thirst``. They are integers tracking how hungry or
+    thirsty a character is. Newly created characters start at ``0`` for
+    both values.
     """
-    The Character just re-implements some of the Object's methods and hooks
-    to represent a Character entity in-game.
 
-    See mygame/typeclasses/objects.py for a list of
-    properties and methods available on all Object child classes like this.
+    def at_object_creation(self):
+        """Called once, when the object is first created."""
+        super().at_object_creation()
+        self.db.hunger = 0
+        self.db.thirst = 0
 
-    """
-
-    pass
+    def at_init(self):
+        """Called whenever the typeclass is cached from memory."""
+        super().at_init()
+        if self.db.hunger is None:
+            self.db.hunger = 0
+        if self.db.thirst is None:
+            self.db.thirst = 0
