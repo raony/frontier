@@ -13,25 +13,11 @@ class CmdDeadLook(Command):
         self.caller.msg("Everything is dark. You are dead.")
 
 
-class CmdDeadNoCommand(Command):
-    """Catch-all command blocking actions when dead."""
-
-    key = "dead_noop"
-    aliases = ["*"]
-    locks = "cmd:all()"
-    arg_regex = r".*"
-
-    def func(self):
-        self.caller.msg("You are dead and cannot do that.")
-
-
 class DeadCmdSet(CmdSet):
     """Command set for dead characters."""
 
     key = "DeadCmdSet"
     priority = 110
-    mergetype = "Replace"
 
     def at_cmdset_creation(self):
         self.add(CmdDeadLook())
-        self.add(CmdDeadNoCommand())
