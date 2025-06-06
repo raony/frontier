@@ -10,6 +10,8 @@ creation commands.
 
 from evennia.objects.objects import DefaultCharacter
 
+from commands.dead_cmdset import DeadCmdSet
+
 from .objects import ObjectParent
 
 
@@ -55,3 +57,10 @@ class Character(LivingMixin, ObjectParent, DefaultCharacter):
             self.db.thirst = 0
         if self.db.is_dead is None:
             self.db.is_dead = False
+        if self.db.is_dead:
+            self.cmdset.add(DeadCmdSet, permanent=True)
+
+    def at_death(self):
+        """Handle character-specific death effects."""
+        super().at_death()
+        self.cmdset.add(DeadCmdSet, permanent=True)
