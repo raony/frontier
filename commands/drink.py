@@ -1,4 +1,5 @@
 from evennia.commands.command import Command
+from evennia.utils.utils import inherits_from
 
 class CmdDrink(Command):
     """Drink from a nearby water source."""
@@ -18,14 +19,7 @@ class CmdDrink(Command):
         obj = caller.search(self.target, location=caller.location)
         if not obj:
             return
-        if not obj.attributes.get("is_water_source", default=False):
+        if not inherits_from(obj, "typeclasses.liquid.LiquidContainerMixin") or not obj.has_liquid():
             caller.msg("You can't drink from that.")
             return
-        caller.decrease_thirst(20)
-        caller.msg(f"You drink from {obj.get_display_name(caller)}.")
-        if caller.location:
-            caller.location.msg_contents(
-                f"$You() $conj(drink) from {obj.get_display_name(caller.location)}.",
-                exclude=caller,
-                from_obj=caller,
-            )
+        obj.drink_liquid(caller)
