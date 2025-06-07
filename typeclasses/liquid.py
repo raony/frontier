@@ -31,6 +31,37 @@ class LiquidContainerMixin:
             return self.db.liquid_capacity or 0
         return self.db.liquid_amount or 0
 
+    def _get_fill_state(self) -> str:
+        """Return a short text describing how full the container is."""
+        if self.db.is_water_source:
+            return "full"
+
+        capacity = self.db.liquid_capacity or 0
+        amount = self.db.liquid_amount or 0
+        if capacity <= 0 or amount <= 0:
+            return "empty"
+
+        ratio = amount / capacity
+        if ratio < 0.15:
+            return "almost empty"
+        if ratio < 0.375:
+            return "1/4 full"
+        if ratio < 0.625:
+            return "1/2 full"
+        if ratio < 0.875:
+            return "3/4 full"
+        if ratio < 1:
+            return "almost full"
+        return "full"
+
+    def get_display_desc(self, looker, **kwargs):
+        """Return description including the container fill state."""
+        desc = super().get_display_desc(looker, **kwargs)
+        fill_state = self._get_fill_state()
+        if desc:
+            return f"{desc} It is {fill_state}."
+        return f"It is {fill_state}."
+
     # Actions
     def fill_liquid(self, liquid: str, filler=None):
         """Fill this container with `liquid`."""
