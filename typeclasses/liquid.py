@@ -73,7 +73,7 @@ class LiquidContainerMixin:
     def drink_liquid(self, drinker, amount: int = 1):
         """Consume liquid from this container."""
         if not self.has_liquid():
-            drinker.msg("The container is empty.")
+            drinker.msg(f"{self.get_display_name(drinker)} is empty.")
             return
         if utils.inherits_from(drinker, "typeclasses.characters.LivingMixin"):
             drinker.decrease_thirst(20)
