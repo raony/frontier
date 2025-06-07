@@ -5,37 +5,38 @@ from evennia.utils.utils import inherits_from
 
 
 class CmdFill(Command):
-    """Fill a container with a liquid.
+    """Fill one liquid container from another.
 
     Usage:
-      fill <container>=<liquid>
+      fill <dest> <source>
     """
 
     key = "fill"
     locks = "cmd:all()"
 
     def parse(self):
-        if "=" in self.args:
-            container, liquid = [part.strip() for part in self.args.split("=", 1)]
+        parts = self.args.rsplit(" ", 1)
+        if len(parts) == 2:
+            self.dest_name = parts[0].strip()
+            self.source_name = parts[1].strip()
         else:
-            container, liquid = self.args.strip(), ""
-        self.container_name = container
-        self.liquid = liquid
+            self.dest_name = self.args.strip()
+            self.source_name = ""
 
     def func(self):
-        if not self.container_name:
-            self.caller.msg("Fill what?")
+        if not self.dest_name or not self.source_name:
+            self.caller.msg("Usage: fill <dest> <source>")
             return
-        container = self.caller.search(self.container_name)
-        if not container:
+        dest = self.caller.search(self.dest_name)
+        if not dest:
             return
-        if not inherits_from(container, "typeclasses.liquid.LiquidContainerMixin"):
-            self.caller.msg("You can't fill that.")
+        source = self.caller.search(self.source_name)
+        if not source:
             return
-        if not self.liquid:
-            self.caller.msg("Fill it with what?")
+        if not (inherits_from(dest, "typeclasses.liquid.LiquidContainerMixin") and inherits_from(source, "typeclasses.liquid.LiquidContainerMixin")):
+            self.caller.msg("Both objects must be liquid containers.")
             return
-        container.fill_liquid(self.liquid, filler=self.caller)
+        dest.fill_from_container(source, filler=self.caller)
 
 
 class CmdEmpty(Command):
