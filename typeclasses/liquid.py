@@ -73,7 +73,7 @@ class LiquidContainerMixin:
     def drink_liquid(self, drinker, amount: int = 1):
         """Consume liquid from this container."""
         if not self.has_liquid():
-            drinker.msg(f"{self.get_display_name(drinker)} is empty.")
+            drinker.msg("The container is empty.")
             return
         if utils.inherits_from(drinker, "typeclasses.characters.LivingMixin"):
             drinker.decrease_thirst(20)
@@ -114,7 +114,10 @@ class LiquidContainerMixin:
                 filler.msg(f"{self.get_display_name(filler)} is already full.")
             return
 
-        transfer = min(available, source.get_liquid_amount())
+        if source.db.is_water_source:
+            transfer = available
+        else:
+            transfer = min(available, source.get_liquid_amount())
         self.db.liquid = source.get_liquid()
         self.db.liquid_amount = (self.db.liquid_amount or 0) + transfer
         if not source.db.is_water_source:
