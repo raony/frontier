@@ -159,12 +159,13 @@ class LivingMixin:
             if not script.is_active:
                 script.start()
         else:
-            self.scripts.add(
+            script = self.scripts.add(
                 "typeclasses.scripts.MetabolismScript",
                 key="metabolism_script",
-                interval=interval,
-                persistent=True,
             )
+            if script:
+                script.interval = interval
+                script.persistent = True
 
     def stop_metabolism_script(self) -> None:
         """Stop the metabolism script if it exists."""
