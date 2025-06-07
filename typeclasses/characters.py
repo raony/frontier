@@ -39,9 +39,9 @@ class LivingMixin:
         """Called whenever the typeclass is cached from memory."""
         super().at_init()
         if self.db.hunger is None:
-            self.db.hunger = 0
+            self.db.hunger = 0.0
         if self.db.thirst is None:
-            self.db.thirst = 0
+            self.db.thirst = 0.0
         if self.db.is_dead is None:
             self.db.is_dead = False
         if self.db.is_living:
@@ -61,22 +61,22 @@ class LivingMixin:
         self.stop_metabolism_script()
 
     # Hunger/thirst management
-    def increase_hunger(self, amount: int = 1) -> None:
+    def increase_hunger(self, amount: float = 0.3) -> None:
         """Increase hunger and check for death."""
         self.db.hunger = (self.db.hunger or 0) + amount
         self.update_living_status()
 
-    def decrease_hunger(self, amount: int = 1) -> None:
+    def decrease_hunger(self, amount: float = 1) -> None:
         """Decrease hunger, not going below zero."""
         self.db.hunger = max((self.db.hunger or 0) - amount, 0)
         self.update_living_status()
 
-    def increase_thirst(self, amount: int = 1) -> None:
+    def increase_thirst(self, amount: float = 1.4) -> None:
         """Increase thirst and check for death."""
         self.db.thirst = (self.db.thirst or 0) + amount
         self.update_living_status()
 
-    def decrease_thirst(self, amount: int = 1) -> None:
+    def decrease_thirst(self, amount: float = 1) -> None:
         """Decrease thirst, not going below zero."""
         self.db.thirst = max((self.db.thirst or 0) - amount, 0)
         self.update_living_status()
@@ -92,7 +92,7 @@ class LivingMixin:
     def get_metabolism_interval(self) -> float:
         """Return real-time seconds per hunger tick based on metabolism."""
         metabolism = self.db.metabolism or 1.0
-        return 3600 / (6 * metabolism)
+        return 600 / (metabolism)
 
     def start_metabolism_script(self) -> None:
         """Start or update the metabolism script if needed."""
