@@ -215,3 +215,13 @@ class Object(ObjectParent, DefaultObject):
     """
 
     pass
+
+
+class WaterSource(Object):
+    """An object representing a source of drinkable water."""
+
+    def at_object_creation(self):
+        super().at_object_creation()
+        self.db.is_water_source = True
+        self.locks.add("get:false()")
+
