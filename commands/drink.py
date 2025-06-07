@@ -22,6 +22,7 @@ class CmdDrink(Command):
             typeclass="typeclasses.liquid.LiquidContainerMixin",
         )
         if not objs:
+            caller.msg("You can't drink from that.")
             return
         obj = objs[0]
         obj.drink_liquid(caller)
