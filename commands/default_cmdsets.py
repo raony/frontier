@@ -31,6 +31,8 @@ class CharacterCmdSet(default_cmds.CharacterCmdSet):
         Populates the cmdset
         """
         super().at_cmdset_creation()
+        from .comer import CmdComer
+        self.add(CmdComer())
         #
         # any commands you add below will overload the default ones.
         #
