@@ -25,6 +25,7 @@ class LivingMixin:
         super().at_object_creation()
         self.db.hunger = 0
         self.db.thirst = 0
+        self.db.tiredness = 0
         self.db.is_dead = False
         self.db.is_living = True
         self.db.metabolism = 1.0
@@ -42,6 +43,8 @@ class LivingMixin:
             self.db.hunger = 0.0
         if self.db.thirst is None:
             self.db.thirst = 0.0
+        if self.db.tiredness is None:
+            self.db.tiredness = 0.0
         if self.db.is_dead is None:
             self.db.is_dead = False
         if self.db.is_living:
@@ -60,7 +63,7 @@ class LivingMixin:
         self.db.is_living = False
         self.stop_metabolism_script()
 
-    # Hunger/thirst management helpers
+    # Hunger/thirst/tiredness management helpers
     def _hunger_level(self) -> int:
         """Return the current hunger level step."""
         hunger = self.db.hunger or 0
@@ -109,7 +112,31 @@ class LivingMixin:
                 self.msg("You're gonna die of thirst.")
             self.ndb.thirst_msg_level = level
 
-    # Hunger/thirst management
+    def _tiredness_level(self) -> int:
+        """Return the current tiredness level step."""
+        tiredness = self.db.tiredness or 0
+        if tiredness >= 60:
+            return 3
+        if tiredness >= 30:
+            return 2
+        if tiredness >= 7:
+            return 1
+        return 0
+
+    def _notify_tiredness(self) -> None:
+        """Send tiredness warning messages when levels change."""
+        level = self._tiredness_level()
+        last = getattr(self.ndb, "tiredness_msg_level", None)
+        if level != last:
+            if level == 1:
+                self.msg("You feel tired.")
+            elif level == 2:
+                self.msg("You are exhausted.")
+            elif level == 3:
+                self.msg("You're about to collapse.")
+            self.ndb.tiredness_msg_level = level
+
+    # Hunger/thirst/tiredness management
     def increase_hunger(self, amount: float = 0.3) -> None:
         """Increase hunger and check for death."""
         self.db.hunger = (self.db.hunger or 0) + amount
@@ -134,16 +161,32 @@ class LivingMixin:
         self._notify_thirst()
         self.update_living_status()
 
+    def increase_tiredness(self, amount: float = 0.5) -> None:
+        """Increase tiredness and check for death."""
+        self.db.tiredness = (self.db.tiredness or 0) + amount
+        self._notify_tiredness()
+        self.update_living_status()
+
+    def decrease_tiredness(self, amount: float = 1) -> None:
+        """Decrease tiredness, not going below zero."""
+        self.db.tiredness = max((self.db.tiredness or 0) - amount, 0)
+        self._notify_tiredness()
+        self.update_living_status()
+
     def update_living_status(self) -> None:
-        """Check if this entity should die based on hunger or thirst."""
+        """Check if this entity should die based on vital stats."""
         if self.db.is_dead:
             return
-        if (self.db.hunger or 0) >= 100 or (self.db.thirst or 0) >= 100:
+        if (
+            (self.db.hunger or 0) >= 100
+            or (self.db.thirst or 0) >= 100
+            or (self.db.tiredness or 0) >= 100
+        ):
             self.at_death()
 
     # Metabolism script management
     def get_metabolism_interval(self) -> float:
-        """Return real-time seconds per hunger tick based on metabolism."""
+        """Return real-time seconds per metabolism tick based on rate."""
         metabolism = self.db.metabolism or 1.0
         return 600 / (metabolism)
 
@@ -177,10 +220,10 @@ class LivingMixin:
 class Character(LivingMixin, ObjectParent, DefaultCharacter):
     """Represents the in-game character entity.
 
-    Two new persistent Attributes are introduced on all characters:
-    ``hunger`` and ``thirst``. They are integers tracking how hungry or
-    thirsty a character is. Newly created characters start at ``0`` for
-    both values.
+    Three persistent Attributes are introduced on all characters:
+    ``hunger``, ``thirst`` and ``tiredness``. They are integers tracking
+    how hungry, thirsty or tired a character is. Newly created characters
+    start at ``0`` for all values.
     """
 
     is_pc = True
