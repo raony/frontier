@@ -6,3 +6,5 @@
   - evennia start
   - then telnet to localhost:4000
 - Do not add the codex chat link to the PRs
+- All code, commit messages, command names and any repository text must be in
+  English only. Do not use Portuguese.
