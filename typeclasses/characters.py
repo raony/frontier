@@ -26,6 +26,9 @@ class LivingMixin:
         self.db.hunger = 0
         self.db.thirst = 0
         self.db.is_dead = False
+        self.db.is_living = True
+        self.db.metabolism = 1.0
+        self.start_metabolism_script()
 
     def at_init(self):
         """Called whenever the typeclass is cached from memory."""
@@ -36,6 +39,10 @@ class LivingMixin:
             self.db.thirst = 0
         if self.db.is_dead is None:
             self.db.is_dead = False
+        if self.db.is_living:
+            self.start_metabolism_script()
+        else:
+            self.stop_metabolism_script()
 
     def at_death(self):
         """Handle death of this entity."""
@@ -45,6 +52,8 @@ class LivingMixin:
                 from_obj=self,
             )
         self.db.is_dead = True
+        self.db.is_living = False
+        self.stop_metabolism_script()
 
     # Hunger/thirst management
     def increase_hunger(self, amount: int = 1) -> None:
@@ -73,6 +82,37 @@ class LivingMixin:
             return
         if (self.db.hunger or 0) >= 100 or (self.db.thirst or 0) >= 100:
             self.at_death()
+
+    # Metabolism script management
+    def get_metabolism_interval(self) -> float:
+        """Return real-time seconds per hunger tick based on metabolism."""
+        metabolism = self.db.metabolism or 1.0
+        return 3600 / (6 * metabolism)
+
+    def start_metabolism_script(self) -> None:
+        """Start or update the metabolism script if needed."""
+        if not self.db.is_living:
+            return
+        existing = self.scripts.get("metabolism_script")
+        interval = self.get_metabolism_interval()
+        if existing:
+            script = existing[0]
+            script.interval = interval
+            if not script.is_active:
+                script.start()
+        else:
+            self.scripts.add(
+                "typeclasses.scripts.MetabolismScript",
+                key="metabolism_script",
+                interval=interval,
+                persistent=True,
+            )
+
+    def stop_metabolism_script(self) -> None:
+        """Stop the metabolism script if it exists."""
+        for script in self.scripts.get("metabolism_script"):
+            script.stop()
+            script.delete()
 
 
 class Character(LivingMixin, ObjectParent, DefaultCharacter):
