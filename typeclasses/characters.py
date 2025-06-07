@@ -186,9 +186,14 @@ class LivingMixin:
 
     # Metabolism script management
     def get_metabolism_interval(self) -> float:
-        """Return real-time seconds per metabolism tick based on rate."""
-        metabolism = self.db.metabolism or 1.0
-        return 600 / (metabolism)
+        """Return real-time seconds per metabolism tick.
+
+        The metabolism rate increases with tiredness so that higher
+        tiredness results in more frequent metabolism ticks.
+        """
+        tiredness = self.db.tiredness or 0
+        metabolism = 1 + (tiredness / 50)
+        return 600 / metabolism
 
     def start_metabolism_script(self) -> None:
         """Start or update the metabolism script if needed."""
