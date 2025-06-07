@@ -1,6 +1,7 @@
 """Commands for interacting with LiquidContainerMixin objects."""
 
 from evennia.commands.command import Command
+from evennia.utils.utils import inherits_from
 
 
 class CmdFill(Command):
@@ -28,7 +29,7 @@ class CmdFill(Command):
         container = self.caller.search(self.container_name)
         if not container:
             return
-        if not hasattr(container, "fill_liquid"):
+        if not inherits_from(container, "typeclasses.liquid.LiquidContainerMixin"):
             self.caller.msg("You can't fill that.")
             return
         if not self.liquid:
@@ -57,7 +58,7 @@ class CmdEmpty(Command):
         container = self.caller.search(self.container_name)
         if not container:
             return
-        if not hasattr(container, "empty_liquid"):
+        if not inherits_from(container, "typeclasses.liquid.LiquidContainerMixin"):
             self.caller.msg("You can't empty that.")
             return
         container.empty_liquid(emptier=self.caller)
