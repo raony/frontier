@@ -19,7 +19,9 @@ class CmdDrink(Command):
         obj = caller.search(self.target, location=caller.location)
         if not obj:
             return
-        if not inherits_from(obj, "typeclasses.liquid.LiquidContainerMixin") or not obj.has_liquid():
+        if not inherits_from(obj, "typeclasses.liquid.LiquidContainerMixin"):
             caller.msg("You can't drink from that.")
             return
+        if not obj.has_liquid():
+            caller.msg(f"{obj.get_display_name(caller)} is empty.")
         obj.drink_liquid(caller)
