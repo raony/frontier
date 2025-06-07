@@ -13,14 +13,30 @@ from .objects import ObjectParent
 
 
 class Exit(ObjectParent, DefaultExit):
-    """
-    Exits are connectors between rooms. Exits are normal Objects except
-    they defines the `destination` property and overrides some hooks
-    and methods to represent the exits.
-
-    See mygame/typeclasses/objects.py for a list of
-    properties and methods available on all Objects child classes like this.
-
-    """
+    """Base exit connecting two rooms."""
 
     pass
+
+
+class EasyExit(Exit):
+    """Exit that requires little effort to traverse."""
+
+    tiredness_cost = 10
+
+    def at_post_traverse(self, traversing_object, source_location, **kwargs):
+        """Increase tiredness when traversed."""
+        super().at_post_traverse(traversing_object, source_location, **kwargs)
+        if hasattr(traversing_object, "increase_tiredness"):
+            traversing_object.increase_tiredness(self.tiredness_cost)
+
+
+class HardExit(Exit):
+    """Exit that requires a lot of effort to traverse."""
+
+    tiredness_cost = 30
+
+    def at_post_traverse(self, traversing_object, source_location, **kwargs):
+        """Increase tiredness when traversed."""
+        super().at_post_traverse(traversing_object, source_location, **kwargs)
+        if hasattr(traversing_object, "increase_tiredness"):
+            traversing_object.increase_tiredness(self.tiredness_cost)
