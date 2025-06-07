@@ -28,6 +28,11 @@ class LivingMixin:
         self.db.is_dead = False
         self.db.is_living = True
         self.db.metabolism = 1.0
+
+    def at_object_post_creation(self):
+        """Called after initial creation and attribute setup."""
+        super().at_object_post_creation()
+
         self.start_metabolism_script()
 
     def at_init(self):
