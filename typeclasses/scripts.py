@@ -101,3 +101,22 @@ class Script(DefaultScript):
     """
 
     pass
+
+
+class MetabolismScript(DefaultScript):
+    """Regularly increase hunger and thirst on a living object."""
+
+    def at_script_creation(self):
+        """Called once when first created."""
+        self.key = "metabolism_script"
+        self.persistent = True
+        self.interval = self.obj.get_metabolism_interval()
+
+    def at_repeat(self):
+        """Increase hunger and thirst each tick."""
+        if not self.obj.db.is_living:
+            return
+        self.obj.increase_hunger()
+        self.obj.increase_thirst()
+        # update interval in case metabolism changed
+        self.interval = self.obj.get_metabolism_interval()
