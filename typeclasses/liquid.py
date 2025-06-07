@@ -1,6 +1,7 @@
 """Liquid container mixin."""
 
 from evennia.utils import utils
+from .objects import Object
 
 
 class LiquidContainerMixin:
@@ -87,3 +88,14 @@ class LiquidContainerMixin:
                 f"{drinker.get_display_name(location)} drinks from {self.get_display_name(location)}.",
                 exclude=drinker,
             )
+
+
+class LiquidContainer(LiquidContainerMixin, Object):
+    """Simple container that starts full of water."""
+
+    def at_object_creation(self):
+        super().at_object_creation()
+        self.db.liquid_capacity = 100
+        self.db.liquid_amount = 100
+        if self.db.liquid is None:
+            self.db.liquid = "water"
