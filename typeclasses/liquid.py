@@ -89,6 +89,50 @@ class LiquidContainerMixin:
                 exclude=drinker,
             )
 
+    def fill_from_container(self, source, filler=None):
+        """Fill this container using another container as the source."""
+        if self.db.is_water_source:
+            if filler:
+                filler.msg(f"You can't fill {self.get_display_name(filler)}.")
+            return
+        if not utils.inherits_from(source, "typeclasses.liquid.LiquidContainerMixin"):
+            if filler:
+                filler.msg("You can't fill from that.")
+            return
+        if not source.has_liquid():
+            if filler:
+                filler.msg(f"{source.get_display_name(filler)} is empty.")
+            return
+        if self.has_liquid() and self.get_liquid() != source.get_liquid():
+            if filler:
+                filler.msg("The liquids don't match.")
+            return
+
+        available = (self.db.liquid_capacity or 0) - (self.db.liquid_amount or 0)
+        if available <= 0:
+            if filler:
+                filler.msg(f"{self.get_display_name(filler)} is already full.")
+            return
+
+        transfer = min(available, source.get_liquid_amount())
+        self.db.liquid = source.get_liquid()
+        self.db.liquid_amount = (self.db.liquid_amount or 0) + transfer
+        if not source.db.is_water_source:
+            source.db.liquid_amount = max((source.db.liquid_amount or 0) - transfer, 0)
+            if source.db.liquid_amount == 0:
+                source.db.liquid = None
+
+        if filler:
+            filler.msg(
+                f"You fill {self.get_display_name(filler)} from {source.get_display_name(filler)}."
+            )
+            location = self.location or filler.location
+            if location:
+                location.msg_contents(
+                    f"{filler.get_display_name(location)} fills {self.get_display_name(location)} from {source.get_display_name(location)}.",
+                    exclude=filler,
+                )
+
 
 class LiquidContainer(LiquidContainerMixin, Object):
     """Simple container that starts full of water."""
@@ -99,3 +143,4 @@ class LiquidContainer(LiquidContainerMixin, Object):
         self.db.liquid_amount = 100
         if self.db.liquid is None:
             self.db.liquid = "water"
+
