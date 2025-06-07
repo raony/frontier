@@ -26,6 +26,7 @@ class LivingMixin:
         self.db.hunger = 0
         self.db.thirst = 0
         self.db.tiredness = 0
+        self.db.is_resting = False
         self.db.is_dead = False
         self.db.is_living = True
         self.db.metabolism = 1.0
@@ -45,6 +46,8 @@ class LivingMixin:
             self.db.thirst = 0.0
         if self.db.tiredness is None:
             self.db.tiredness = 0.0
+        if self.db.is_resting is None:
+            self.db.is_resting = False
         if self.db.is_dead is None:
             self.db.is_dead = False
         if self.db.is_living:
@@ -61,6 +64,7 @@ class LivingMixin:
             )
         self.db.is_dead = True
         self.db.is_living = False
+        self.db.is_resting = False
         self.stop_metabolism_script()
 
     # Hunger/thirst/tiredness management helpers
