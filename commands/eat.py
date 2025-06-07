@@ -1,5 +1,4 @@
 """Eat command for consuming Food objects."""
-from evennia.utils.utils import inherits_from
 
 from .command import Command
 
@@ -17,17 +16,16 @@ class CmdEat(Command):
             caller.msg("What do you want to eat?")
             return
 
-        obj = caller.search(
+        objs = caller.search(
             self.args,
             location=caller,
             candidates=caller.contents + caller.location.contents,
+            quiet=True,
+            typeclass="typeclasses.food.FoodMixin",
         )
-        if not obj:
+        if not objs:
             return
-
-        if not inherits_from(obj, "typeclasses.food.FoodMixin"):
-            caller.msg("You can't eat that.")
-            return
+        obj = objs[0]
 
         obj.eat(caller)
 

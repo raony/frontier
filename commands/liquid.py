@@ -29,7 +29,7 @@ class CmdFill(Command):
         dest_candidates = self.caller.search(
             self.dest_name,
             quiet=True,
-            typeclass="typeclasses.liquid.LiquidContainerMixin",
+            typeclass="typeclasses.food.FoodMixin",
         )
         if not dest_candidates:
             self.caller.msg("You can't fill that.")
@@ -37,7 +37,7 @@ class CmdFill(Command):
         source_candidates = self.caller.search(
             self.source_name,
             quiet=True,
-            typeclass="typeclasses.liquid.LiquidContainerMixin",
+            typeclass="typeclasses.food.FoodMixin",
         )
         if not source_candidates:
             self.caller.msg("You can't fill from that.")
@@ -67,7 +67,7 @@ class CmdEmpty(Command):
         container_candidates = self.caller.search(
             self.container_name,
             quiet=True,
-            typeclass="typeclasses.liquid.LiquidContainerMixin",
+            typeclass="typeclasses.food.FoodMixin",
         )
         if not container_candidates:
             self.caller.msg("You can't empty that.")
