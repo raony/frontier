@@ -22,4 +22,6 @@ class CmdDrink(Command):
         if not inherits_from(obj, "typeclasses.liquid.LiquidContainerMixin"):
             caller.msg("You can't drink from that.")
             return
+        if not obj.has_liquid():
+            caller.msg(f"{obj.get_display_name(caller)} is empty.")
         obj.drink_liquid(caller)
