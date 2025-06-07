@@ -60,25 +60,78 @@ class LivingMixin:
         self.db.is_living = False
         self.stop_metabolism_script()
 
+    # Hunger/thirst management helpers
+    def _hunger_level(self) -> int:
+        """Return the current hunger level step."""
+        hunger = self.db.hunger or 0
+        if hunger >= 60:
+            return 3
+        if hunger >= 30:
+            return 2
+        if hunger >= 7:
+            return 1
+        return 0
+
+    def _notify_hunger(self) -> None:
+        """Send hunger warning messages when levels change."""
+        level = self._hunger_level()
+        last = getattr(self.ndb, "hunger_msg_level", None)
+        if level != last:
+            if level == 1:
+                self.msg("You feel hungry.")
+            elif level == 2:
+                self.msg("You're starving.")
+            elif level == 3:
+                self.msg("You're gonna die.")
+            self.ndb.hunger_msg_level = level
+
+    def _thirst_level(self) -> int:
+        """Return the current thirst level step."""
+        thirst = self.db.thirst or 0
+        if thirst >= 60:
+            return 3
+        if thirst >= 30:
+            return 2
+        if thirst >= 7:
+            return 1
+        return 0
+
+    def _notify_thirst(self) -> None:
+        """Send thirst warning messages when levels change."""
+        level = self._thirst_level()
+        last = getattr(self.ndb, "thirst_msg_level", None)
+        if level != last:
+            if level == 1:
+                self.msg("You feel thirsty.")
+            elif level == 2:
+                self.msg("You're starving for water.")
+            elif level == 3:
+                self.msg("You're gonna die of thirst.")
+            self.ndb.thirst_msg_level = level
+
     # Hunger/thirst management
     def increase_hunger(self, amount: float = 0.3) -> None:
         """Increase hunger and check for death."""
         self.db.hunger = (self.db.hunger or 0) + amount
+        self._notify_hunger()
         self.update_living_status()
 
     def decrease_hunger(self, amount: float = 1) -> None:
         """Decrease hunger, not going below zero."""
         self.db.hunger = max((self.db.hunger or 0) - amount, 0)
+        self._notify_hunger()
         self.update_living_status()
 
     def increase_thirst(self, amount: float = 1.4) -> None:
         """Increase thirst and check for death."""
         self.db.thirst = (self.db.thirst or 0) + amount
+        self._notify_thirst()
         self.update_living_status()
 
     def decrease_thirst(self, amount: float = 1) -> None:
         """Decrease thirst, not going below zero."""
         self.db.thirst = max((self.db.thirst or 0) - amount, 0)
+        self._notify_thirst()
         self.update_living_status()
 
     def update_living_status(self) -> None:
