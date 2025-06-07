@@ -40,16 +40,17 @@ class LivingMixin:
     def at_init(self):
         """Called whenever the typeclass is cached from memory."""
         super().at_init()
-        if self.db.hunger is None:
-            self.db.hunger = 0.0
-        if self.db.thirst is None:
-            self.db.thirst = 0.0
-        if self.db.tiredness is None:
-            self.db.tiredness = 0.0
-        if self.db.is_resting is None:
-            self.db.is_resting = False
-        if self.db.is_dead is None:
-            self.db.is_dead = False
+        if self.pk:
+            if self.db.hunger is None:
+                self.db.hunger = 0.0
+            if self.db.thirst is None:
+                self.db.thirst = 0.0
+            if self.db.tiredness is None:
+                self.db.tiredness = 0.0
+            if self.db.is_resting is None:
+                self.db.is_resting = False
+            if self.db.is_dead is None:
+                self.db.is_dead = False
         if self.db.is_living:
             self.start_metabolism_script()
         else:
