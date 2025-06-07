@@ -32,6 +32,7 @@ class LivingMixin:
     def at_object_post_creation(self):
         """Called after initial creation and attribute setup."""
         super().at_object_post_creation()
+
         self.start_metabolism_script()
 
     def at_init(self):
