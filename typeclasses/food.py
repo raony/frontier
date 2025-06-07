@@ -22,7 +22,7 @@ class FoodMixin:
         eater.msg(f"You eat {self.key}.")
         if self.location:
             self.location.msg_contents(
-                f"$You() eats {self.get_display_name(self.location, looker=eater)}.",
+                f"$You() eats {self.get_display_name(eater)}.",
                 from_obj=eater,
                 exclude=eater,
             )
