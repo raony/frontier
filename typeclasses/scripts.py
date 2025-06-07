@@ -118,6 +118,11 @@ class MetabolismScript(DefaultScript):
             return
         self.obj.increase_hunger()
         self.obj.increase_thirst()
-        self.obj.increase_tiredness()
+        if self.obj.db.is_resting:
+            tiredness = self.obj.db.tiredness or 0
+            recovery = 1 + tiredness / 20
+            self.obj.decrease_tiredness(recovery)
+        else:
+            self.obj.increase_tiredness()
         # update interval in case metabolism changed
         self.interval = self.obj.get_metabolism_interval()

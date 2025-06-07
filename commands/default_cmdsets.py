@@ -18,6 +18,7 @@ from evennia import default_cmds
 from .drink import CmdDrink
 from .eat import CmdEat
 from .liquid import CmdFill, CmdEmpty
+from .rest import CmdRest
 
 
 class CharacterCmdSet(default_cmds.CharacterCmdSet):
@@ -42,6 +43,7 @@ class CharacterCmdSet(default_cmds.CharacterCmdSet):
         self.add(CmdFill())
         self.add(CmdEmpty())
         self.add(CmdDrink())
+        self.add(CmdRest())
 
 
 class AccountCmdSet(default_cmds.AccountCmdSet):
