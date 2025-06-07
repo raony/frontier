@@ -16,7 +16,11 @@ class CmdDrink(Command):
         if not self.target:
             caller.msg("Drink from what?")
             return
-        obj = caller.search(self.target, location=caller.location)
+        obj = caller.search(
+            self.target,
+            location=caller,
+            candidates=caller.contents + caller.location.contents,
+        )
         if not obj:
             return
         if not inherits_from(obj, "typeclasses.liquid.LiquidContainerMixin"):
