@@ -1,7 +1,6 @@
 """Commands for interacting with LiquidContainerMixin objects."""
 
 from evennia.commands.command import Command
-from evennia.utils.utils import inherits_from
 
 
 class CmdFill(Command):
@@ -27,15 +26,24 @@ class CmdFill(Command):
         if not self.dest_name or not self.source_name:
             self.caller.msg("Usage: fill <dest> <source>")
             return
-        dest = self.caller.search(self.dest_name)
-        if not dest:
+        dest_candidates = self.caller.search(
+            self.dest_name,
+            quiet=True,
+            typeclass="typeclasses.liquid.LiquidContainerMixin",
+        )
+        if not dest_candidates:
+            self.caller.msg("You can't fill that.")
             return
-        source = self.caller.search(self.source_name)
-        if not source:
+        source_candidates = self.caller.search(
+            self.source_name,
+            quiet=True,
+            typeclass="typeclasses.liquid.LiquidContainerMixin",
+        )
+        if not source_candidates:
+            self.caller.msg("You can't fill from that.")
             return
-        if not (inherits_from(dest, "typeclasses.liquid.LiquidContainerMixin") and inherits_from(source, "typeclasses.liquid.LiquidContainerMixin")):
-            self.caller.msg("Both objects must be liquid containers.")
-            return
+        dest = dest_candidates[0]
+        source = source_candidates[0]
         dest.fill_from_container(source, filler=self.caller)
 
 
@@ -56,10 +64,13 @@ class CmdEmpty(Command):
         if not self.container_name:
             self.caller.msg("Empty what?")
             return
-        container = self.caller.search(self.container_name)
-        if not container:
-            return
-        if not inherits_from(container, "typeclasses.liquid.LiquidContainerMixin"):
+        container_candidates = self.caller.search(
+            self.container_name,
+            quiet=True,
+            typeclass="typeclasses.liquid.LiquidContainerMixin",
+        )
+        if not container_candidates:
             self.caller.msg("You can't empty that.")
             return
+        container = container_candidates[0]
         container.empty_liquid(emptier=self.caller)
