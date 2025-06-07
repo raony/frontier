@@ -16,7 +16,7 @@ own cmdsets by inheriting from them or directly from `evennia.CmdSet`.
 
 from evennia import default_cmds
 from .drink import CmdDrink
-from .comer import CmdComer
+from .eat import CmdEat
 from .liquid import CmdFill, CmdEmpty
 
 
@@ -38,7 +38,7 @@ class CharacterCmdSet(default_cmds.CharacterCmdSet):
         #
         # any commands you add below will overload the default ones.
         #
-        self.add(CmdComer())
+        self.add(CmdEat())
         self.add(CmdFill())
         self.add(CmdEmpty())
         self.add(CmdDrink())
