@@ -39,10 +39,6 @@ class LivingMixin:
             self.db.thirst = 0
         if self.db.is_dead is None:
             self.db.is_dead = False
-        if self.db.is_living is None:
-            self.db.is_living = True
-        if self.db.metabolism is None:
-            self.db.metabolism = 1.0
         if self.db.is_living:
             self.start_metabolism_script()
         else:
