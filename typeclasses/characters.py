@@ -9,6 +9,7 @@ creation commands.
 """
 
 from evennia.objects.objects import DefaultCharacter
+from evennia import AttributeProperty
 
 from commands.dead_cmdset import DeadCmdSet
 
@@ -20,16 +21,18 @@ class LivingMixin:
 
     is_pc = False
 
+    hunger = AttributeProperty(default=0.0)
+    thirst = AttributeProperty(default=0.0)
+    tiredness = AttributeProperty(default=0.0)
+    is_resting = AttributeProperty(default=False)
+    is_dead = AttributeProperty(default=False)
+    is_living = AttributeProperty(default=True)
+    metabolism = AttributeProperty(default=1.0)
+
     def at_object_creation(self):
         """Called once, when the object is first created."""
         super().at_object_creation()
-        self.db.hunger = 0
-        self.db.thirst = 0
-        self.db.tiredness = 0
-        self.db.is_resting = False
-        self.db.is_dead = False
-        self.db.is_living = True
-        self.db.metabolism = 1.0
+        # Attribute defaults are handled by AttributeProperty
 
     def at_object_post_creation(self):
         """Called after initial creation and attribute setup."""
@@ -40,21 +43,11 @@ class LivingMixin:
     def at_init(self):
         """Called whenever the typeclass is cached from memory."""
         super().at_init()
-        if self.pk:
-            if self.db.hunger is None:
-                self.db.hunger = 0.0
-            if self.db.thirst is None:
-                self.db.thirst = 0.0
-            if self.db.tiredness is None:
-                self.db.tiredness = 0.0
-            if self.db.is_resting is None:
-                self.db.is_resting = False
-            if self.db.is_dead is None:
-                self.db.is_dead = False
-        if self.db.is_living:
-            self.start_metabolism_script()
-        else:
-            self.stop_metabolism_script()
+        if self.pk and getattr(self._state, "db", None):
+            if self.is_living:
+                self.start_metabolism_script()
+            else:
+                self.stop_metabolism_script()
 
     def at_death(self):
         """Handle death of this entity."""
