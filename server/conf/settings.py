@@ -27,6 +27,9 @@ put secret game- or server-specific settings in secret_settings.py.
 # Use the defaults from Evennia unless explicitly overridden
 from evennia.settings_default import *
 
+# Register world app for custom database models
+INSTALLED_APPS += ["world"]
+
 ######################################################################
 # Evennia base server config
 ######################################################################
