@@ -8,3 +8,9 @@
 - Do not add the codex chat link to the PRs
 - All code, commit messages, command names and any repository text must be in
   English only. Do not use Portuguese.
+- Hexagons represent regions on the world map and each hexagon measures roughly
+  three miles in diameter.
+- Biomes assigned to a hexagon should make sense in relation to its
+  neighboring hexagons.
+- Every hexagon must include one biome and one distinctive feature such as a
+  unique tree, prominent rock, creek, spring or a river crossing.
