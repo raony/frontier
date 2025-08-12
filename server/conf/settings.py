@@ -45,3 +45,13 @@ try:
     from server.conf.secret_settings import *
 except ImportError:
     print("secret_settings.py file not found or failed to import.")
+
+######################################################################
+# Game time configuration
+######################################################################
+
+# In-game time runs 6× faster than real time (1 real hour = 6 in-game hours)
+TIME_FACTOR = 6.0
+
+# Optional: Define a custom epoch for game time (None uses real epoch)
+# TIME_GAME_EPOCH = None

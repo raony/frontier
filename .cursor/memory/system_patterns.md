@@ -1,3 +1,9 @@
+## Time & Ticking
+
+- Use Evennia gametime settings: `TIME_FACTOR = 6.0` (game runs 6× faster than real time). Optionally set `TIME_GAME_EPOCH`.
+- Query and schedule via `evennia.utils.gametime` and `gametime.schedule(...)` for time-based events.
+- Character metabolism defines one tick as one in-game hour: `get_metabolism_interval()` returns `(3600 / TIME_FACTOR) / metabolism`.
+- Avoid custom world-clock scripts; rely on Evennia’s built-in time facilities.
 # System Patterns and Conventions
 
 ## General

@@ -15,6 +15,7 @@ from commands.dead_cmdset import DeadCmdSet
 from commands.default_cmdsets import AliveCmdSet
 
 from .objects import ObjectParent
+from django.conf import settings
 
 
 class LivingMixin:
@@ -228,17 +229,21 @@ class LivingMixin:
     def get_metabolism_interval(self) -> float:
         """Return real-time seconds per metabolism tick based on metabolism.
 
-        Uses the Character Attribute `metabolism` (AttributeProperty / self.db.metabolism).
-        A higher metabolism value means more frequent ticks (shorter interval).
+        We define one metabolism 'tick' as one in-game hour to align with
+        world time. With the global time scale, one in-game hour equals
+        ``REAL_SECONDS_PER_GAME_HOUR`` real seconds. The character's
+        ``metabolism`` scales this frequency (higher metabolism → shorter interval).
         """
         value = self.metabolism if hasattr(self, "metabolism") else 1.0
         try:
             effective = float(value)
         except (TypeError, ValueError):
             effective = 1.0
-        # Avoid division by zero and overly fast ticking
         effective = max(effective, 0.1)
-        return 600 / effective
+        # Base interval (real seconds) for one in-game hour, adjusted by metabolism
+        time_factor = float(getattr(settings, "TIME_FACTOR", 1.0)) or 1.0
+        real_seconds_per_game_hour = 3600.0 / time_factor
+        return real_seconds_per_game_hour / effective
 
     def start_metabolism_script(self) -> None:
         """Start or update the metabolism script if needed."""

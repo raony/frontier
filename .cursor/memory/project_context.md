@@ -21,6 +21,7 @@ This repository is an Evennia-based MUD (multi-user dungeon) game using Python a
 - Prototypes and help entries in `world/prototypes.py` and `world/help_entries.py`.
 - Web URLs extend Evennia’s defaults (`web/urls.py`, `web/website/urls.py`, `web/webclient/urls.py`); templates and static override Evennia defaults under `web/templates/` and `web/static/`.
 - Settings import Evennia defaults (`server/conf/settings.py`) and override selectively.
+- Global time system: Evennia `TIME_FACTOR=6.0` in `server/conf/settings.py`; use `evennia.utils.gametime` for time queries and scheduling.
 
 ## Documentation
 - Evennia docs (latest): [https://www.evennia.com/docs/latest/](https://www.evennia.com/docs/latest/)

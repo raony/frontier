@@ -21,7 +21,10 @@ Last updated: 2025-08-12
    - Character stores mapping `skills: {skill_key: level_label}` and helpers on `LivingMixin`.
    - Next: Add practice/progression and tests.
 2. Add time passage
-   - Global time/ticker Script; room/environment day/night; impacts on metabolism and descriptions.
+   - Adopted Evennia gametime: `TIME_FACTOR = 6.0` in `server/conf/settings.py`.
+   - `Character.get_metabolism_interval()` uses `TIME_FACTOR` to map 1 in-game hour to real seconds and scale by metabolism.
+   - Prefer `evennia.utils.gametime` and `gametime.schedule` for time queries/events.
+   - Next: Add `time` command and day/night effects using `gametime` APIs.
 3. Test hexmap
    - Unit tests for `HexMap.load_all/save_all`, neighbor logic, and overwrite modes.
 4. Start LLM integration
