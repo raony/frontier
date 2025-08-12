@@ -54,4 +54,8 @@
 - Food/liquid: typeclass gating (`FoodMixin`, `LiquidContainerMixin`) required for `eat`/`drink`.
 - Pythonic, readable, explicit names. Keep business logic in typeclasses/commands; configuration in `server/conf`.
 
+### Status display
+- Public label helpers on `LivingMixin`: `get_hunger_label()`, `get_thirst_label()`, `get_tiredness_label()` map internal values to text-only levels.
+- `status` command (in `commands/status.py`) shows: Hunger, Thirst, Tiredness using labels only (no numbers).
+
 Related memories: `project_context.md`, `evennia-how-to.md`, `active_context.md`.

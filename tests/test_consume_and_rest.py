@@ -1,4 +1,5 @@
 from evennia.utils.test_resources import EvenniaTest
+from commands.default_cmdsets import AliveCmdSet
 from evennia.utils.create import create_object
 
 
@@ -13,6 +14,8 @@ class TestConsumeAndRest(EvenniaTest):
         self.food = create_object(Food, key="apple", location=self.room1)
 
     def test_drink_reduces_thirst(self):
+        # Ensure alive cmdset active to expose gameplay commands
+        self.char1.cmdset.add(AliveCmdSet, permanent=True)
         self.char1.location = self.room1
         self.char1.thirst = 50
         self.assertEqual(self.char1.thirst, 50)
@@ -23,6 +26,7 @@ class TestConsumeAndRest(EvenniaTest):
         self.assertLess(self.char1.thirst, 50)
 
     def test_eat_reduces_hunger(self):
+        self.char1.cmdset.add(AliveCmdSet, permanent=True)
         self.char1.location = self.room1
         self.char1.hunger = 50
         self.assertEqual(self.char1.hunger, 50)
@@ -34,6 +38,7 @@ class TestConsumeAndRest(EvenniaTest):
 
     def test_rest_and_stand_affect_state_and_metabolism(self):
         # toggle on
+        self.char1.cmdset.add(AliveCmdSet, permanent=True)
         self.char1.location = self.room1
         self.char1.is_resting = False
         self.char1.execute_cmd("rest")

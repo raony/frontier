@@ -138,6 +138,22 @@ class LivingMixin:
                 self.msg("You're about to collapse.")
             self.ndb.tiredness_msg_level = level
 
+    # Public-facing label helpers
+    def get_hunger_label(self) -> str:
+        """Return a user-facing hunger label without numbers."""
+        level = self._hunger_level()
+        return ["sated", "hungry", "starving", "starving to death"][level]
+
+    def get_thirst_label(self) -> str:
+        """Return a user-facing thirst label without numbers."""
+        level = self._thirst_level()
+        return ["quenched", "thirsty", "parched", "dying of thirst"][level]
+
+    def get_tiredness_label(self) -> str:
+        """Return a user-facing tiredness label without numbers."""
+        level = self._tiredness_level()
+        return ["rested", "tired", "exhausted", "about to collapse"][level]
+
     # Hunger/thirst/tiredness management
     def increase_hunger(self, amount: float = 0.3) -> None:
         """Increase hunger and check for death."""

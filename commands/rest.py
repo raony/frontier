@@ -1,4 +1,3 @@
-from evennia.utils import utils
 from .command import Command
 
 
@@ -10,7 +9,8 @@ class CmdRest(Command):
 
     def func(self):
         caller = self.caller
-        if not utils.inherits_from(caller, "typeclasses.characters.LivingMixin"):
+        # Check capability rather than inheritance path to support mixin composition
+        if not hasattr(caller, "is_resting"):
             caller.msg("You can't rest.")
             return
         if caller.is_resting:

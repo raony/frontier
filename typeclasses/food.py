@@ -17,7 +17,7 @@ class FoodMixin:
     def eat(self, eater):
         """Consume this item, reducing eater hunger."""
         calories = max(1, min(int(self.db.calories or self.calories), 7))
-        if inherits_from(eater, "typeclasses.characters.LivingMixin"):
+        if hasattr(eater, "decrease_hunger"):
             eater.decrease_hunger(calories)
         eater.msg(f"You eat {self.key}.")
         if self.location:
@@ -70,8 +70,7 @@ class PortionedFoodMixin(FoodMixin):
             eater.msg(f"There is nothing left of {self.get_display_name(eater)} to eat.")
             return
         calories = max(1, min(int(self.db.calories_per_part or self.calories_per_part), 7))
-        from evennia.utils.utils import inherits_from
-        if inherits_from(eater, "typeclasses.characters.LivingMixin"):
+        if hasattr(eater, "decrease_hunger"):
             eater.decrease_hunger(calories)
         eater.msg(f"You eat a portion of {self.get_display_name(eater)}.")
         if self.location:

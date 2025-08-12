@@ -21,6 +21,7 @@ from .liquid import CmdFill, CmdEmpty
 from .rest import CmdRest
 from .reset import CmdResetChar
 from .stand import CmdStand
+from .status import CmdStatus
 
 
 class AliveCmdSet(default_cmds.CharacterCmdSet):
@@ -42,6 +43,7 @@ class AliveCmdSet(default_cmds.CharacterCmdSet):
         self.add(CmdDrink())
         self.add(CmdRest())
         self.add(CmdStand())
+        self.add(CmdStatus())
 
 
 class CharacterCmdSet(default_cmds.CharacterCmdSet):

@@ -1,4 +1,5 @@
 from evennia.utils.test_resources import EvenniaTest
+from commands.default_cmdsets import AliveCmdSet
 from evennia.utils.create import create_object
 
 
@@ -8,6 +9,7 @@ class TestPortionedFood(EvenniaTest):
 
         chicken = create_object(RoastedChicken, key="roasted chicken", location=self.room1)
         self.char1.location = self.room1
+        self.char1.cmdset.add(AliveCmdSet, permanent=True)
 
         # initial portions
         self.assertEqual(chicken.db.parts_total, 6)

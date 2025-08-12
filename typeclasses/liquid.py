@@ -106,7 +106,7 @@ class LiquidContainerMixin:
         if not self.has_liquid():
             drinker.msg(f"{self.get_display_name(drinker)} is empty.")
             return
-        if utils.inherits_from(drinker, "typeclasses.characters.LivingMixin"):
+        if hasattr(drinker, "decrease_thirst"):
             drinker.decrease_thirst(20)
         if not self.db.is_water_source:
             self.db.liquid_amount = max((self.db.liquid_amount or 0) - amount, 0)
@@ -177,4 +177,3 @@ class LiquidContainer(LiquidContainerMixin, Object):
         self.db.liquid_amount = 100
         if self.db.liquid is None:
             self.db.liquid = "water"
-

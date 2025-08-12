@@ -24,9 +24,8 @@ class CmdDrink(Command):
             caller.msg("You can't drink from that.")
             return
         obj = objs[0]
-        # Only allow liquids
-        from evennia.utils.utils import inherits_from
-        if not inherits_from(obj, "typeclasses.liquid.LiquidContainerMixin"):
+        # Accept anything that exposes a 'drink_liquid' action
+        if not hasattr(obj, "drink_liquid"):
             caller.msg("You can't drink from that.")
             return
         obj.drink_liquid(caller)
