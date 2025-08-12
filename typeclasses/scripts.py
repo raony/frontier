@@ -114,11 +114,11 @@ class MetabolismScript(DefaultScript):
 
     def at_repeat(self):
         """Increase hunger, thirst and tiredness each tick."""
-        if not self.obj.is_living:
+        if not getattr(self.obj, "is_living", False):
             return
         self.obj.increase_hunger()
         self.obj.increase_thirst()
-        if self.obj.is_resting:
+        if getattr(self.obj, "is_resting", False):
             tiredness = self.obj.tiredness or 0
             recovery = 1 + tiredness / 20
             self.obj.decrease_tiredness(recovery)

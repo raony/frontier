@@ -25,6 +25,9 @@ from .status import CmdStatus
 from .skills import CmdSkills, CmdCreateSkill, CmdSetSkill
 from .forage import CmdForage
 from .resources import CmdCreateResource
+from .time import CmdSetTime
+from .gametime import CmdTime
+from .external import CmdMakeExternal
 
 
 class AliveCmdSet(default_cmds.CharacterCmdSet):
@@ -63,6 +66,9 @@ class CharacterCmdSet(default_cmds.CharacterCmdSet):
         self.add(CmdCreateSkill())
         self.add(CmdSetSkill())
         self.add(CmdCreateResource())
+        self.add(CmdSetTime())
+        self.add(CmdTime())
+        self.add(CmdMakeExternal())
 
 
 class AccountCmdSet(default_cmds.AccountCmdSet):

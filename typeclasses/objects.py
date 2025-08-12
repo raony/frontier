@@ -22,6 +22,19 @@ class ObjectParent:
 
     """
 
+    def get_light_level(self, looker=None) -> int:
+        """Return this object's own light contribution (0..100).
+
+        Default implementation uses the Attribute `db.light_level` if present,
+        otherwise 0. Rooms should override to include ambient light sources
+        (e.g., sunlight) and combine with contained light sources.
+        """
+        try:
+            level = int(getattr(self.db, "light_level", 0) or 0)
+            return max(0, min(level, 100))
+        except Exception:
+            return 0
+
 
 class Object(ObjectParent, DefaultObject):
     """
@@ -228,4 +241,3 @@ class WaterSource(LiquidContainerMixin, Object):
         self.db.is_water_source = True
         self.db.liquid = "water"
         self.locks.add("get:false()")
-

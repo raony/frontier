@@ -32,6 +32,9 @@ class LivingMixin:
     metabolism = AttributeProperty(default=1.0)
     # Skills stored as mapping {skill_key: level_label}
     skills = AttributeProperty(default=dict)
+    # Visual perception threshold (0..100). If ambient light (sunlight) in the
+    # room is below this value, the character cannot see details.
+    light_threshold = AttributeProperty(default=20)
 
     def at_object_creation(self):
         """Called once, when the object is first created."""
@@ -242,6 +245,8 @@ class LivingMixin:
         effective = max(effective, 0.1)
         # Base interval (real seconds) for one in-game hour, adjusted by metabolism
         time_factor = float(getattr(settings, "TIME_FACTOR", 1.0)) or 1.0
+        # With custom gametime, an in-game hour is still 3600 seconds in the units
+        # defined by TIME_UNITS; TIME_FACTOR governs acceleration.
         real_seconds_per_game_hour = 3600.0 / time_factor
         return real_seconds_per_game_hour / effective
 
@@ -310,3 +315,23 @@ class Character(LivingMixin, ObjectParent, DefaultCharacter):
         super().at_death()
         self.cmdset.remove(AliveCmdSet)
         self.cmdset.add(DeadCmdSet, permanent=True)
+
+    # --- Perception / Look -------------------------------------------------
+    def _get_ambient_sunlight(self) -> int:
+        """Return ambient light level (0..100) from current location."""
+        room = self.location
+        if room and hasattr(room, "get_light_level"):
+            try:
+                level = int(room.get_light_level(looker=self))
+            except Exception:
+                level = 100
+            return max(0, min(level, 100))
+        return 100
+
+    def at_look(self, target, **kwargs):
+        """Gate visibility based on ambient light vs character threshold."""
+        ambient = self._get_ambient_sunlight()
+        threshold = int(self.light_threshold or 0)
+        if ambient < threshold:
+            return "it is too dark to see anything"
+        return super().at_look(target, **kwargs)

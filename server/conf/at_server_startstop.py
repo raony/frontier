@@ -30,7 +30,13 @@ def at_server_start():
     This is called every time the server starts up, regardless of
     how it was shut down.
     """
-    pass
+    # Schedule sunrise/sunset events if not already present
+    try:
+        from world.ingame_time import start_time_events
+
+        start_time_events()
+    except Exception:
+        pass
 
 
 def at_server_stop():

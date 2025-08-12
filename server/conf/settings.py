@@ -55,3 +55,15 @@ TIME_FACTOR = 6.0
 
 # Optional: Define a custom epoch for game time (None uses real epoch)
 # TIME_GAME_EPOCH = None
+
+# Enable custom gametime calendar (Evennia contrib) — example Shire-like calendar
+# Adjust as needed. Units must be multiples of the previous one.
+TIME_UNITS = {
+    "sec": 1,
+    "min": 60,
+    "hour": 60 * 60,
+    "day": 60 * 60 * 24,
+    "month": 60 * 60 * 24 * 30,
+    "year": 60 * 60 * 24 * 30 * 12,
+}
+TIME_GAME_EPOCH = 63006808816
