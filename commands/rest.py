@@ -14,20 +14,13 @@ class CmdRest(Command):
             caller.msg("You can't rest.")
             return
         if caller.is_resting:
-            caller.is_resting = False
-            caller.msg("You stop resting.")
-            location = caller.location
-            if location:
-                location.msg_contents(
-                    f"{caller.get_display_name(location)} gets back up.",
-                    exclude=caller,
-                )
-        else:
-            caller.is_resting = True
-            caller.msg("You settle down to rest.")
-            location = caller.location
-            if location:
-                location.msg_contents(
-                    f"{caller.get_display_name(location)} lies down to rest.",
-                    exclude=caller,
-                )
+            caller.msg("You are already resting. Use 'stand' to get up.")
+            return
+        caller.is_resting = True
+        caller.msg("You settle down to rest.")
+        location = caller.location
+        if location:
+            location.msg_contents(
+                f"{caller.get_display_name(location)} lies down to rest.",
+                exclude=caller,
+            )

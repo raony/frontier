@@ -32,7 +32,7 @@ class TestConsumeAndRest(EvenniaTest):
 
         self.assertLess(self.char1.hunger, 50)
 
-    def test_rest_toggles_and_affects_metabolism(self):
+    def test_rest_and_stand_affect_state_and_metabolism(self):
         # toggle on
         self.char1.location = self.room1
         self.char1.is_resting = False
@@ -46,6 +46,10 @@ class TestConsumeAndRest(EvenniaTest):
         script.at_repeat()
         self.assertLess(self.char1.tiredness, 20)
 
-        # toggle off
+        # 'rest' again should not stop resting
         self.char1.execute_cmd("rest")
+        self.assertTrue(self.char1.is_resting)
+
+        # 'stand' should stop resting
+        self.char1.execute_cmd("stand")
         self.assertFalse(self.char1.is_resting)

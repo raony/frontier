@@ -20,6 +20,7 @@ from .eat import CmdEat
 from .liquid import CmdFill, CmdEmpty
 from .rest import CmdRest
 from .reset import CmdResetChar
+from .stand import CmdStand
 
 
 class CharacterCmdSet(default_cmds.CharacterCmdSet):
@@ -46,6 +47,7 @@ class CharacterCmdSet(default_cmds.CharacterCmdSet):
         self.add(CmdDrink())
         self.add(CmdRest())
         self.add(CmdResetChar())
+        self.add(CmdStand())
 
 
 class AccountCmdSet(default_cmds.AccountCmdSet):
