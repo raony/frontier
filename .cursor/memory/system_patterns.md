@@ -45,6 +45,11 @@
 - Stop/Restart: `evennia stop` / `evennia restart`
 - Reload: `evennia reload`
 
+### Local environment
+- Activate the virtualenv before using the `evennia` CLI in terminal:
+  - `source .venv/bin/activate`
+  - Then run commands like `evennia test --settings settings.py .`
+
 ## Code style
 ## Gameplay patterns established
 - Survival needs: `hunger`, `thirst`, `tiredness`, and `metabolism` as AttributeProperties; metabolism independent of tiredness.
