@@ -56,15 +56,15 @@ class LivingMixin:
                 "$You() collapse lifelessly.",
                 from_obj=self,
             )
-        self.db.is_dead = True
-        self.db.is_living = False
-        self.db.is_resting = False
+        self.is_dead = True
+        self.is_living = False
+        self.is_resting = False
         self.stop_metabolism_script()
 
     # Hunger/thirst/tiredness management helpers
     def _hunger_level(self) -> int:
         """Return the current hunger level step."""
-        hunger = self.db.hunger or 0
+        hunger = self.hunger or 0
         if hunger >= 60:
             return 3
         if hunger >= 30:
@@ -88,7 +88,7 @@ class LivingMixin:
 
     def _thirst_level(self) -> int:
         """Return the current thirst level step."""
-        thirst = self.db.thirst or 0
+        thirst = self.thirst or 0
         if thirst >= 60:
             return 3
         if thirst >= 30:
@@ -112,7 +112,7 @@ class LivingMixin:
 
     def _tiredness_level(self) -> int:
         """Return the current tiredness level step."""
-        tiredness = self.db.tiredness or 0
+        tiredness = self.tiredness or 0
         if tiredness >= 60:
             return 3
         if tiredness >= 30:
@@ -137,65 +137,70 @@ class LivingMixin:
     # Hunger/thirst/tiredness management
     def increase_hunger(self, amount: float = 0.3) -> None:
         """Increase hunger and check for death."""
-        self.db.hunger = (self.db.hunger or 0) + amount
+        self.hunger = (self.hunger or 0) + amount
         self._notify_hunger()
         self.update_living_status()
 
     def decrease_hunger(self, amount: float = 1) -> None:
         """Decrease hunger, not going below zero."""
-        self.db.hunger = max((self.db.hunger or 0) - amount, 0)
+        self.hunger = max((self.hunger or 0) - amount, 0)
         self._notify_hunger()
         self.update_living_status()
 
     def increase_thirst(self, amount: float = 1.4) -> None:
         """Increase thirst and check for death."""
-        self.db.thirst = (self.db.thirst or 0) + amount
+        self.thirst = (self.thirst or 0) + amount
         self._notify_thirst()
         self.update_living_status()
 
     def decrease_thirst(self, amount: float = 1) -> None:
         """Decrease thirst, not going below zero."""
-        self.db.thirst = max((self.db.thirst or 0) - amount, 0)
+        self.thirst = max((self.thirst or 0) - amount, 0)
         self._notify_thirst()
         self.update_living_status()
 
     def increase_tiredness(self, amount: float = 0.5) -> None:
         """Increase tiredness and check for death."""
-        self.db.tiredness = (self.db.tiredness or 0) + amount
+        self.tiredness = (self.tiredness or 0) + amount
         self._notify_tiredness()
         self.update_living_status()
 
     def decrease_tiredness(self, amount: float = 1) -> None:
         """Decrease tiredness, not going below zero."""
-        self.db.tiredness = max((self.db.tiredness or 0) - amount, 0)
+        self.tiredness = max((self.tiredness or 0) - amount, 0)
         self._notify_tiredness()
         self.update_living_status()
 
     def update_living_status(self) -> None:
         """Check if this entity should die based on vital stats."""
-        if self.db.is_dead:
+        if self.is_dead:
             return
         if (
-            (self.db.hunger or 0) >= 100
-            or (self.db.thirst or 0) >= 100
-            or (self.db.tiredness or 0) >= 100
+            (self.hunger or 0) >= 100
+            or (self.thirst or 0) >= 100
+            or (self.tiredness or 0) >= 100
         ):
             self.at_death()
 
     # Metabolism script management
     def get_metabolism_interval(self) -> float:
-        """Return real-time seconds per metabolism tick.
+        """Return real-time seconds per metabolism tick based on metabolism.
 
-        The metabolism rate increases with tiredness so that higher
-        tiredness results in more frequent metabolism ticks.
+        Uses the Character Attribute `metabolism` (AttributeProperty / self.db.metabolism).
+        A higher metabolism value means more frequent ticks (shorter interval).
         """
-        tiredness = self.db.tiredness or 0
-        metabolism = 1 + (tiredness / 50)
-        return 600 / metabolism
+        value = self.metabolism if hasattr(self, "metabolism") else 1.0
+        try:
+            effective = float(value)
+        except (TypeError, ValueError):
+            effective = 1.0
+        # Avoid division by zero and overly fast ticking
+        effective = max(effective, 0.1)
+        return 600 / effective
 
     def start_metabolism_script(self) -> None:
         """Start or update the metabolism script if needed."""
-        if not self.db.is_living:
+        if not self.is_living:
             return
         existing = self.scripts.get("metabolism_script")
         interval = self.get_metabolism_interval()
@@ -238,7 +243,7 @@ class Character(LivingMixin, ObjectParent, DefaultCharacter):
     def at_init(self):
         """Called whenever the typeclass is cached from memory."""
         super().at_init()
-        if self.db.is_dead:
+        if self.is_dead:
             self.at_death()
         else:
             self.cmdset.remove(DeadCmdSet)

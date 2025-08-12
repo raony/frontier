@@ -13,8 +13,8 @@ class CmdRest(Command):
         if not utils.inherits_from(caller, "typeclasses.characters.LivingMixin"):
             caller.msg("You can't rest.")
             return
-        if caller.db.is_resting:
-            caller.db.is_resting = False
+        if caller.is_resting:
+            caller.is_resting = False
             caller.msg("You stop resting.")
             location = caller.location
             if location:
@@ -23,7 +23,7 @@ class CmdRest(Command):
                     exclude=caller,
                 )
         else:
-            caller.db.is_resting = True
+            caller.is_resting = True
             caller.msg("You settle down to rest.")
             location = caller.location
             if location:
