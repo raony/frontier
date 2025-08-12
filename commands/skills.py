@@ -16,11 +16,13 @@ from evennia.utils.evtable import EvTable
 from .command import Command
 
 
-SKILL_LEVELS: Tuple[str, ...] = ("novice", "journeyman", "master")
+SKILL_LEVELS: Tuple[str, ...] = ("untrained", "novice", "journeyman", "master")
 _LEVEL_ALIASES = {
     "journey": "journeyman",
     "jr": "journeyman",
     "jm": "journeyman",
+    "none": "untrained",
+    "unskill": "untrained",
 }
 
 
@@ -73,7 +75,7 @@ class CmdSkills(Command):
                 # Normalize aliases
                 level_label = _LEVEL_ALIASES.get(level_label, level_label)
                 if level_label not in SKILL_LEVELS:
-                    level_label = "novice"
+                    level_label = "untrained"
                 rows.append((display, level_label))
 
         if not rows:

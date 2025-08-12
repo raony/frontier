@@ -23,6 +23,8 @@ from .reset import CmdResetChar
 from .stand import CmdStand
 from .status import CmdStatus
 from .skills import CmdSkills, CmdCreateSkill, CmdSetSkill
+from .forage import CmdForage
+from .resources import CmdCreateResource
 
 
 class AliveCmdSet(default_cmds.CharacterCmdSet):
@@ -46,6 +48,7 @@ class AliveCmdSet(default_cmds.CharacterCmdSet):
         self.add(CmdStand())
         self.add(CmdStatus())
         self.add(CmdSkills())
+        self.add(CmdForage())
 
 
 class CharacterCmdSet(default_cmds.CharacterCmdSet):
@@ -59,6 +62,7 @@ class CharacterCmdSet(default_cmds.CharacterCmdSet):
         self.add(CmdResetChar())
         self.add(CmdCreateSkill())
         self.add(CmdSetSkill())
+        self.add(CmdCreateResource())
 
 
 class AccountCmdSet(default_cmds.AccountCmdSet):

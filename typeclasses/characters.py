@@ -160,17 +160,17 @@ class LivingMixin:
     def get_skill_level_label(self, skill_key: str) -> str:
         """Return the textual skill level for a given skill key.
 
-        Levels are textual among {novice, journeyman, master}. Defaults to novice.
+        Levels are textual among {untrained, novice, journeyman, master}. Defaults to untrained.
         """
         skills_map = self.skills or {}
-        level = (skills_map.get(skill_key) or "novice").lower()
-        if level not in {"novice", "journeyman", "master"}:
-            level = "novice"
+        level = (skills_map.get(skill_key) or "untrained").lower()
+        if level not in {"untrained", "novice", "journeyman", "master"}:
+            level = "untrained"
         return level
 
     def set_skill_level_label(self, skill_key: str, level_label: str) -> None:
         """Set the textual skill level for a given skill key."""
-        if level_label not in {"novice", "journeyman", "master"}:
+        if level_label not in {"untrained", "novice", "journeyman", "master"}:
             raise ValueError("Invalid skill level label")
         skills_map = self.skills or {}
         skills_map[skill_key] = level_label
