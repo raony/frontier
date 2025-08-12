@@ -19,6 +19,7 @@ from .drink import CmdDrink
 from .eat import CmdEat
 from .liquid import CmdFill, CmdEmpty
 from .rest import CmdRest
+from .reset import CmdResetChar
 
 
 class CharacterCmdSet(default_cmds.CharacterCmdSet):
@@ -35,7 +36,7 @@ class CharacterCmdSet(default_cmds.CharacterCmdSet):
         Populates the cmdset
         """
         super().at_cmdset_creation()
-       
+
         #
         # any commands you add below will overload the default ones.
         #
@@ -44,6 +45,7 @@ class CharacterCmdSet(default_cmds.CharacterCmdSet):
         self.add(CmdEmpty())
         self.add(CmdDrink())
         self.add(CmdRest())
+        self.add(CmdResetChar())
 
 
 class AccountCmdSet(default_cmds.AccountCmdSet):
