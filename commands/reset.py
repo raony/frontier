@@ -14,7 +14,7 @@ class CmdResetChar(Command):
     """
 
     key = "resetchar"
-    locks = "cmd:all()"
+    locks = "cmd:perm(Admin) or perm(Builder) or perm(Developer) or superuser()"
     arg_regex = r"$"
 
     def func(self):

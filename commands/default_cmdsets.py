@@ -23,31 +23,36 @@ from .reset import CmdResetChar
 from .stand import CmdStand
 
 
-class CharacterCmdSet(default_cmds.CharacterCmdSet):
+class AliveCmdSet(default_cmds.CharacterCmdSet):
     """
-    The `CharacterCmdSet` contains general in-game commands like `look`,
-    `get`, etc available on in-game Character objects. It is merged with
-    the `AccountCmdSet` when an Account puppets a Character.
+    Commands available only to living characters.
     """
 
-    key = "DefaultCharacter"
+    key = "AliveCharacter"
 
     def at_cmdset_creation(self):
         """
         Populates the cmdset
         """
         super().at_cmdset_creation()
-
-        #
-        # any commands you add below will overload the default ones.
-        #
+        # Movement and interaction commands live here (implicitly via default parent)
         self.add(CmdEat())
         self.add(CmdFill())
         self.add(CmdEmpty())
         self.add(CmdDrink())
         self.add(CmdRest())
-        self.add(CmdResetChar())
         self.add(CmdStand())
+
+
+class CharacterCmdSet(default_cmds.CharacterCmdSet):
+    """Restore default Evennia character command set as baseline."""
+
+    key = "DefaultCharacter"
+
+    def at_cmdset_creation(self):
+        super().at_cmdset_creation()
+        # Admin maintenance command - available even when dead (locks restrict use)
+        self.add(CmdResetChar())
 
 
 class AccountCmdSet(default_cmds.AccountCmdSet):
@@ -97,14 +102,5 @@ class SessionCmdSet(default_cmds.SessionCmdSet):
     key = "DefaultSession"
 
     def at_cmdset_creation(self):
-        """
-        This is the only method defined in a cmdset, called during
-        its creation. It should populate the set with command instances.
-
-        As and example we just add the empty base `Command` object.
-        It prints some info.
-        """
         super().at_cmdset_creation()
-        #
-        # any commands you add below will overload the default ones.
-        #
+        # Intentionally minimal. Gameplay commands live in AliveCmdSet.

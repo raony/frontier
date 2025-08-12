@@ -12,6 +12,7 @@ from evennia.objects.objects import DefaultCharacter
 from evennia import AttributeProperty
 
 from commands.dead_cmdset import DeadCmdSet
+from commands.default_cmdsets import AliveCmdSet
 
 from .objects import ObjectParent
 
@@ -60,6 +61,9 @@ class LivingMixin:
         self.is_living = False
         self.is_resting = False
         self.stop_metabolism_script()
+        # Remove alive-only commands and add dead cmdset
+        self.cmdset.remove(AliveCmdSet)
+        self.cmdset.add(DeadCmdSet, permanent=True)
 
     # Hunger/thirst/tiredness management helpers
     def _hunger_level(self) -> int:
@@ -240,16 +244,26 @@ class Character(LivingMixin, ObjectParent, DefaultCharacter):
         """Called once, when the object is first created."""
         super().at_object_creation()
 
+    def at_pre_move(self, destination, **kwargs):
+        """Prevent dead characters from moving under their own power."""
+        if self.is_dead:
+            self.msg("You are dead and cannot move.")
+            return False
+        return super().at_pre_move(destination, **kwargs)
+
     def at_init(self):
         """Called whenever the typeclass is cached from memory."""
         super().at_init()
         if self.is_dead:
-            self.at_death()
+            self.cmdset.remove(AliveCmdSet)
+            self.cmdset.add(DeadCmdSet, permanent=True)
         else:
             self.cmdset.remove(DeadCmdSet)
+            self.cmdset.add(AliveCmdSet, permanent=True)
         self.update_living_status()
 
     def at_death(self):
         """Handle character-specific death effects."""
         super().at_death()
+        self.cmdset.remove(AliveCmdSet)
         self.cmdset.add(DeadCmdSet, permanent=True)
