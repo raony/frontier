@@ -17,8 +17,7 @@ class CmdDrink(Command):
             return
         objs = caller.search(
             self.target,
-            location=caller.location,
-            candidates=(caller.location.contents if caller.location else []),
+            candidates=(caller.contents + (caller.location.contents if caller.location else [])),
             quiet=True,
         )
         if not objs:
