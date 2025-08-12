@@ -1,0 +1,118 @@
+---
+alwaysApply: true
+---
+
+# Memory Bank System
+
+## Overview
+This project uses a memory bank system consisting of markdown files in `.cursor/memory/` that serve as a knowledge base for development work. **The primary purpose of these memory files is to provide context and knowledge for AI usage, enabling the AI assistant to ramp up quickly and deliver more efficient, context-aware development assistance.** When "memory" or "memory bank" is referenced, it refers to these files, NOT Cursor's built-in memory system.
+
+## Memory Bank Usage Rules
+
+### Starting a Session
+- ALWAYS begin by listing files in `.cursor/memory/` to understand available context
+- Read relevant memory files when starting work on features or areas covered by existing memories
+- Reference memory files when you (the AI) need context about system patterns, project conventions, or established practices
+
+### During Development
+- Update memory files when discovering new patterns, conventions, or important information
+- Create new memory files for complex features or systems being developed
+- Split memory files appropriately:
+  - **system_patterns.md** - Core patterns and conventions
+  - **project_context.md** - High-level project structure and context
+  - **active_context.md** - Current work and ongoing tasks
+  - **[feature]-how-to.md** - Specific implementation guides
+
+### Memory File Management
+- Keep memory files focused and well-organized
+- Use clear, descriptive filenames
+- Include concrete examples and actionable information
+- Update files as the project evolves
+- Cross-reference related memories
+
+## Good Examples
+
+✅ **Good**: "I'll check the git-policy.md memory file for branch naming conventions before making changes."
+✅ **Good**: "Let me update the active_context.md with our current progress so the AI can ramp up faster next time."
+✅ **Good**: "I'll create a new memory file for the authentication system patterns we've established to help the AI understand our approach."
+
+## Bad Examples
+
+❌ **Bad**: Using Cursor's built-in memory for project-specific information
+❌ **Bad**: Not referencing existing memory files when relevant context exists
+❌ **Bad**: Creating duplicate information across multiple memory files
+
+## Memory File Format
+
+Memory files should:
+- Use clear markdown structure with headers
+- Include practical examples
+- Be maintained and updated regularly
+- Focus on actionable information
+- Reference related files and external documentation
+
+---
+
+**Note:** The memory bank is primarily for AI usage, but can also benefit human developers who want to understand project context, patterns, and conventions quickly.
+
+- Include practical examples
+- Be maintained and updated regularly
+- Focus on actionable information
+- Reference related files and external documentation
+# Memory Bank System
+
+## Overview
+This project uses a memory bank system consisting of markdown files in `.cursor/memory/` that serve as a knowledge base for development work. **The primary purpose of these memory files is to provide context and knowledge for AI usage, enabling the AI assistant to ramp up quickly and deliver more efficient, context-aware development assistance.** When "memory" or "memory bank" is referenced, it refers to these files, NOT Cursor's built-in memory system.
+
+## Memory Bank Usage Rules
+
+### Starting a Session
+- ALWAYS begin by listing files in `.cursor/memory/` to understand available context
+- Read relevant memory files when starting work on features or areas covered by existing memories
+- Reference memory files when you (the AI) need context about system patterns, project conventions, or established practices
+
+### During Development
+- Update memory files when discovering new patterns, conventions, or important information
+- Create new memory files for complex features or systems being developed
+- Split memory files appropriately:
+  - **system_patterns.md** - Core patterns and conventions
+  - **project_context.md** - High-level project structure and context
+  - **active_context.md** - Current work and ongoing tasks
+  - **[feature]-how-to.md** - Specific implementation guides
+
+### Memory File Management
+- Keep memory files focused and well-organized
+- Use clear, descriptive filenames
+- Include concrete examples and actionable information
+- Update files as the project evolves
+- Cross-reference related memories
+
+## Good Examples
+
+✅ **Good**: "I'll check the git-policy.md memory file for branch naming conventions before making changes."
+✅ **Good**: "Let me update the active_context.md with our current progress so the AI can ramp up faster next time."
+✅ **Good**: "I'll create a new memory file for the authentication system patterns we've established to help the AI understand our approach."
+
+## Bad Examples
+
+❌ **Bad**: Using Cursor's built-in memory for project-specific information
+❌ **Bad**: Not referencing existing memory files when relevant context exists
+❌ **Bad**: Creating duplicate information across multiple memory files
+
+## Memory File Format
+
+Memory files should:
+- Use clear markdown structure with headers
+- Include practical examples
+- Be maintained and updated regularly
+- Focus on actionable information
+- Reference related files and external documentation
+
+---
+
+**Note:** The memory bank is primarily for AI usage, but can also benefit human developers who want to understand project context, patterns, and conventions quickly.
+
+- Include practical examples
+- Be maintained and updated regularly
+- Focus on actionable information
+- Reference related files and external documentation

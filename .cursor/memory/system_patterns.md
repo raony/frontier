@@ -1,0 +1,57 @@
+# System Patterns and Conventions
+
+## General
+- Base framework: Evennia (Twisted + Django). Game code extends Evennia via typeclasses, commands, and hooks.
+- Keep custom code under `commands/`, `typeclasses/`, `world/`, and `server/conf/`.
+- Use Evennia import paths and settings to register new modules when moving/renaming files.
+
+## Typeclasses
+- Extend Evennia defaults, e.g. `DefaultCharacter`, `DefaultRoom`, `DefaultExit`, `DefaultObject`, `DefaultScript`.
+- Create using `evennia.create_object()` to ensure correct hooks and DB connections.
+- Prefer `AttributeProperty` for persistent attributes on typeclasses. When we say "character attribute" we mean an Evennia Attribute (backed by `self.db.<name>` via `AttributeProperty`), not a Python attribute.
+- Use `AttributeProperty` also for non-character entities when values should be @set-able in-game (e.g., `Exit.tiredness_cost`).
+
+## Commands and CmdSets
+- Implement commands in `commands/*.py` and group them into CmdSets in `commands/default_cmdsets.py` (and others).
+- Attach CmdSets on objects/characters or globally in settings as needed.
+- Follow Evennia command API: `key`, `aliases`, `locks`, `help_category`, and `func()`.
+- CmdSet strategy:
+  - Keep `CharacterCmdSet` inheriting from Evennia defaults for baseline commands.
+  - Add living-only gameplay commands to `AliveCmdSet`; add when alive, remove when dead.
+  - `DeadCmdSet` should override/block commands not allowed while dead (e.g., `look`, `say`, `pose`, `whisper`, `get`, `give`, `drop`, `inventory`, `ooc`).
+  - Admin maintenance commands (e.g., `resetchar`) can live in the baseline cmdset but must be permission-gated (`locks`).
+
+## World content
+- `world/prototypes.py`: Prototypes for spawning via `evennia.prototypes.spawner.spawn`.
+- `world/help_entries.py`: File-based help entries; activate via `settings.FILE_HELP_ENTRY_MODULES`.
+- `world/hexmap.py` + `world/models.py`: Hex map with DB persistence (`HexMap.load_all/save_all` backed by `HexTile`).
+
+## Web/Django overrides
+- Extend Evennia URL patterns: `web/urls.py`, `web/website/urls.py`, `web/webclient/urls.py`.
+- Override templates/static by mirroring Evennia paths under `web/templates/` and `web/static/`.
+
+## Settings
+- `server/conf/settings.py` imports from `evennia.settings_default` and overrides selectively.
+- Use `EVENNIA_DIR`, `GAME_DIR` helpers for referencing locations.
+
+## Testing
+- Tests use `evennia.utils.test_resources.EvenniaTest`.
+- Run via `evennia test --settings settings.py .` from game dir.
+- Prefer executing commands in tests with `obj.execute_cmd(...)`; for scripts, attach/start via handlers (e.g., `start_metabolism_script()`).
+
+## Operations
+- Init DB: `evennia migrate`
+- Start: `evennia start`
+- Stop/Restart: `evennia stop` / `evennia restart`
+- Reload: `evennia reload`
+
+## Code style
+## Gameplay patterns established
+- Survival needs: `hunger`, `thirst`, `tiredness`, and `metabolism` as AttributeProperties; metabolism independent of tiredness.
+- Movement block when dead via `Character.at_pre_move` returning `False`.
+- Exit traversal applies `tiredness_cost` (AttributeProperty) in `Exit.at_post_traverse`.
+- Rest/sleep mechanics: `rest` toggles resting on; `stand` ends resting; metabolism decreases tiredness when resting.
+- Food/liquid: typeclass gating (`FoodMixin`, `LiquidContainerMixin`) required for `eat`/`drink`.
+- Pythonic, readable, explicit names. Keep business logic in typeclasses/commands; configuration in `server/conf`.
+
+Related memories: `project_context.md`, `evennia-how-to.md`, `active_context.md`.
