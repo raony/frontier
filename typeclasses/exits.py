@@ -8,35 +8,36 @@ for allowing Characters to traverse the exit to its destination.
 """
 
 from evennia.objects.objects import DefaultExit
+from evennia import AttributeProperty
 
 from .objects import ObjectParent
 
 
 class Exit(ObjectParent, DefaultExit):
-    """Base exit connecting two rooms."""
+    """Base exit connecting two rooms with effort cost on traverse."""
 
-    pass
+    # Persistent Character Attribute-style property so it can be changed with @set
+    tiredness_cost = AttributeProperty(default=0)
+
+    def at_post_traverse(self, traversing_object, source_location, **kwargs):
+        """Increase tiredness when traversed based on `tiredness_cost`."""
+        super().at_post_traverse(traversing_object, source_location, **kwargs)
+        cost = self.tiredness_cost or 0
+        if hasattr(traversing_object, "increase_tiredness") and cost:
+            traversing_object.increase_tiredness(cost)
 
 
 class EasyExit(Exit):
     """Exit that requires little effort to traverse."""
 
-    tiredness_cost = 10
-
-    def at_post_traverse(self, traversing_object, source_location, **kwargs):
-        """Increase tiredness when traversed."""
-        super().at_post_traverse(traversing_object, source_location, **kwargs)
-        if hasattr(traversing_object, "increase_tiredness"):
-            traversing_object.increase_tiredness(self.tiredness_cost)
+    def at_object_creation(self):
+        super().at_object_creation()
+        self.tiredness_cost = 10
 
 
 class HardExit(Exit):
     """Exit that requires a lot of effort to traverse."""
 
-    tiredness_cost = 30
-
-    def at_post_traverse(self, traversing_object, source_location, **kwargs):
-        """Increase tiredness when traversed."""
-        super().at_post_traverse(traversing_object, source_location, **kwargs)
-        if hasattr(traversing_object, "increase_tiredness"):
-            traversing_object.increase_tiredness(self.tiredness_cost)
+    def at_object_creation(self):
+        super().at_object_creation()
+        self.tiredness_cost = 30
