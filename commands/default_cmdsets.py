@@ -22,6 +22,7 @@ from .rest import CmdRest
 from .reset import CmdResetChar
 from .stand import CmdStand
 from .status import CmdStatus
+from .skills import CmdSkills, CmdCreateSkill, CmdSetSkill
 
 
 class AliveCmdSet(default_cmds.CharacterCmdSet):
@@ -44,6 +45,7 @@ class AliveCmdSet(default_cmds.CharacterCmdSet):
         self.add(CmdRest())
         self.add(CmdStand())
         self.add(CmdStatus())
+        self.add(CmdSkills())
 
 
 class CharacterCmdSet(default_cmds.CharacterCmdSet):
@@ -55,6 +57,8 @@ class CharacterCmdSet(default_cmds.CharacterCmdSet):
         super().at_cmdset_creation()
         # Admin maintenance command - available even when dead (locks restrict use)
         self.add(CmdResetChar())
+        self.add(CmdCreateSkill())
+        self.add(CmdSetSkill())
 
 
 class AccountCmdSet(default_cmds.AccountCmdSet):

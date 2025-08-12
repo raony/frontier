@@ -29,6 +29,8 @@ class LivingMixin:
     is_dead = AttributeProperty(default=False)
     is_living = AttributeProperty(default=True)
     metabolism = AttributeProperty(default=1.0)
+    # Skills stored as mapping {skill_key: level_label}
+    skills = AttributeProperty(default=dict)
 
     def at_object_creation(self):
         """Called once, when the object is first created."""
@@ -153,6 +155,26 @@ class LivingMixin:
         """Return a user-facing tiredness label without numbers."""
         level = self._tiredness_level()
         return ["rested", "tired", "exhausted", "about to collapse"][level]
+
+    # Skills helpers
+    def get_skill_level_label(self, skill_key: str) -> str:
+        """Return the textual skill level for a given skill key.
+
+        Levels are textual among {novice, journeyman, master}. Defaults to novice.
+        """
+        skills_map = self.skills or {}
+        level = (skills_map.get(skill_key) or "novice").lower()
+        if level not in {"novice", "journeyman", "master"}:
+            level = "novice"
+        return level
+
+    def set_skill_level_label(self, skill_key: str, level_label: str) -> None:
+        """Set the textual skill level for a given skill key."""
+        if level_label not in {"novice", "journeyman", "master"}:
+            raise ValueError("Invalid skill level label")
+        skills_map = self.skills or {}
+        skills_map[skill_key] = level_label
+        self.skills = skills_map
 
     # Hunger/thirst/tiredness management
     def increase_hunger(self, amount: float = 0.3) -> None:

@@ -1,6 +1,6 @@
 # Active Context — Current Work
 
-Last updated: 2025-08-11
+Last updated: 2025-08-12
 
 ## Goals
 - Understand Frontier codebase structure and Evennia integration.
@@ -16,9 +16,10 @@ Last updated: 2025-08-11
 - Tests available under `tests/` using `EvenniaTest`.
 
 ## Next steps
-1. Add a skill system
-   - Define skill model/attributes on `Character` (AttributeProperty-based), e.g., `foraging`, `cooking`, `endurance`.
-   - Commands to practice/use skills; simple progression; tests.
+1. Skill system
+   - Implemented dynamic skills as objects (`typeclasses.skills.Skill`) with player-visible `skills` command and admin `createskill`/`setskill`.
+   - Character stores mapping `skills: {skill_key: level_label}` and helpers on `LivingMixin`.
+   - Next: Add practice/progression and tests.
 2. Add time passage
    - Global time/ticker Script; room/environment day/night; impacts on metabolism and descriptions.
 3. Test hexmap
