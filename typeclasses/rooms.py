@@ -7,9 +7,10 @@ Rooms are simple containers that has no location of their own.
 
 from evennia.objects.objects import DefaultRoom
 from evennia.contrib.base_systems import custom_gametime as gametime
+import evennia
 
-# World models
-from world.models import HexTile
+# Hex tile typeclass
+from .hextile import HexTile
 
 from .objects import ObjectParent
 
@@ -36,35 +37,32 @@ class Room(ObjectParent, DefaultRoom):
         if (q + r + s) != 0:
             raise ValueError("Hex cube coords must satisfy q + r + s == 0")
 
-        tile, _ = HexTile.objects.get_or_create(
-            q=q,
-            r=r,
-            s=s,
-            defaults={"terrain": "plain"},
-        )
-        self.attributes.add("hex_id", tile.id, category="environment")
+        tile, _created = HexTile.get_or_create_by_coords(q, r, s, terrain="plain")
+        # Store dbref to make it easy to resolve later in-game
+        self.attributes.add("hex_dbref", tile.dbref, category="environment")
         return tile
 
     def set_hex(self, tile: HexTile):
         """Link this room to an existing `HexTile` instance."""
         if not isinstance(tile, HexTile):
             raise TypeError("tile must be a HexTile instance")
-        self.attributes.add("hex_id", tile.id, category="environment")
+        self.attributes.add("hex_dbref", tile.dbref, category="environment")
         return tile
 
     def get_hex_tile(self) -> HexTile | None:
         """Return the linked `HexTile` or None if not linked."""
-        hex_id = self.attributes.get("hex_id", category="environment", default=None)
-        if hex_id is None:
+        dbref = self.attributes.get("hex_dbref", category="environment", default=None)
+        if not dbref:
             return None
-        return HexTile.objects.filter(id=hex_id).first()
+        objs = evennia.search_object(dbref)
+        return objs[0] if objs else None
 
     def get_hex_coords(self) -> tuple[int, int, int] | None:
         """Return (q, r, s) for the linked hex or None if not linked."""
         tile = self.get_hex_tile()
         if tile is None:
             return None
-        return (tile.q, tile.r, tile.s)
+        return (int(tile.db.q or 0), int(tile.db.r or 0), int(tile.db.s or 0))
 
     # --- Macro attributes via hex -------------------------------------------
     def get_hex_weather(self) -> str:
@@ -76,7 +74,7 @@ class Room(ObjectParent, DefaultRoom):
         tile = self.get_hex_tile()
         if tile is None:
             return "clear"
-        terrain = (tile.terrain or "").lower()
+        terrain = (getattr(tile.db, "terrain", "") or "").lower()
         terrain_to_weather = {
             "plain": "clear",
             "plains": "clear",

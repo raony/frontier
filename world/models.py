@@ -10,6 +10,8 @@ class HexTile(models.Model):
     r = models.IntegerField()
     s = models.IntegerField()
     terrain = models.CharField(max_length=32, default="plain")
+    # Arbitrary macro attributes for this hex (e.g., weather, temperature, etc.)
+    attributes = models.JSONField(default=dict, blank=True)
 
     class Meta:
         unique_together = ("q", "r", "s")

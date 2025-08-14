@@ -6,15 +6,14 @@ class TestHexRoomLinkage(EvenniaTest):
         room = self.room1
         # Link to a valid cube coordinate
         tile = room.set_hex_by_coords(0, 1, -1)
-        assert tile.q == 0 and tile.r == 1 and tile.s == -1
+        assert tile.db.q == 0 and tile.db.r == 1 and tile.db.s == -1
         assert room.get_hex_coords() == (0, 1, -1)
 
         # Default terrain is 'plain' -> weather 'clear'
         assert room.get_hex_weather() == "clear"
 
         # Change terrain to something else and verify weather mapping
-        tile.terrain = "forest"
-        tile.save()
+        tile.db.terrain = "forest"
         assert room.get_hex_weather() == "overcast"
 
     def test_invalid_coords_raise(self):

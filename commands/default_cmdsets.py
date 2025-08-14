@@ -29,6 +29,7 @@ from .time import CmdSetDateTime, CmdSetTime
 from .gametime import CmdTime
 from .external import CmdMakeExternal
 from .equip import CmdEquip, CmdUnequip, CmdInventoryEnhanced
+from .hex import CmdSetHex, CmdWeather
 
 
 class AliveCmdSet(default_cmds.CharacterCmdSet):
@@ -75,6 +76,9 @@ class CharacterCmdSet(default_cmds.CharacterCmdSet):
         self.add(CmdSetTime())
         self.add(CmdTime())
         self.add(CmdMakeExternal())
+        # Builder utilities
+        self.add(CmdSetHex())
+        self.add(CmdWeather())
 
 
 class AccountCmdSet(default_cmds.AccountCmdSet):
