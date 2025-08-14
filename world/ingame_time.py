@@ -10,8 +10,7 @@ from __future__ import annotations
 
 from evennia.contrib.base_systems import custom_gametime
 from evennia.scripts.models import ScriptDB
-from evennia.objects.models import ObjectDB
-from typeclasses.rooms import Room
+from evennia.utils.search import search_typeclass
 
 
 SUNRISE_KEY = "at sunrise"
@@ -19,23 +18,15 @@ SUNSET_KEY = "at sunset"
 
 
 def _broadcast_external(text: str) -> None:
-    """Send message only to external rooms (tagged), including subclasses.
+    """Send message to all rooms of type `typeclasses.rooms.ExternalRoom`.
 
-    We resolve rooms via tags on ObjectDB to include any room subclasses,
-    then guard with a typeclass check before broadcasting.
+    Uses Evennia's object search by typeclass, including subclasses when exact=False.
     """
-    candidates = ObjectDB.objects.filter(
-        db_tags__db_key="external", db_tags__db_category="environment"
-    )
-    # Also include any rooms that are ExternalRoom typeclass even without tag
-    rooms_qs = ObjectDB.objects.filter(db_typeclass_path__icontains="typeclasses.rooms.ExternalRoom")
-    ids = set(candidates.values_list("id", flat=True))
-    for r in rooms_qs:
-        ids.add(r.id)
-    for obj in ObjectDB.objects.filter(id__in=list(ids)):
+    rooms = search_typeclass("typeclasses.rooms.ExternalRoom", include_children=True)
+
+    for room in rooms:
         try:
-            if obj.is_typeclass("typeclasses.rooms.Room", exact=False):
-                obj.msg_contents(text)
+            room.msg_contents(text)
         except Exception:
             continue
 
@@ -57,11 +48,24 @@ def start_time_events():
     at the specified hour/min/sec according to the custom calendar/time factor.
     """
 
-    # Avoid duplicates by checking for existing scripts by key
-    if not ScriptDB.objects.filter(db_key=SUNRISE_KEY).exists():
-        script = custom_gametime.schedule(at_sunrise, repeat=True, hour=6, min=0, sec=0)
-        script.key = SUNRISE_KEY
+    def _unschedule(key: str) -> None:
+        for script in ScriptDB.objects.filter(db_key=key):
+            try:
+                script.stop()
+            except Exception:
+                pass
+            try:
+                script.delete()
+            except Exception:
+                pass
 
-    if not ScriptDB.objects.filter(db_key=SUNSET_KEY).exists():
-        script = custom_gametime.schedule(at_sunset, repeat=True, hour=18, min=0, sec=0)
-        script.key = SUNSET_KEY
+    # Drop any existing sunrise/sunset schedules to avoid duplicates and stale timers
+    _unschedule(SUNRISE_KEY)
+    _unschedule(SUNSET_KEY)
+
+    # Schedule fresh daily events
+    script = custom_gametime.schedule(at_sunrise, repeat=True, hour=6, min=0, sec=0)
+    script.key = SUNRISE_KEY
+
+    script = custom_gametime.schedule(at_sunset, repeat=True, hour=18, min=0, sec=0)
+    script.key = SUNSET_KEY

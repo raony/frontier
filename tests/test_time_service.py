@@ -50,5 +50,5 @@ class TestGameTimeService(EvenniaTest):
         current = (2025, 8, 12, 5, 50, 0)
         target_time = (6, 0, 0)
         delta = svc.compute_epoch_shift_same_day_time(current, target_time)
-        # 10 minutes of in-game time at 6x -> 100 real seconds / 6 = ~100? Wait: 10 min = 600s game, /6 = 100 real
-        self.assertEqual(delta, int((10 * 60) / FakeSettings().TIME_FACTOR))
+        # 10 minutes difference -> 600 game seconds; epoch adjusts by 600 directly
+        self.assertEqual(delta, 10 * 60)

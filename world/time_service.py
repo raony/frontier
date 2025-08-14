@@ -107,13 +107,13 @@ class GameTimeService:
                                           desired_time: Tuple[int, int, int]) -> Seconds:
         """Compute epoch shift to change only time within the same custom day.
 
-        Returns the delta in epoch seconds to add to current epoch.
+        Returns the delta in GAME seconds to add to TIME_GAME_EPOCH directly.
+        Since game_now = epoch + runtime * TIME_FACTOR, adjusting epoch by N
+        moves the game clock by exactly N game-seconds (no division by factor).
         """
         cy, cmon, cday, ch, cmi, cs = current_custom
         th, tmi, ts = desired_time
         current_seconds = self.to_custom_seconds(cy, cmon, cday, ch, cmi, cs)
         desired_seconds = self.to_custom_seconds(cy, cmon, cday, th, tmi, ts)
         delta_game = desired_seconds - current_seconds
-        tf = self.get_time_factor()
-        delta_epoch = int(delta_game / tf)
-        return delta_epoch
+        return int(delta_game)

@@ -122,12 +122,13 @@ class CmdSetTime(MuxCommand):
         try:
             cy, cmon, cday, chr_, cmin, csec = custom_gametime.custom_gametime(absolute=True)
             svc = GameTimeService(settings=settings, now_provider=time.time)
-            delta_epoch = svc.compute_epoch_shift_same_day_time(
+            # Adjust epoch by game-seconds difference directly
+            delta_epoch_game_seconds = svc.compute_epoch_shift_same_day_time(
                 (cy, cmon, cday, chr_, cmin, csec),
                 (t_only.hour, t_only.minute, t_only.second),
             )
             current_epoch = int(getattr(settings, "TIME_GAME_EPOCH", 0) or 0)
-            epoch = current_epoch + delta_epoch
+            epoch = current_epoch + delta_epoch_game_seconds
 
             game_dir = getattr(settings, "GAME_DIR", ".")
             settings_path = os.path.join(game_dir, "server", "conf", "settings.py")
