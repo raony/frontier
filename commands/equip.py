@@ -73,3 +73,5 @@ class CmdInventoryEnhanced(default_cmds.CmdInventory):
             lines = caller.get_equipment_display_lines()
             if lines:
                 caller.msg("\nEquipped:\n" + "\n".join(f"  {ln}" for ln in lines))
+        if hasattr(caller, "get_holding_display_line"):
+            caller.msg("\n" + caller.get_holding_display_line())

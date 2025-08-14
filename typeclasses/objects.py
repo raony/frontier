@@ -230,6 +230,27 @@ class Object(ObjectParent, DefaultObject):
     pass
 
 
+class LightSourceMixin:
+    """Mixin for objects that emit light.
+
+    Sets a default persistent `db.light_level` on creation. Objects can override
+    `light_level_default` to change brightness (0..100). Use together with
+    `Object` or other typeclasses.
+    """
+
+    light_level_default: int = 30
+
+    def at_object_creation(self):
+        try:
+            super().at_object_creation()  # type: ignore[misc]
+        except Exception:
+            pass
+        level = int(getattr(self, "light_level_default", 0) or 0)
+        level = max(0, min(level, 100))
+        self.db.light_level = level
+        self.db.is_lightsource = True
+
+
     # --- Equipment helpers -------------------------------------------------
     @property
     def equipable_slot(self):

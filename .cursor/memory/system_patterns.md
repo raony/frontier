@@ -70,6 +70,13 @@
 - Characters maintain `db.equipment` as `{slot: object_id or None}`; never store object instances.
 - Keep mapping consistent when items leave inventory (clear slot on `at_object_leave`).
 
+### Holding System Patterns
+- Holding is distinct from equipment. Items must have `db.is_holdable=True` (via `HoldableMixin`).
+- Characters store held items as a list of object ids in `db.holding` (max capacity 2 hands).
+- API on `Character`: `get_holding() -> list[int]`, `hold(obj)`, `release(obj_or_all)`, `get_holding_display_line()`.
+- Commands: `hold <item>`, `release <item|all>` registered in `AliveCmdSet`.
+- Light sources: Items with `LightSourceMixin` set `db.light_level` (0..100). Rooms aggregate contained light and sunlight.
+
 ## Code style
 ## Gameplay patterns established
 - Survival needs: `hunger`, `thirst`, `tiredness`, and `metabolism` as AttributeProperties; metabolism independent of tiredness.

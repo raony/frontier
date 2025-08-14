@@ -353,6 +353,14 @@ class Character(LivingMixin, ObjectParent, DefaultCharacter):
             except Exception:
                 continue
         self.db.equipment = equipped
+        # Also clear from holding if it was held
+        try:
+            obj_id_int = int(getattr(obj, "id", -1))
+        except Exception:
+            obj_id_int = -1
+        held_list = getattr(self.db, "holding", None) or []
+        if held_list and obj_id_int in held_list:
+            self.db.holding = [oid for oid in held_list if int(oid) != obj_id_int]
 
     # --- Equipment API -----------------------------------------------------
     def _normalize_equipment_mapping(self) -> None:
@@ -495,3 +503,111 @@ class Character(LivingMixin, ObjectParent, DefaultCharacter):
             else:
                 lines.append(f"{slot.capitalize():<6}: [empty]")
         return lines
+
+    # --- Holding API ---------------------------------------------------------
+    def _normalize_holding(self) -> None:
+        """Ensure holding list stores only ints (object ids) present in inventory."""
+        raw = getattr(self.db, "holding", None) or []
+        normalized: list[int] = []
+        for value in raw:
+            try:
+                obj_id = int(value)
+            except Exception:
+                try:
+                    obj_id = int(getattr(value, "id", 0))
+                except Exception:
+                    obj_id = 0
+            if obj_id:
+                normalized.append(obj_id)
+        # Filter out items no longer carried
+        carried_ids = {int(getattr(o, "id", 0)) for o in (self.contents or [])}
+        normalized = [oid for oid in normalized if oid in carried_ids]
+        # Enforce capacity
+        capacity = self.get_holding_capacity()
+        if len(normalized) > capacity:
+            normalized = normalized[:capacity]
+        self.db.holding = normalized
+
+    def get_holding_capacity(self) -> int:
+        """Number of items that can be held at once."""
+        return 2
+
+    def get_holding(self) -> list[int]:
+        """Return list of held object ids."""
+        raw = getattr(self.db, "holding", None)
+        if raw is None:
+            return []
+        self._normalize_holding()
+        return list(getattr(self.db, "holding", []))
+
+    def _resolve_any(self, obj_or_id):
+        if not obj_or_id:
+            return None
+        if isinstance(obj_or_id, int):
+            return self._resolve_object_id(obj_or_id)
+        return obj_or_id
+
+    def is_holdable(self, obj) -> bool:
+        try:
+            return bool(getattr(getattr(obj, "db", object()), "is_holdable", False))
+        except Exception:
+            return False
+
+    def can_hold(self, obj) -> tuple[bool, str]:
+        if not obj or obj.location != self:
+            return False, "You must carry it to hold it."
+        if not self.is_holdable(obj):
+            return False, "You can't hold that."
+        held = self.get_holding()
+        if any(int(oid) == int(getattr(obj, "id", 0)) for oid in held):
+            return False, f"You already hold {obj.get_display_name(self)}."
+        if len(held) >= self.get_holding_capacity():
+            return False, "Your hands are full."
+        return True, ""
+
+    def hold(self, obj) -> bool:
+        ok, reason = self.can_hold(obj)
+        if not ok:
+            self.msg(reason)
+            return False
+        held = self.get_holding()
+        held.append(int(obj.id))
+        self.db.holding = held
+        self.msg(f"You hold {obj.get_display_name(self)} in your hand.")
+        return True
+
+    def release(self, obj_or_all) -> bool:
+        """Release a held item by object or use string 'all' to free hands."""
+        held = self.get_holding()
+        if not held:
+            self.msg("Your hands are empty.")
+            return False
+        if isinstance(obj_or_all, str) and obj_or_all.strip().lower() == "all":
+            self.db.holding = []
+            self.msg("You relax your grip and free your hands.")
+            return True
+        obj = self._resolve_any(obj_or_all)
+        if not obj:
+            self.msg("You don't hold that.")
+            return False
+        try:
+            obj_id = int(getattr(obj, "id", 0))
+        except Exception:
+            obj_id = 0
+        if not obj_id or obj_id not in held:
+            self.msg("You don't hold that.")
+            return False
+        self.db.holding = [oid for oid in held if int(oid) != obj_id]
+        self.msg(f"You release {obj.get_display_name(self)}.")
+        return True
+
+    def get_holding_display_line(self) -> str:
+        held = self.get_holding()
+        if not held:
+            return "Held: [empty]"
+        names: list[str] = []
+        for oid in held:
+            obj = self._resolve_object_id(oid)
+            if obj:
+                names.append(obj.get_display_name(self))
+        return "Held: " + (", ".join(names) if names else "[missing]")

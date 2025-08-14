@@ -64,6 +64,58 @@ class Room(ObjectParent, DefaultRoom):
             return None
         return (int(tile.db.q or 0), int(tile.db.r or 0), int(tile.db.s or 0))
 
+    # --- Lighting ------------------------------------------------------------
+    def _accumulate_contained_light(self, max_depth: int = 2) -> int:
+        """Sum light contributions from contents up to a limited depth.
+
+        Args:
+            max_depth: Maximum recursion depth into contents. Depth 0 means only
+                this object (room) itself; depth 1 includes direct contents; depth 2
+                includes contents of contents, etc.
+        """
+        def light_of(obj) -> int:
+            try:
+                val = int(getattr(obj, "get_light_level")(looker=None))
+            except Exception:
+                try:
+                    # Fallback to Attribute-based default
+                    val = int(getattr(getattr(obj, "db", object()), "light_level", 0) or 0)
+                except Exception:
+                    val = 0
+            return max(0, min(val, 100))
+
+        total = 0
+        visited: set[int] = set()
+
+        def recurse(container, depth: int):
+            nonlocal total
+            if depth > max_depth:
+                return
+            for obj in getattr(container, "contents", []) or []:
+                try:
+                    obj_id = int(getattr(obj, "id", 0))
+                except Exception:
+                    obj_id = 0
+                if obj_id and obj_id in visited:
+                    continue
+                if obj_id:
+                    visited.add(obj_id)
+                total += light_of(obj)
+                recurse(obj, depth + 1)
+
+        # Only sum from the contents; ambient from the room itself is handled separately
+        recurse(self, 1)
+        return max(0, min(total, 100))
+
+    def get_light_level(self, looker=None) -> int:
+        """Ambient light level from contained light sources (no sunlight).
+
+        Internal rooms have no sunlight contribution by default; they are only
+        lit by objects (e.g., torches) present in the room or held/carried by
+        occupants.
+        """
+        return self._accumulate_contained_light(max_depth=2)
+
     # --- Macro attributes via hex -------------------------------------------
     def get_hex_weather(self) -> str:
         """Return current macro weather from the linked hex.
@@ -141,8 +193,11 @@ class ExternalRoom(Room):
         return self.compute_sunlight_level()
 
     def get_light_level(self, looker=None) -> int:
-        """Ambient light level for this room, including sunlight.
+        """Ambient light including sunlight and contained light sources.
 
-        Future: Sum with contained light sources (torches, lamps) and clamp 0..100.
+        Returns:
+            An integer 0..100 representing visibility in this room.
         """
-        return self.get_sunlight_level()
+        sunlight = self.get_sunlight_level()
+        contained = super().get_light_level(looker=looker)
+        return max(0, min(int(sunlight) + int(contained), 100))
