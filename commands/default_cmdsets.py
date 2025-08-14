@@ -26,7 +26,7 @@ from .skills import CmdSkills, CmdCreateSkill, CmdSetSkill
 from .forage import CmdForage
 from .resources import CmdCreateResource
 from .time import CmdSetDateTime, CmdSetTime
-from .gametime import CmdTime, CmdSysTime
+from .gametime import CmdTime
 from .external import CmdMakeExternal
 from .equip import CmdEquip, CmdUnequip, CmdInventoryEnhanced
 
@@ -74,7 +74,6 @@ class CharacterCmdSet(default_cmds.CharacterCmdSet):
         self.add(CmdSetDateTime())
         self.add(CmdSetTime())
         self.add(CmdTime())
-        self.add(CmdSysTime())
         self.add(CmdMakeExternal())
 
 

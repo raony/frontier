@@ -66,19 +66,3 @@ class CmdTime(MuxCommand):
             msg = f"{sun}\n{approx_time(hour, minute, level)}"
 
         self.caller.msg(msg)
-
-
-class CmdSysTime(MuxCommand):
-    """Show Evennia's default system/game time table.
-
-    Usage:
-      systime
-    """
-
-    key = "systime"
-    locks = "cmd:all()"
-    help_category = "General"
-
-    def func(self):
-        # Defer to Evennia's default time command (usually @time)
-        self.caller.execute_cmd("@time")
