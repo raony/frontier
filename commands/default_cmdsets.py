@@ -25,9 +25,10 @@ from .status import CmdStatus
 from .skills import CmdSkills, CmdCreateSkill, CmdSetSkill
 from .forage import CmdForage
 from .resources import CmdCreateResource
-from .time import CmdSetTime
-from .gametime import CmdTime
+from .time import CmdSetDateTime, CmdSetTime
+from .gametime import CmdTime, CmdSysTime
 from .external import CmdMakeExternal
+from .equip import CmdEquip, CmdUnequip, CmdInventoryEnhanced
 
 
 class AliveCmdSet(default_cmds.CharacterCmdSet):
@@ -52,6 +53,10 @@ class AliveCmdSet(default_cmds.CharacterCmdSet):
         self.add(CmdStatus())
         self.add(CmdSkills())
         self.add(CmdForage())
+        # Override default inventory while alive to include equipped section
+        self.add(CmdInventoryEnhanced())
+        self.add(CmdEquip())
+        self.add(CmdUnequip())
 
 
 class CharacterCmdSet(default_cmds.CharacterCmdSet):
@@ -66,8 +71,10 @@ class CharacterCmdSet(default_cmds.CharacterCmdSet):
         self.add(CmdCreateSkill())
         self.add(CmdSetSkill())
         self.add(CmdCreateResource())
+        self.add(CmdSetDateTime())
         self.add(CmdSetTime())
         self.add(CmdTime())
+        self.add(CmdSysTime())
         self.add(CmdMakeExternal())
 
 

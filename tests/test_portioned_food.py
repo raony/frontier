@@ -9,7 +9,7 @@ class TestPortionedFood(EvenniaTest):
 
         chicken = create_object(RoastedChicken, key="roasted chicken", location=self.room1)
         self.char1.location = self.room1
-        self.char1.cmdset.add(AliveCmdSet, permanent=True)
+        self.char1.cmdset.add(AliveCmdSet, persistent=True)
 
         # initial portions
         self.assertEqual(chicken.db.parts_total, 6)

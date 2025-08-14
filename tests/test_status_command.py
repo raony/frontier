@@ -36,5 +36,5 @@ class TestStatusCommand(EvenniaTest):
 
     def test_status_command_available(self):
         # Smoke test: ensure command set is present and command runs
-        self.char1.cmdset.add(AliveCmdSet, permanent=True)
+        self.char1.cmdset.add(AliveCmdSet, persistent=True)
         self.char1.execute_cmd("status")

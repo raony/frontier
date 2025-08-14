@@ -56,6 +56,20 @@
   - `source .venv/bin/activate`
   - Then run commands like `evennia test --settings settings.py .`
 
+### Persistence & Restart Safety (Important)
+- Do NOT store live object instances inside Evennia Attributes (e.g., `self.db.*`). Store primitive values (ids, strings) instead.
+  - Example: For equipment mappings, store `object.id` (int) and resolve with `search_object(f"#{id}")` when needed.
+- Avoid writing new Attributes (`self.db.* = ...`) during `at_init`, `at_object_post_creation`, or connection sync events; these can run during server start/AMP sync and cause DB errors.
+  - Prefer lazy initialization: return transient defaults in getters, and only persist after the server is fully up or within explicit player actions.
+- When attaching/removing CmdSets, use `persistent=True` (not `permanent=True`), per Evennia’s updated API/deprecation.
+- When normalizing legacy Attribute data, do it on-demand and guard writes to avoid altering Attributes during sensitive initialization.
+
+### Equipment System Patterns
+- Slots are defined centrally in `typeclasses/equipment.py`.
+- Items expose `equipable_slot` via either `obj.db.equipable` or mixins like `EquippableHead`.
+- Characters maintain `db.equipment` as `{slot: object_id or None}`; never store object instances.
+- Keep mapping consistent when items leave inventory (clear slot on `at_object_leave`).
+
 ## Code style
 ## Gameplay patterns established
 - Survival needs: `hunger`, `thirst`, `tiredness`, and `metabolism` as AttributeProperties; metabolism independent of tiredness.

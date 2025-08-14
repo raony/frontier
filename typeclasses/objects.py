@@ -230,6 +230,28 @@ class Object(ObjectParent, DefaultObject):
     pass
 
 
+    # --- Equipment helpers -------------------------------------------------
+    @property
+    def equipable_slot(self):
+        """Return the canonical slot this object can be equipped to, if any.
+
+        Items can define either `db.equipable` or `db.equipable_slot` as the slot
+        name (one of: head, body, legs, waist, hands, feet). This property returns
+        the normalized slot string or None if not equipable.
+        """
+        from .equipment import normalize_slot
+
+        # Support both attribute names
+        value = getattr(self.db, "equipable", None)
+        if not value:
+            value = getattr(self.db, "equipable_slot", None)
+        return normalize_slot(value)
+
+    def is_equipable(self) -> bool:
+        """True if this object can be equipped to a known slot."""
+        return self.equipable_slot is not None
+
+
 from .liquid import LiquidContainerMixin
 
 

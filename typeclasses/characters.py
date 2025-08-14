@@ -9,13 +9,14 @@ creation commands.
 """
 
 from evennia.objects.objects import DefaultCharacter
-from evennia import AttributeProperty
+from evennia import AttributeProperty, search_object
 
 from commands.dead_cmdset import DeadCmdSet
 from commands.default_cmdsets import AliveCmdSet
 
 from .objects import ObjectParent
 from django.conf import settings
+from .equipment import EQUIPMENT_SLOTS, default_equipment_map, normalize_slot
 
 
 class LivingMixin:
@@ -69,7 +70,7 @@ class LivingMixin:
         self.stop_metabolism_script()
         # Remove alive-only commands and add dead cmdset
         self.cmdset.remove(AliveCmdSet)
-        self.cmdset.add(DeadCmdSet, permanent=True)
+        self.cmdset.add(DeadCmdSet, persistent=True)
 
     # Hunger/thirst/tiredness management helpers
     def _hunger_level(self) -> int:
@@ -291,6 +292,7 @@ class Character(LivingMixin, ObjectParent, DefaultCharacter):
     def at_object_creation(self):
         """Called once, when the object is first created."""
         super().at_object_creation()
+        # Initialize equipment mapping lazily to avoid Attribute creation during init sync
 
     def at_pre_move(self, destination, **kwargs):
         """Prevent dead characters from moving under their own power."""
@@ -304,17 +306,17 @@ class Character(LivingMixin, ObjectParent, DefaultCharacter):
         super().at_init()
         if self.is_dead:
             self.cmdset.remove(AliveCmdSet)
-            self.cmdset.add(DeadCmdSet, permanent=True)
+            self.cmdset.add(DeadCmdSet, persistent=True)
         else:
             self.cmdset.remove(DeadCmdSet)
-            self.cmdset.add(AliveCmdSet, permanent=True)
+            self.cmdset.add(AliveCmdSet, persistent=True)
         self.update_living_status()
 
     def at_death(self):
         """Handle character-specific death effects."""
         super().at_death()
         self.cmdset.remove(AliveCmdSet)
-        self.cmdset.add(DeadCmdSet, permanent=True)
+        self.cmdset.add(DeadCmdSet, persistent=True)
 
     # --- Perception / Look -------------------------------------------------
     def _get_ambient_sunlight(self) -> int:
@@ -335,3 +337,161 @@ class Character(LivingMixin, ObjectParent, DefaultCharacter):
         if ambient < threshold:
             return "it is too dark to see anything"
         return super().at_look(target, **kwargs)
+
+    def at_object_leave(self, obj, target_location, move_type="move", **kwargs):
+        """Ensure equipment mapping stays consistent when items leave inventory."""
+        try:
+            super().at_object_leave(obj, target_location, move_type=move_type, **kwargs)  # type: ignore[misc]
+        except Exception:
+            # Be permissive if MRO differs
+            pass
+        equipped = getattr(self.db, "equipment", None) or {}
+        for slot, obj_id in list(equipped.items()):
+            try:
+                if obj_id and int(obj_id) == int(getattr(obj, "id", -1)):
+                    equipped[slot] = None
+            except Exception:
+                continue
+        self.db.equipment = equipped
+
+    # --- Equipment API -----------------------------------------------------
+    def _normalize_equipment_mapping(self) -> None:
+        """Ensure equipment mapping stores only ints (object ids) or None."""
+        mapping = getattr(self.db, "equipment", None) or {}
+        changed = False
+        for slot in EQUIPMENT_SLOTS:
+            value = mapping.get(slot)
+            if value is None:
+                continue
+            # Already an int id
+            try:
+                if isinstance(value, int):
+                    continue
+                # If it looks like a dbref string "#123" or "123"
+                if isinstance(value, str):
+                    s = value.strip().lstrip("#")
+                    if s.isdigit():
+                        mapping[slot] = int(s)
+                        changed = True
+                        continue
+                # If it's an object instance with id
+                obj_id = int(getattr(value, "id", 0))
+                if obj_id > 0:
+                    mapping[slot] = obj_id
+                    changed = True
+                else:
+                    mapping[slot] = None
+                    changed = True
+            except Exception:
+                mapping[slot] = None
+                changed = True
+        if changed:
+            self.db.equipment = mapping
+    def get_equipped(self):
+        """Return the equipment mapping {slot: obj_id (int) or None}."""
+        mapping = getattr(self.db, "equipment", None)
+        if not mapping:
+            # Do not create attribute in early init/sync; return a transient default
+            return default_equipment_map()
+        # Keep it normalized on access
+        self._normalize_equipment_mapping()
+        return getattr(self.db, "equipment", mapping)
+
+    def get_equipped_in_slot(self, slot: str):
+        slot_key = normalize_slot(slot)
+        if not slot_key:
+            return None
+        obj_id = (self.get_equipped() or {}).get(slot_key)
+        return self._resolve_object_id(obj_id)
+
+    def _resolve_object_id(self, obj_id):
+        """Return object instance from an object id (int/dbref) or None."""
+        if not obj_id:
+            return None
+        try:
+            obj_id_int = int(obj_id)
+        except Exception:
+            return None
+        try:
+            results = search_object(f"#{obj_id_int}")
+            return results[0] if results else None
+        except Exception:
+            return None
+
+    def can_equip(self, obj) -> tuple[bool, str]:
+        """Check if object can be equipped and return (ok, reason_if_not)."""
+        if not obj or obj.location != self:
+            return False, "You must carry it to equip it."
+        slot = getattr(obj, "equipable_slot", None)
+        if not slot:
+            return False, "You can't equip that."
+        if slot not in EQUIPMENT_SLOTS:
+            return False, "That doesn't fit anywhere."
+        equipped_id = self.get_equipped().get(slot)
+        if equipped_id and int(equipped_id) == int(getattr(obj, "id", 0)):
+            return False, f"You already wear {obj.get_display_name(self)}."
+        return True, ""
+
+    def equip(self, obj) -> bool:
+        """Equip an object. Returns True on success, False otherwise."""
+        ok, reason = self.can_equip(obj)
+        if not ok:
+            self.msg(reason)
+            return False
+        slot = obj.equipable_slot
+        equipped = self.get_equipped()
+        previous_id = equipped.get(slot)
+        equipped[slot] = int(obj.id)
+        self.db.equipment = equipped
+        if previous_id and int(previous_id) != int(obj.id):
+            previous_obj = self._resolve_object_id(previous_id)
+            prev_name = previous_obj.get_display_name(self) if previous_obj else "your previous item"
+            self.msg(f"You replace {prev_name} with {obj.get_display_name(self)} on your {slot}.")
+        else:
+            self.msg(f"You equip {obj.get_display_name(self)} on your {slot}.")
+        return True
+
+    def unequip(self, slot_or_obj) -> bool:
+        """Unequip by slot name or object reference. Returns True if something was unequipped."""
+        equipped = self.get_equipped()
+        target_slot = None
+        target_obj = None
+        # Accept either slot string or object
+        if isinstance(slot_or_obj, str):
+            target_slot = normalize_slot(slot_or_obj)
+            if target_slot:
+                obj_id = equipped.get(target_slot)
+                target_obj = self._resolve_object_id(obj_id)
+        else:
+            # assume object
+            for s, obj_id in equipped.items():
+                try:
+                    if obj_id and int(obj_id) == int(getattr(slot_or_obj, "id", 0)):
+                        target_slot = s
+                        target_obj = self._resolve_object_id(obj_id)
+                        break
+                except Exception:
+                    continue
+        if not target_slot or not target_obj:
+            self.msg("Nothing to unequip.")
+            return False
+        equipped[target_slot] = None
+        self.db.equipment = equipped
+        self.msg(f"You remove {target_obj.get_display_name(self)} from your {target_slot}.")
+        return True
+
+    def get_equipment_display_lines(self) -> list[str]:
+        """Return human-readable equipment lines for display in inventory/status."""
+        lines: list[str] = []
+        equipped = self.get_equipped()
+        for slot in EQUIPMENT_SLOTS:
+            obj_id = equipped.get(slot)
+            if obj_id:
+                obj = self._resolve_object_id(obj_id)
+                if obj:
+                    lines.append(f"{slot.capitalize():<6}: {obj.get_display_name(self)}")
+                else:
+                    lines.append(f"{slot.capitalize():<6}: [missing]")
+            else:
+                lines.append(f"{slot.capitalize():<6}: [empty]")
+        return lines

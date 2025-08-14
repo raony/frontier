@@ -12,7 +12,7 @@ class TestResetCommand(EvenniaTest):
         self.char1.is_dead = True
         self.char1.is_living = False
         self.char1.is_resting = True
-        self.char1.cmdset.add(DeadCmdSet, permanent=True)
+        self.char1.cmdset.add(DeadCmdSet, persistent=True)
 
         # Execute the command via the command handler
         self.char1.execute_cmd("resetchar")
