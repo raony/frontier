@@ -8,6 +8,9 @@ Rooms are simple containers that has no location of their own.
 from evennia.objects.objects import DefaultRoom
 from evennia.contrib.base_systems import custom_gametime as gametime
 
+# World models
+from world.models import HexTile
+
 from .objects import ObjectParent
 
 
@@ -22,7 +25,71 @@ class Room(ObjectParent, DefaultRoom):
     properties and methods available on all Objects.
     """
 
-    pass
+    # --- Hex linkage ---------------------------------------------------------
+    def set_hex_by_coords(self, q: int, r: int, s: int):
+        """Link this room to a hex tile identified by cube coords.
+
+        Stores the `HexTile.id` in an Evennia Attribute `hex_id` (category
+        "environment"). Creates the `HexTile` if it does not exist.
+        """
+        # q + r + s must be 0 for valid cube coords; enforce lightly here
+        if (q + r + s) != 0:
+            raise ValueError("Hex cube coords must satisfy q + r + s == 0")
+
+        tile, _ = HexTile.objects.get_or_create(
+            q=q,
+            r=r,
+            s=s,
+            defaults={"terrain": "plain"},
+        )
+        self.attributes.add("hex_id", tile.id, category="environment")
+        return tile
+
+    def set_hex(self, tile: HexTile):
+        """Link this room to an existing `HexTile` instance."""
+        if not isinstance(tile, HexTile):
+            raise TypeError("tile must be a HexTile instance")
+        self.attributes.add("hex_id", tile.id, category="environment")
+        return tile
+
+    def get_hex_tile(self) -> HexTile | None:
+        """Return the linked `HexTile` or None if not linked."""
+        hex_id = self.attributes.get("hex_id", category="environment", default=None)
+        if hex_id is None:
+            return None
+        return HexTile.objects.filter(id=hex_id).first()
+
+    def get_hex_coords(self) -> tuple[int, int, int] | None:
+        """Return (q, r, s) for the linked hex or None if not linked."""
+        tile = self.get_hex_tile()
+        if tile is None:
+            return None
+        return (tile.q, tile.r, tile.s)
+
+    # --- Macro attributes via hex -------------------------------------------
+    def get_hex_weather(self) -> str:
+        """Return current macro weather from the linked hex.
+
+        Placeholder: Until a dedicated weather system is added on `HexTile`,
+        this uses a simple mapping from terrain to a representative weather.
+        """
+        tile = self.get_hex_tile()
+        if tile is None:
+            return "clear"
+        terrain = (tile.terrain or "").lower()
+        terrain_to_weather = {
+            "plain": "clear",
+            "plains": "clear",
+            "forest": "overcast",
+            "mountain": "windy",
+            "hills": "breezy",
+            "swamp": "humid",
+            "desert": "dry",
+            "tundra": "snow",
+            "coast": "breezy",
+            "ocean": "stormy",
+        }
+        return terrain_to_weather.get(terrain, "clear")
 
 
 class ExternalRoom(Room):

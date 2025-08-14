@@ -25,8 +25,12 @@ Last updated: 2025-08-14
    - `Character.get_metabolism_interval()` uses `TIME_FACTOR` to map 1 in-game hour to real seconds and scale by metabolism.
    - Prefer `evennia.utils.gametime` and `gametime.schedule` for time queries/events.
    - Next: Add `time` command and day/night effects using `gametime` APIs.
-3. Test hexmap
-   - Unit tests for `HexMap.load_all/save_all`, neighbor logic, and overwrite modes.
+3. Hex ↔ Room linkage
+   - Rooms can link to macro hex tiles via Evennia Attribute `hex_id` (category `environment`).
+   - Helper APIs on `typeclasses.rooms.Room`:
+     - `set_hex_by_coords(q, r, s)`, `set_hex(tile)`, `get_hex_tile()`, `get_hex_coords()`.
+     - `get_hex_weather()` maps `HexTile.terrain` to a placeholder weather string.
+   - Future: Dedicated weather model per hex; expose richer macro attributes.
 4. Start LLM integration
    - Scaffold `world/llm_service.py`, provider client (Ollama), and prompt templates; add stub tests.
 
