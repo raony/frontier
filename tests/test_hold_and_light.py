@@ -36,11 +36,30 @@ class TestHoldAndLight(EvenniaTest):
         out = self.char1.at_look(room)
         assert "too dark" in out.lower()
 
-        # Drop a torch in the room: should raise light
+        # Drop a torch in the room and light it: should raise light
         torch = self.create_object("typeclasses.items.Torch", key="torch", location=room)
+        # Off by default
+        assert not getattr(torch.db, "is_on", False)
+        # Command to light it won't work unless we carry it; just turn on directly for this test
+        torch.turn_on(caller=self.char1)
         # Now ambient light should be above threshold 20
         ambient = room.get_light_level(looker=self.char1)
         assert ambient >= int(self.char1.light_threshold)
         # Looking should now work and not be dark
         out2 = self.char1.at_look(room)
         assert "too dark" not in out2.lower()
+
+    def test_torch_consumes_fuel_when_on(self):
+        torch = self.create_object("typeclasses.items.Torch", key="torch", location=self.char1)
+        # Default full fuel
+        full = float(torch.db.fuel)
+        torch.turn_on(caller=self.char1)
+        # Simulate some ticks
+        for _ in range(3):
+            torch._consume_tick()
+        assert float(torch.db.fuel) < full
+        # Exhaust fuel
+        torch.db.consume_rate = 1000.0
+        torch._consume_tick()
+        assert torch.db.fuel == 0
+        assert not torch.db.is_on

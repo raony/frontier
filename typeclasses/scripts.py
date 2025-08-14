@@ -126,3 +126,34 @@ class MetabolismScript(DefaultScript):
             self.obj.increase_tiredness()
         # update interval in case metabolism changed
         self.interval = self.obj.get_metabolism_interval()
+
+
+class ItemConsumptionScript(DefaultScript):
+    """Regularly consume fuel/charges on an object when it's ON.
+
+    The object should implement `_consume_tick()` and `get_consume_interval()`.
+    """
+
+    def at_script_creation(self):
+        self.key = "consumption_script"
+        self.persistent = True
+        interval = 0
+        try:
+            interval = int(self.obj.get_consume_interval())
+        except Exception:
+            interval = 5
+        self.interval = max(1, interval)
+
+    def at_repeat(self):
+        # Only consume if object exposes the helper and is ON
+        try:
+            if getattr(getattr(self.obj, "db", object()), "is_on", False):
+                if hasattr(self.obj, "_consume_tick"):
+                    self.obj._consume_tick()
+        finally:
+            # Keep interval synced if object changes it dynamically
+            try:
+                new_interval = int(self.obj.get_consume_interval())
+                self.interval = max(1, new_interval)
+            except Exception:
+                pass

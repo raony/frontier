@@ -29,7 +29,7 @@ from .time import CmdSetDateTime, CmdSetTime
 from .gametime import CmdTime
 from .external import CmdMakeExternal
 from .equip import CmdEquip, CmdUnequip, CmdInventoryEnhanced
-from .hold import CmdHold, CmdRelease
+from .hold import CmdHold, CmdRelease, CmdLight, CmdExtinguish
 from .hex import CmdSetHex, CmdWeather
 
 
@@ -61,6 +61,8 @@ class AliveCmdSet(default_cmds.CharacterCmdSet):
         self.add(CmdUnequip())
         self.add(CmdHold())
         self.add(CmdRelease())
+        self.add(CmdLight())
+        self.add(CmdExtinguish())
 
 
 class CharacterCmdSet(default_cmds.CharacterCmdSet):
