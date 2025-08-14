@@ -1,20 +1,5 @@
-"""Database models for world objects."""
+"""World app models.
 
-from django.db import models
-
-
-class HexTile(models.Model):
-    """Model storing cube coordinate tiles."""
-
-    q = models.IntegerField()
-    r = models.IntegerField()
-    s = models.IntegerField()
-    terrain = models.CharField(max_length=32, default="plain")
-    # Arbitrary macro attributes for this hex (e.g., weather, temperature, etc.)
-    attributes = models.JSONField(default=dict, blank=True)
-
-    class Meta:
-        unique_together = ("q", "r", "s")
-
-    def __str__(self) -> str:
-        return f"HexTile(q={self.q}, r={self.r}, s={self.s})"
+Currently, hex tiles are represented as Evennia typeclassed Objects
+(`typeclasses.hextile.HexTile`) rather than Django models.
+"""

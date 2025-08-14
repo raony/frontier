@@ -1,17 +1,14 @@
 """Hexagonal map representation using cube coordinates.
 
-This module defines simple data structures for representing a hexagonal
-map that is completely separate from Evennia's database models and
-Typeclasses.
+This module provides helpers around cube coordinates and persists hex tiles
+as Evennia objects via the `typeclasses.hextile.HexTile` typeclass.
 """
 
 from dataclasses import dataclass
 from typing import Dict, Optional, Iterable
 
 from django.db import transaction
-
-# DB model for persistence
-from .models import HexTile
+from typeclasses.hextile import HexTile
 
 
 @dataclass(frozen=True)
@@ -59,44 +56,36 @@ class HexMap:
     # --- Persistence helpers ---
     @classmethod
     def load_all(cls) -> "HexMap":
-        """Load entire map from the database into a HexMap instance."""
+        """Load entire map from Evennia objects into a HexMap instance."""
         hm = cls()
-        for tile in HexTile.objects.all():
-            hm.add_tile(CubeCoord(tile.q, tile.r, tile.s), tile.terrain)
+        # Use tag category 'hexcoord' to find all hex tiles
+        from evennia import search_tag
+
+        tiles = [obj for obj in search_tag(category="hexcoord") if obj.is_typeclass(HexTile, exact=False)]
+        for obj in tiles:
+            q, r, s = int(obj.db.q or 0), int(obj.db.r or 0), int(obj.db.s or 0)
+            hm.add_tile(CubeCoord(q, r, s), getattr(obj.db, "terrain", None))
         return hm
 
     @transaction.atomic
     def save_all(self, overwrite: bool = True) -> None:
-        """Persist the current map to the database.
+        """Persist the current map to Evennia objects (typeclass HexTile).
 
-        - If `overwrite` is True, existing rows for present coords are updated and
-          any DB rows not present in the in-memory map are deleted.
-        - If False, only upserts for present coords are performed and extras remain.
+        - If `overwrite` is True, hex objects not present in the in-memory map are deleted.
+        - Otherwise, only upserts are performed.
         """
+        from evennia import search_tag
+
         coords_seen: set[tuple[int, int, int]] = set()
-        # Upsert tiles
         for coord, terrain in self._tiles.items():
             coords_seen.add((coord.q, coord.r, coord.s))
-            HexTile.objects.update_or_create(
-                q=coord.q,
-                r=coord.r,
-                s=coord.s,
-                defaults={"terrain": terrain or "plain"},
-            )
+            obj, _ = HexTile.get_or_create_by_coords(coord.q, coord.r, coord.s, terrain=terrain or "plain")
+            if terrain is not None:
+                obj.db.terrain = terrain
         if overwrite:
-            # Delete tiles not represented in this HexMap
-            qs = HexTile.objects.all()
-            to_delete_ids: Iterable[int] = (
-                qs.exclude(
-                    q__in=[q for q, _, _ in coords_seen],
-                )
-                .values_list("id", flat=True)
-            )
-            # Further filter by matching full tuple to avoid partial collisions
-            delete_ids: list[int] = []
-            for tile in qs:
-                tup = (tile.q, tile.r, tile.s)
+            # Delete hex objects not in map
+            tiles = [obj for obj in search_tag(category="hexcoord") if obj.is_typeclass(HexTile, exact=False)]
+            for obj in tiles:
+                tup = (int(obj.db.q or 0), int(obj.db.r or 0), int(obj.db.s or 0))
                 if tup not in coords_seen:
-                    delete_ids.append(tile.id)
-            if delete_ids:
-                HexTile.objects.filter(id__in=delete_ids).delete()
+                    obj.delete()
