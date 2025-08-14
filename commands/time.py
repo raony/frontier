@@ -18,6 +18,8 @@ import os
 import re
 from django.conf import settings
 from evennia.contrib.base_systems import custom_gametime
+from evennia.utils import gametime as std_gametime
+from world.time_service import GameTimeService
 
 
 class CmdSetDateTime(MuxCommand):
@@ -28,6 +30,7 @@ class CmdSetDateTime(MuxCommand):
     """
 
     key = "@setdatetime"
+    switch_options = ("debug",)
     # Always operate in the custom calendar defined by TIME_UNITS
     locks = "cmd:perm(Builder)"
     help_category = "Building"
@@ -45,35 +48,13 @@ class CmdSetDateTime(MuxCommand):
             return
 
         # Persist by updating TIME_GAME_EPOCH in settings.py and reloading.
-        # Compute the epoch needed so that the current time becomes the desired time.
+        # Compute epoch directly from desired Gregorian datetime and current real time:
+        #   game_now = TIME_GAME_EPOCH + real_elapsed * TIME_FACTOR
+        # We want: game_now == desired_dt -> TIME_GAME_EPOCH = desired - real_elapsed * TIME_FACTOR
         try:
-            # Compute delta using custom calendar seconds
-            cy, cmon, cday, chr_, cmin, csec = custom_gametime.custom_gametime(absolute=True)
-            units = getattr(settings, "TIME_UNITS", None) or {
-                "sec": 1,
-                "min": 60,
-                "hour": 3600,
-                "day": 86400,
-                "month": 2592000,
-                "year": 31104000,
-            }
-
-            def to_seconds(y: int, mon: int, d: int, h: int, mi: int, s: int) -> int:
-                # Months and days are 1-indexed in custom calendar
-                sec = int(s)
-                sec += int(mi) * units["min"]
-                sec += int(h) * units["hour"]
-                sec += max(int(d) - 1, 0) * units["day"]
-                sec += max(int(mon) - 1, 0) * units["month"]
-                sec += int(y) * units["year"]
-                return sec
-
-            current_game_seconds = to_seconds(cy, cmon, cday, chr_, cmin, csec)
-            desired_game_seconds = to_seconds(dt.year, dt.month, dt.day, dt.hour, dt.minute, dt.second)
-            current_epoch = int(getattr(settings, "TIME_GAME_EPOCH", 0) or 0)
-            # New epoch so that (current_game_seconds - current_epoch) + new_epoch == desired_game_seconds
-            # => new_epoch = current_epoch + (desired - current)
-            epoch = current_epoch + (desired_game_seconds - current_game_seconds)
+            # Prefer runtime-based anchoring for accuracy across reloads
+            svc = GameTimeService(settings=settings, now_provider=time.time)
+            epoch = svc.compute_epoch_from_desired_using_runtime(dt)
             game_dir = getattr(settings, "GAME_DIR", ".")
             settings_path = os.path.join(game_dir, "server", "conf", "settings.py")
 
@@ -92,6 +73,18 @@ class CmdSetDateTime(MuxCommand):
 
             with open(settings_path, "w", encoding="utf-8") as f:
                 f.write(new_content)
+
+            if "debug" in (self.switches or ()):  # optional diagnostics
+                from evennia.utils import gametime as std_gametime
+                tf = getattr(settings, 'TIME_FACTOR', 1.0)
+                runtime = std_gametime.runtime()
+                caller.msg(
+                    "setdatetime debug (runtime-based):\n"
+                    f"  time_factor: {tf}\n"
+                    f"  runtime_seconds: {runtime}\n"
+                    f"  desired_unix: {int(dt.timestamp())}\n"
+                    f"  new_epoch(int): {epoch}"
+                )
 
             caller.msg(f"In-game time set to {dt:%Y-%m-%d %H:%M:%S}. Reloading server ...")
             # Use in-game reload command to apply new settings
@@ -128,28 +121,13 @@ class CmdSetTime(MuxCommand):
         # Compute epoch delta using custom calendar (keep same date)
         try:
             cy, cmon, cday, chr_, cmin, csec = custom_gametime.custom_gametime(absolute=True)
-            units = getattr(settings, "TIME_UNITS", None) or {
-                "sec": 1,
-                "min": 60,
-                "hour": 3600,
-                "day": 86400,
-                "month": 2592000,
-                "year": 31104000,
-            }
-
-            def to_seconds(y: int, mon: int, d: int, h: int, mi: int, s: int) -> int:
-                sec = int(s)
-                sec += int(mi) * units["min"]
-                sec += int(h) * units["hour"]
-                sec += max(int(d) - 1, 0) * units["day"]
-                sec += max(int(mon) - 1, 0) * units["month"]
-                sec += int(y) * units["year"]
-                return sec
-
-            current_game_seconds = to_seconds(cy, cmon, cday, chr_, cmin, csec)
-            desired_game_seconds = to_seconds(cy, cmon, cday, t_only.hour, t_only.minute, t_only.second)
+            svc = GameTimeService(settings=settings, now_provider=time.time)
+            delta_epoch = svc.compute_epoch_shift_same_day_time(
+                (cy, cmon, cday, chr_, cmin, csec),
+                (t_only.hour, t_only.minute, t_only.second),
+            )
             current_epoch = int(getattr(settings, "TIME_GAME_EPOCH", 0) or 0)
-            epoch = current_epoch + (desired_game_seconds - current_game_seconds)
+            epoch = current_epoch + delta_epoch
 
             game_dir = getattr(settings, "GAME_DIR", ".")
             settings_path = os.path.join(game_dir, "server", "conf", "settings.py")

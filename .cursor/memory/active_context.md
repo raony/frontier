@@ -1,6 +1,6 @@
 # Active Context — Current Work
 
-Last updated: 2025-08-12
+Last updated: 2025-08-14
 
 ## Goals
 - Understand Frontier codebase structure and Evennia integration.

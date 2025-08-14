@@ -3,6 +3,9 @@
 Practical notes for working with this codebase using Evennia.
 
 ## Setup and running
+- Activate virtualenv (from project root):
+  - `source .venv/bin/activate`
+  - Run all commands below inside the activated venv.
 - Create/upgrade DB: `evennia migrate`
 - Start server: `evennia start`
 - Connect: telnet `localhost:4000` or webclient `http://localhost:4001/`

@@ -66,4 +66,4 @@ TIME_UNITS = {
     "month": 60 * 60 * 24 * 30,
     "year": 60 * 60 * 24 * 30 * 12,
 }
-TIME_GAME_EPOCH = 63006283966
+TIME_GAME_EPOCH = 1753695170
