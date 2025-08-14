@@ -113,3 +113,30 @@ class CmdExtinguish(Command):
             caller.msg("You can't extinguish that.")
             return
         obj.turn_off(caller=caller)
+
+
+class CmdDarkvision(Command):
+    """Toggle darkvision for builders to see in dark areas.
+
+    Usage:
+      darkvision
+    """
+
+    key = "darkvision"
+    locks = "cmd:perm(Builder)"
+
+    def func(self):
+        caller = self.caller
+        if not hasattr(caller, "light_threshold"):
+            caller.msg("You don't have light perception.")
+            return
+
+        current = int(caller.light_threshold or 20)
+        if current > 0:
+            # Enable darkvision by setting threshold to 0
+            caller.light_threshold = 0
+            caller.msg("Darkvision enabled. You can now see in complete darkness.")
+        else:
+            # Disable darkvision by restoring normal threshold
+            caller.light_threshold = 20
+            caller.msg("Darkvision disabled. You now require light to see.")

@@ -61,7 +61,7 @@
   - Example: For equipment mappings, store `object.id` (int) and resolve with `search_object(f"#{id}")` when needed.
 - Avoid writing new Attributes (`self.db.* = ...`) during `at_init`, `at_object_post_creation`, or connection sync events; these can run during server start/AMP sync and cause DB errors.
   - Prefer lazy initialization: return transient defaults in getters, and only persist after the server is fully up or within explicit player actions.
-- When attaching/removing CmdSets, use `persistent=True` (not `permanent=True`), per Evennia’s updated API/deprecation.
+- When attaching/removing CmdSets, use `persistent=True` (not `permanent=True`), per Evennia's updated API/deprecation.
 - When normalizing legacy Attribute data, do it on-demand and guard writes to avoid altering Attributes during sensitive initialization.
 
 ### Equipment System Patterns
@@ -76,6 +76,9 @@
 - API on `Character`: `get_holding() -> list[int]`, `hold(obj)`, `release(obj_or_all)`, `get_holding_display_line()`.
 - Commands: `hold <item>`, `release <item|all>` registered in `AliveCmdSet`.
 - Light sources: Items with `LightSourceMixin` set `db.light_level` (0..100). Rooms aggregate contained light and sunlight.
+
+### Builder Utilities
+- `darkvision` command: Toggles `light_threshold` between 0 (see in darkness) and 20 (normal). Requires Builder permission.
 
 ## Code style
 ## Gameplay patterns established

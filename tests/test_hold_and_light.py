@@ -63,3 +63,21 @@ class TestHoldAndLight(EvenniaTest):
         torch._consume_tick()
         assert torch.db.fuel == 0
         assert not torch.db.is_on
+
+    def test_darkvision_command(self):
+        # Give character builder permissions
+        self.char1.permissions.add("Builder")
+        # Add darkvision command
+        from commands.default_cmdsets import CharacterCmdSet
+        self.char1.cmdset.add(CharacterCmdSet, persistent=True)
+
+        # Initial threshold should be 20
+        assert self.char1.light_threshold == 20
+
+        # Enable darkvision
+        self.char1.execute_cmd("darkvision")
+        assert self.char1.light_threshold == 0
+
+        # Disable darkvision
+        self.char1.execute_cmd("darkvision")
+        assert self.char1.light_threshold == 20
