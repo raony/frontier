@@ -3,7 +3,7 @@
 - Use Evennia gametime settings: `TIME_FACTOR = 6.0` (game runs 6× faster than real time). Optionally set `TIME_GAME_EPOCH`.
 - Query and schedule via `evennia.utils.gametime` and `gametime.schedule(...)` for time-based events.
 - Character metabolism defines one tick as one in-game hour: `get_metabolism_interval()` returns `(3600 / TIME_FACTOR) / metabolism`.
-- Avoid custom world-clock scripts; rely on Evennia’s built-in time facilities.
+- Avoid custom world-clock scripts; rely on Evennia's built-in time facilities.
 # System Patterns and Conventions
 
 ## General
@@ -16,6 +16,7 @@
 - Create using `evennia.create_object()` to ensure correct hooks and DB connections.
 - Prefer `AttributeProperty` for persistent attributes on typeclasses. When we say "character attribute" we mean an Evennia Attribute (backed by `self.db.<name>` via `AttributeProperty`), not a Python attribute.
 - Use `AttributeProperty` also for non-character entities when values should be @set-able in-game (e.g., `Exit.tiredness_cost`).
+- **Use Django Tags for categorical and state properties** (e.g., `holdable`, `equipable`, `living_state`)
 
 ## Commands and CmdSets
 - Implement commands in `commands/*.py` and group them into CmdSets in `commands/default_cmdsets.py` (and others).
@@ -70,12 +71,22 @@
 - Characters maintain `db.equipment` as `{slot: object_id or None}`; never store object instances.
 - Keep mapping consistent when items leave inventory (clear slot on `at_object_leave`).
 
-### Holding System Patterns
-- Holding is distinct from equipment. Items must have `db.is_holdable=True` (via `HoldableMixin`).
-- Characters store held items as a list of object ids in `db.holding` (max capacity 2 hands).
-- API on `Character`: `get_holding() -> list[int]`, `hold(obj)`, `release(obj_or_all)`, `get_holding_display_line()`.
-- Commands: `hold <item>`, `release <item|all>` registered in `AliveCmdSet`.
-- Light sources: Items with `LightSourceMixin` set `db.light_level` (0..100). Rooms aggregate contained light and sunlight.
+### Holding System Patterns (Updated)
+- **Tag-based approach**: Items use `tags.add("holdable", category="holding")` via `HoldableMixin`
+- **Slot management**: Characters use `category="holding_slot"` tags for main/off hand slots
+- **Held state**: Items use `tags.add("held", category="holding")` when held
+- **Automatic cleanup**: Items lose held status when moved from inventory via `at_pre_object_leave`
+- **API**: `HeldItemsHandler` manages slot allocation and validation
+- **Commands**: `hold <item>` with slot specification (`/main`, `/off`, `/both`)
+- **Display**: Held items show slot information in their names
+
+### Tag System Patterns
+- **Use Django Tags for categorical and state properties**
+- **Categories**: Group related tags (e.g., `"holding"`, `"holding_slot"`, `"living_state"`)
+- **Boolean states**: Use additive tags (e.g., `"living_being"` + `"dead"` for dead state)
+- **Validation**: Check tags with `obj.tags.has(tag, category=category)`
+- **Search**: Use `search_tag(tag, category=category)` for finding objects
+- **Performance**: Tags are shared between objects, more efficient than attributes
 
 ### Builder Utilities
 - `darkvision` command: Toggles `light_threshold` between 0 (see in darkness) and 20 (normal). Requires Builder permission.

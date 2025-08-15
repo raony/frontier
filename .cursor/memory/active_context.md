@@ -2,6 +2,24 @@
 
 ## Recent Changes
 
+### Holding System Tag Conversion (Completed)
+- **Converted holding system to use Django Tags** instead of AttributeProperty
+- **Updated `HoldableMixin`** to use `tags.add("holdable", category="holding")` on object creation
+- **Enhanced `HeldItemsHandler`** to work with tag-based slot management:
+  - Uses `category="holding_slot"` for slot tags (main, off)
+  - Uses `category="holding"` for holdable and held states
+  - Improved slot validation and management
+- **Updated `HolderMixin`** to use tag-based slot initialization
+- **Enhanced display methods** to show holding status in item names
+- **Comprehensive test coverage** in `tests/test_holding.py` with 65/65 tests passing
+
+### Holding System API (Updated)
+- **Tag-based holdable detection**: `item.tags.has("holdable", category="holding")`
+- **Tag-based held state**: `item.tags.has("held", category="holding")`
+- **Slot management**: Uses `category="holding_slot"` for main/off hand slots
+- **Automatic cleanup**: Items automatically lose held status when moved from inventory
+- **Display integration**: Held items show slot information in their names
+
 ### Weight System Implementation (Completed)
 - **Added `WeightMixin`** to `typeclasses/objects.py` - provides weight functionality to all objects
 - **Updated base `Object` class** to include `WeightMixin` by default
@@ -38,10 +56,11 @@ obj.weight_default = 200 # Set default for new instances
 ```
 
 ## Current Focus
+- Holding system successfully converted to tag-based approach
 - Weight system is now fully implemented and tested
 - All existing items have appropriate default weights
 - Commands are available for players and builders
-- System follows Evennia patterns with persistent attributes
+- System follows Evennia patterns with persistent attributes and tags
 - All tests passing (65/65)
 
 ## Next Steps
@@ -49,15 +68,19 @@ obj.weight_default = 200 # Set default for new instances
 - Add weight to character encumbrance calculations
 - Integrate weight with movement/travel systems
 - Add weight-based crafting requirements
+- Continue tag system conversion for other boolean properties
 
 ## Related Files
+- `typeclasses/holding.py` - Updated holding system with tag-based approach
 - `typeclasses/objects.py` - WeightMixin and base Object class
 - `typeclasses/food.py` - Food weight defaults
 - `typeclasses/items.py` - Equipment weight defaults
 - `typeclasses/liquid.py` - Container weight defaults
 - `commands/weight.py` - Weight commands
+- `commands/hold.py` - Hold command (updated for tag system)
 - `commands/default_cmdsets.py` - Command registration
 - `tests/test_weight_system.py` - Weight system tests
+- `tests/test_holding.py` - Updated holding system tests
 - `tests/test_light.py` - Light system tests (renamed from test_hold_and_light.py)
 
 ---
@@ -76,12 +99,6 @@ obj.weight_default = 200 # Set default for new instances
 - **Equipment commands**: `equip`, `unequip`, enhanced `inventory`
 - **Equipment mixins** for different slot types
 - **Equipment persistence** using object IDs in character attributes
-
-### Holding System (Completed)
-- **Hand-based holding system** with main/off hand slots
-- **Holding commands**: `hold`, `release`
-- **HoldableMixin** for items that can be held
-- **HeldItemsHandler** for managing held items
 
 ### Survival System (Completed)
 - **Hunger, thirst, tiredness** as persistent attributes
@@ -149,6 +166,7 @@ obj.weight_default = 200 # Set default for new instances
 
 ### Database Patterns
 - **Use AttributeProperty for persistent attributes**
+- **Use Django Tags for categorical and state properties**
 - **Store primitive values, not object instances**
 - **Lazy initialization for complex attributes**
 - **Migration-safe attribute handling**
@@ -163,6 +181,7 @@ obj.weight_default = 200 # Set default for new instances
 
 ## Project Status
 - **Core systems implemented and tested**
+- **Holding system converted to tag-based approach**
 - **Weight system completed**
 - **All major gameplay mechanics functional**
 - **Ready for content creation and refinement**
@@ -174,3 +193,4 @@ obj.weight_default = 200 # Set default for new instances
 3. **Combat mechanics**
 4. **NPC and AI systems**
 5. **World generation and content**
+6. **Continue tag system conversion for other properties**
