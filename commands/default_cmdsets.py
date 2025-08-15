@@ -31,6 +31,7 @@ from .external import CmdMakeExternal
 from .equip import CmdEquip, CmdUnequip, CmdInventoryEnhanced
 from .hex import CmdSetHex, CmdWeather
 from .hold import CmdHold, CmdRelease, CmdLight, CmdExtinguish, CmdDarkvision
+from .kill import CmdKill, CmdRevive
 
 
 class AliveCmdSet(default_cmds.CharacterCmdSet):
@@ -63,6 +64,7 @@ class AliveCmdSet(default_cmds.CharacterCmdSet):
         self.add(CmdRelease())
         self.add(CmdLight())
         self.add(CmdExtinguish())
+        self.add(CmdTime())
 
 
 class CharacterCmdSet(default_cmds.CharacterCmdSet):
@@ -79,12 +81,13 @@ class CharacterCmdSet(default_cmds.CharacterCmdSet):
         self.add(CmdCreateResource())
         self.add(CmdSetDateTime())
         self.add(CmdSetTime())
-        self.add(CmdTime())
         self.add(CmdMakeExternal())
         # Builder utilities
         self.add(CmdSetHex())
         self.add(CmdWeather())
         self.add(CmdDarkvision())
+        self.add(CmdKill())
+        self.add(CmdRevive())
 
 
 class AccountCmdSet(default_cmds.AccountCmdSet):

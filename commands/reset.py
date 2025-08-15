@@ -22,15 +22,10 @@ class CmdResetChar(Command):
         if not caller:
             return
 
-        # Reset survival stats
+        # Reset survival stats to 0
         caller.hunger = 0
         caller.thirst = 0
         caller.tiredness = 0
-
-        # Make alive
-        caller.is_dead = False
-        caller.is_living = True
-        caller.is_resting = False
 
         # Clear threshold message trackers
         if hasattr(caller, "ndb"):
@@ -38,16 +33,17 @@ class CmdResetChar(Command):
             caller.ndb.thirst_msg_level = 0
             caller.ndb.tiredness_msg_level = 0
 
-        # Ensure correct cmdsets and scripts
-        try:
-            caller.cmdset.remove(DeadCmdSet)
-        except Exception:
-            pass
-
-        # Restart metabolism script and update living status messages
-        if hasattr(caller, "start_metabolism_script"):
-            caller.start_metabolism_script()
-        if hasattr(caller, "update_living_status"):
-            caller.update_living_status()
-
-        caller.msg("You feel refreshed and alive. Your needs are reset.")
+        # Use the new living module functionality
+        if hasattr(caller, 'reset_and_revive'):
+            message = caller.reset_and_revive()
+            caller.msg(message)
+        else:
+            # Fallback for non-living beings or old system
+            caller.is_dead = False
+            caller.is_living = True
+            caller.is_resting = False
+            if hasattr(caller, "start_metabolism_script"):
+                caller.start_metabolism_script()
+            if hasattr(caller, "update_living_status"):
+                caller.update_living_status()
+            caller.msg("You feel refreshed and alive. Your needs are reset.")
