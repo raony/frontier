@@ -30,7 +30,8 @@ from .gametime import CmdTime
 from .external import CmdMakeExternal
 from .equip import CmdEquip, CmdUnequip, CmdInventoryEnhanced
 from .hex import CmdSetHex, CmdWeather
-from .hold import CmdHold, CmdRelease, CmdLight, CmdExtinguish, CmdDarkvision
+from .hold import CmdHold, CmdRelease
+from .light import CmdDarkvision, CmdLight, CmdExtinguish
 from .kill import CmdKill, CmdRevive
 
 

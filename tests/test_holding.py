@@ -45,3 +45,9 @@ class TestHolding(EvenniaTest):
         self.item1_char1_inv.move_to(self.char1.location)
         self.assertEqual(len(self.char1.held_items.all), 0)
         self.assertIsNone(self.item1_char1_inv.tags.get("held", category="holding"))
+
+    def test_remove_items(self):
+        self.assertFalse(self.char1.held_items.remove(self.item1_char1_inv))
+        self.assertFalse(self.char1.held_items.remove(None))
+        self.assertFalse(self.char1.held_items.remove(self.item4_char1_loc))
+        self.assertFalse(self.char1.held_items.remove(self.not_holdable_obj))
