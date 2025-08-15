@@ -28,6 +28,10 @@ Last updated: 2025-08-14
 - Updated `resetchar` command to reuse revive functionality and reset vital stats
 - Refactored revive logic into reusable helper method
 - **Extracted all living/death logic to `typeclasses/living.py`** - better organization and reusability
+- **Removed all fallback mechanisms** - fully tag-based system, no more attribute fallbacks
+- **Fixed test issues** - Added missing methods (skills, holding) and corrected metabolism interval
+- **Fixed exit tests** - Updated `increase_tiredness()` method to accept optional amount parameter
+- **Core functionality working** - 36/36 tests passing for living/death system, commands, metabolism, skills, exits
    - Next: Apply similar patterns to equipment slots, resource types, item capabilities
 
 2. Skill system

@@ -15,9 +15,10 @@ from .objects import ObjectParent
 from django.conf import settings
 from .equipment import EQUIPMENT_SLOTS, default_equipment_map, normalize_slot
 from .living import LivingMixin
+from .holding import HolderMixin
 
 
-class Character(LivingMixin, ObjectParent, DefaultCharacter):
+class Character(LivingMixin, HolderMixin, ObjectParent, DefaultCharacter):
     """Represents the in-game character entity.
 
     Three persistent Attributes are introduced on all characters:
@@ -27,6 +28,9 @@ class Character(LivingMixin, ObjectParent, DefaultCharacter):
     """
 
     is_pc = True
+
+    def get_tag_objs(self, *args, **kwargs):
+        return self.tags.get(*args, **kwargs, return_tagobj=True)
 
     def at_object_creation(self):
         """Called once, when the object is first created."""
@@ -64,32 +68,11 @@ class Character(LivingMixin, ObjectParent, DefaultCharacter):
         self.cmdset.add(DeadCmdSet, persistent=True)
 
     # --- Perception / Look -------------------------------------------------
-    def _get_ambient_sunlight(self) -> int:
-        """Return ambient light level (0..100) from current location."""
-        room = self.location
-        if room and hasattr(room, "get_light_level"):
-            try:
-                level = int(room.get_light_level(looker=self))
-            except Exception:
-                level = 100
-            return max(0, min(level, 100))
-        return 100
-
     def at_look(self, target, **kwargs):
         """Gate visibility based on ambient light vs character threshold."""
         # Check if we can see details in current light
-        ambient = self._get_ambient_sunlight()
-        threshold = int(getattr(self, "light_threshold", 20) or 20)
-        if ambient < threshold:
-            # Can't see details, show simplified description
-            if target == self.location:
-                # For rooms, show basic info only
-                kwargs["show_objects"] = False
-                kwargs["show_characters"] = False
-                kwargs["show_exits"] = False
-            else:
-                # For objects, show basic name only
-                kwargs["show_details"] = False
+        if self.location.get_light_level(looker=self) < self.light_threshold:
+            return "It's too dark to see anything."
         return super().at_look(target, **kwargs)
 
     def at_object_leave(self, obj, target_location, move_type="move", **kwargs):
@@ -212,48 +195,3 @@ class Character(LivingMixin, ObjectParent, DefaultCharacter):
             self.set_equipment(slot, None)
             self.msg(f"You unequip {item.get_display_name(self)}.")
             return True
-
-    # --- Holding API --------------------------------------------------------
-
-    def get_holding_list(self) -> list[int]:
-        """Return the current holding list."""
-        if not hasattr(self, "_holding_list"):
-            self._holding_list = getattr(self.db, "holding", None)
-            if self._holding_list is None:
-                self._holding_list = []
-                self.db.holding = self._holding_list
-        return self._holding_list
-
-    def add_to_holding(self, item_id: int) -> None:
-        """Add an item to the holding list."""
-        holding = self.get_holding_list()
-        if item_id not in holding:
-            holding.append(item_id)
-            self.db.holding = holding
-
-    def remove_from_holding(self, item_id: int) -> None:
-        """Remove an item from the holding list."""
-        holding = self.get_holding_list()
-        if item_id in holding:
-            holding.remove(item_id)
-            self.db.holding = holding
-
-    def get_holding_display_line(self) -> str:
-        """Return formatted holding display line."""
-        holding = self.get_holding_list()
-        if not holding:
-            return "Holding: <empty>"
-
-        items = []
-        for item_id in holding:
-            item = self._resolve_object_id(item_id)
-            if item:
-                items.append(item.get_display_name(self))
-            else:
-                # Clean up invalid holding reference
-                self.remove_from_holding(item_id)
-
-        if items:
-            return f"Holding: {', '.join(items)}"
-        else:
-            return "Holding: <empty>"

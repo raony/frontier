@@ -41,27 +41,6 @@ class FeetItem(EquippableFeet, Object):
     """Base typeclass for items that equip to the feet slot."""
 
 
-# --- Holdable items -----------------------------------------------------------
-
-class HoldableMixin:
-    """Mixin for items that can be held in hands (not worn).
-
-    On creation, sets a persistent attribute `db.is_holdable = True` so builders
-    can mark holdables and commands can validate items for holding.
-    """
-
-    def at_object_creation(self):
-        try:
-            super().at_object_creation()  # type: ignore[misc]
-        except Exception:
-            pass
-        self.db.is_holdable = True
-
-
-class HoldableItem(HoldableMixin, Object):
-    """Base typeclass for simple items intended to be held in hand."""
-
-
 # --- Consumable toggle mixin --------------------------------------------------
 
 class ConsumableToggleMixin:

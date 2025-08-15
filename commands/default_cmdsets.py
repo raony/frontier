@@ -65,6 +65,9 @@ class AliveCmdSet(default_cmds.CharacterCmdSet):
         self.add(CmdLight())
         self.add(CmdExtinguish())
         self.add(CmdTime())
+        # Holding commands
+        self.add(CmdHold())
+        self.add(CmdRelease())
 
 
 class CharacterCmdSet(default_cmds.CharacterCmdSet):

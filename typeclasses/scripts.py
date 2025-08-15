@@ -114,14 +114,9 @@ class MetabolismScript(DefaultScript):
 
     def at_repeat(self):
         """Increase hunger, thirst and tiredness each tick."""
-        # Use tag-based living state check with fallback
-        try:
-            if not self.obj.is_living_tag():
-                return
-        except Exception:
-            # Fallback to attribute-based check
-            if not getattr(self.obj, "is_living", False):
-                return
+        # Use tag-based living state check
+        if not self.obj.is_living_tag():
+            return
         self.obj.increase_hunger()
         self.obj.increase_thirst()
         if getattr(self.obj, "is_resting", False):
@@ -129,7 +124,7 @@ class MetabolismScript(DefaultScript):
             recovery = 1 + tiredness / 20
             self.obj.decrease_tiredness(recovery)
         else:
-            self.obj.increase_tiredness()
+            self.obj.increase_tiredness()  # Uses default metabolism rate
         # update interval in case metabolism changed
         self.interval = self.obj.get_metabolism_interval()
 

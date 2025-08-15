@@ -33,17 +33,6 @@ class CmdResetChar(Command):
             caller.ndb.thirst_msg_level = 0
             caller.ndb.tiredness_msg_level = 0
 
-        # Use the new living module functionality
-        if hasattr(caller, 'reset_and_revive'):
-            message = caller.reset_and_revive()
-            caller.msg(message)
-        else:
-            # Fallback for non-living beings or old system
-            caller.is_dead = False
-            caller.is_living = True
-            caller.is_resting = False
-            if hasattr(caller, "start_metabolism_script"):
-                caller.start_metabolism_script()
-            if hasattr(caller, "update_living_status"):
-                caller.update_living_status()
-            caller.msg("You feel refreshed and alive. Your needs are reset.")
+        # Use the living module functionality
+        message = caller.reset_and_revive()
+        caller.msg(message)

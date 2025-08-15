@@ -11,7 +11,7 @@ class TestMetabolism(EvenniaTest):
 
     def test_metabolism_tick_increases_needs(self):
         # ensure living and not resting
-        self.char1.is_living = True
+        self.char1.set_living_state(True)  # Ensure alive
         self.char1.is_resting = False
         h0, t0, f0 = self.char1.hunger, self.char1.thirst, self.char1.tiredness
 
@@ -26,7 +26,7 @@ class TestMetabolism(EvenniaTest):
         self.assertGreaterEqual(self.char1.tiredness, f0)
 
     def test_resting_recovers_tiredness(self):
-        self.char1.is_living = True
+        self.char1.set_living_state(True)  # Ensure alive
         self.char1.is_resting = True
         self.char1.tiredness = 20
 

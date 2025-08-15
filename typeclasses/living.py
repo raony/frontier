@@ -11,7 +11,7 @@ class LivingStateMixin:
     This approach uses two tags:
     - "living_being": indicates the object is a living entity
     - "dead": indicates the living being is dead
-    
+
     States:
     - Alive: has "living_being" tag, does NOT have "dead" tag
     - Dead: has both "living_being" AND "dead" tags
@@ -23,7 +23,7 @@ class LivingStateMixin:
         # Ensure living_being tag exists (all characters are living beings)
         if not self.tags.has("living_being", category="living_state"):
             self.tags.add("living_being", category="living_state")
-        
+
         if alive:
             # Alive: remove dead tag
             self.tags.remove("dead", category="living_state")
@@ -84,6 +84,8 @@ class LivingMixin(LivingStateMixin):
     is_resting = AttributeProperty(default=False)
     metabolism = AttributeProperty(default=1.0)
     light_threshold = AttributeProperty(default=20)
+    # Skills stored as mapping {skill_key: level_label}
+    skills = AttributeProperty(default=dict)
 
     def at_death(self):
         """Handle death of this entity."""
@@ -116,7 +118,7 @@ class LivingMixin(LivingStateMixin):
         self.thirst = 0
         self.tiredness = 0
         self.is_resting = False
-        
+
         # Clear threshold message trackers
         if hasattr(self, "ndb"):
             self.ndb.hunger_msg_level = 0
@@ -126,7 +128,7 @@ class LivingMixin(LivingStateMixin):
     def reset_and_revive(self):
         """Reset survival stats and revive if dead."""
         self.reset_survival_stats()
-        
+
         if self.is_dead():
             self.revive()
             return "You have been revived and your needs are reset."
@@ -240,10 +242,10 @@ class LivingMixin(LivingStateMixin):
         """Return metabolism tick interval in seconds."""
         try:
             metabolism = float(getattr(self, "metabolism", 1.0) or 1.0)
-            # Base interval is 60 seconds, modified by metabolism rate
-            return max(10, int(60 / metabolism))
+            # Base interval is 600 seconds, modified by metabolism rate
+            return max(10, int(600 / metabolism))
         except Exception:
-            return 60
+            return 600
 
     def start_metabolism_script(self) -> None:
         """Start the metabolism script if not already running."""
@@ -278,7 +280,47 @@ class LivingMixin(LivingStateMixin):
         self.thirst = min(100, (self.thirst or 0) + self.metabolism)
         self._notify_thirst()
 
-    def increase_tiredness(self) -> None:
-        """Increase tiredness by metabolism rate."""
-        self.tiredness = min(100, (self.tiredness or 0) + self.metabolism)
+    def increase_tiredness(self, amount: float = None) -> None:
+        """Increase tiredness by amount or metabolism rate if not specified."""
+        if amount is None:
+            amount = self.metabolism
+        self.tiredness = min(100, (self.tiredness or 0) + amount)
         self._notify_tiredness()
+
+    def decrease_hunger(self, amount: float = 1.0) -> None:
+        """Decrease hunger by amount, not going below zero."""
+        self.hunger = max((self.hunger or 0) - amount, 0)
+        self._notify_hunger()
+        self.update_living_status()
+
+    def decrease_thirst(self, amount: float = 1.0) -> None:
+        """Decrease thirst by amount, not going below zero."""
+        self.thirst = max((self.thirst or 0) - amount, 0)
+        self._notify_thirst()
+        self.update_living_status()
+
+    def decrease_tiredness(self, amount: float = 1.0) -> None:
+        """Decrease tiredness by amount, not going below zero."""
+        self.tiredness = max((self.tiredness or 0) - amount, 0)
+        self._notify_tiredness()
+        self.update_living_status()
+
+    # Skills helpers
+    def get_skill_level_label(self, skill_key: str) -> str:
+        """Return the textual skill level for a given skill key.
+
+        Levels are textual among {untrained, novice, journeyman, master}. Defaults to untrained.
+        """
+        skills_map = self.skills or {}
+        level = (skills_map.get(skill_key) or "untrained").lower()
+        if level not in {"untrained", "novice", "journeyman", "master"}:
+            level = "untrained"
+        return level
+
+    def set_skill_level_label(self, skill_key: str, level_label: str) -> None:
+        """Set the textual skill level for a given skill key."""
+        if level_label not in {"untrained", "novice", "journeyman", "master"}:
+            raise ValueError("Invalid skill level label")
+        skills_map = self.skills or {}
+        skills_map[skill_key] = level_label
+        self.skills = skills_map
