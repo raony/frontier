@@ -8,6 +8,7 @@ class FoodMixin:
     """Mixin that marks an object as edible."""
 
     calories = 1
+    weight_default = 50  # Default weight for food items in grams
 
     def at_object_creation(self):
         super().at_object_creation()
@@ -44,6 +45,7 @@ class PortionedFoodMixin(FoodMixin):
 
     parts_total = 4
     calories_per_part = 2
+    weight_default = 200  # Heavier for portioned food
 
     def at_object_creation(self):
         super().at_object_creation()
@@ -95,3 +97,4 @@ class RoastedChicken(PortionedFood):
 
     parts_total = 6
     calories_per_part = 3
+    weight_default = 800  # A whole roasted chicken weighs about 800g

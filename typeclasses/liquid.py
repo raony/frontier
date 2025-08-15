@@ -171,6 +171,8 @@ class LiquidContainerMixin:
 class LiquidContainer(LiquidContainerMixin, Object):
     """Simple container that starts full of water."""
 
+    weight_default = 150  # Container weight in grams
+
     def at_object_creation(self):
         super().at_object_creation()
         self.db.liquid_capacity = 100

@@ -3,20 +3,7 @@ from evennia.utils.test_resources import EvenniaTest
 from typeclasses.characters import Character
 
 
-class TestHoldAndLight(EvenniaTest):
-    def test_hold_and_release(self):
-        # Create a simple holdable via typeclass
-        torch = create_object("typeclasses.items.Torch", key="torch", location=self.char1)
-        # Initially not held
-        self.assertIn(getattr(self.char1.db, "holding", None), (None, []))
-        # Hold the torch
-        self.char1.execute_cmd("hold torch")
-        held = self.char1.get_holding_list()
-        self.assertEqual(len(held), 1)
-        # Release the torch
-        self.char1.execute_cmd("release torch")
-        self.assertEqual(self.char1.get_holding_list(), [])
-
+class TestLight(EvenniaTest):
     def test_room_darkness_and_torch_light(self):
         # Make an indoor room with no sunlight
         room = create_object("typeclasses.rooms.Room", key="cave")

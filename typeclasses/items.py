@@ -15,30 +15,37 @@ from .equipment import (
     EquippableHands,
     EquippableFeet,
 )
+from .holding import HoldableMixin
 
 
 class HeadItem(EquippableHead, Object):
     """Base typeclass for items that equip to the head slot."""
+    weight_default = 150  # Typical headgear weight in grams
 
 
 class BodyItem(EquippableBody, Object):
     """Base typeclass for items that equip to the body slot."""
+    weight_default = 500  # Typical body armor/clothing weight in grams
 
 
 class LegsItem(EquippableLegs, Object):
     """Base typeclass for items that equip to the legs slot."""
+    weight_default = 300  # Typical legwear weight in grams
 
 
 class WaistItem(EquippableWaist, Object):
     """Base typeclass for items that equip to the waist slot."""
+    weight_default = 100  # Typical waist item weight in grams
 
 
 class HandsItem(EquippableHands, Object):
     """Base typeclass for items that equip to the hands slot."""
+    weight_default = 50  # Typical handwear weight in grams
 
 
 class FeetItem(EquippableFeet, Object):
     """Base typeclass for items that equip to the feet slot."""
+    weight_default = 200  # Typical footwear weight in grams
 
 
 # --- Consumable toggle mixin --------------------------------------------------
@@ -160,6 +167,7 @@ class Torch(ConsumableToggleMixin, HoldableMixin, LightSourceMixin, Object):
     """
 
     light_level_default = 40
+    weight_default = 300  # A wooden torch weighs about 300g
 
     def get_light_level(self, looker=None) -> int:
         # Emit light only while lit

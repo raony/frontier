@@ -36,7 +36,39 @@ class ObjectParent:
             return 0
 
 
-class Object(ObjectParent, DefaultObject):
+class WeightMixin:
+    """Mixin for objects that have weight.
+
+    Sets a default persistent `db.weight` on creation. Objects can override
+    `weight_default` to change the default weight in grams. Use together with
+    `Object` or other typeclasses.
+    """
+
+    weight_default: int = 100  # Default weight in grams
+
+    def at_object_creation(self):
+        try:
+            super().at_object_creation()  # type: ignore[misc]
+        except Exception:
+            pass
+        weight = int(getattr(self, "weight_default", 100) or 100)
+        weight = max(0, weight)  # Weight cannot be negative
+        self.db.weight = weight
+
+    def get_weight(self) -> int:
+        """Return the weight of this object in grams."""
+        try:
+            return int(getattr(self.db, "weight", 0) or 0)
+        except Exception:
+            return 0
+
+    def set_weight(self, weight: int) -> None:
+        """Set the weight of this object in grams."""
+        weight = max(0, int(weight))  # Ensure non-negative integer
+        self.db.weight = weight
+
+
+class Object(WeightMixin, ObjectParent, DefaultObject):
     """
     This is the root Object typeclass, representing all entities that
     have an actual presence in-game. DefaultObjects generally have a

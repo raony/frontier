@@ -33,6 +33,7 @@ from .hex import CmdSetHex, CmdWeather
 from .hold import CmdHold, CmdRelease
 from .light import CmdDarkvision, CmdLight, CmdExtinguish
 from .kill import CmdKill, CmdRevive
+from .weight import CmdWeight, CmdSetWeight
 
 
 class AliveCmdSet(default_cmds.CharacterCmdSet):
@@ -66,6 +67,7 @@ class AliveCmdSet(default_cmds.CharacterCmdSet):
         self.add(CmdLight())
         self.add(CmdExtinguish())
         self.add(CmdTime())
+        self.add(CmdWeight())
         # Holding commands
         self.add(CmdHold())
         self.add(CmdRelease())
@@ -92,6 +94,7 @@ class CharacterCmdSet(default_cmds.CharacterCmdSet):
         self.add(CmdDarkvision())
         self.add(CmdKill())
         self.add(CmdRevive())
+        self.add(CmdSetWeight())
 
 
 class AccountCmdSet(default_cmds.AccountCmdSet):
