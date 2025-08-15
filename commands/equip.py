@@ -58,20 +58,3 @@ class CmdUnequip(Command):
         if not obj:
             return
         caller.unequip(obj)
-
-
-class CmdInventoryEnhanced(default_cmds.CmdInventory):
-    """Show inventory including equipped slots."""
-
-    key = "inventory"
-    aliases = ["inv", "i"]
-
-    def func(self):
-        super().func()
-        caller = self.caller
-        if hasattr(caller, "get_equipment_display_lines"):
-            lines = caller.get_equipment_display_lines()
-            if lines:
-                caller.msg("\nEquipped:\n" + "\n".join(f"  {ln}" for ln in lines))
-        if hasattr(caller, "get_holding_display_line"):
-            caller.msg("\n" + caller.get_holding_display_line())

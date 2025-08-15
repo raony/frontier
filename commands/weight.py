@@ -9,7 +9,6 @@ class CmdWeight(Command):
     Usage:
       weight                    - Show total weight of your inventory
       weight <item>            - Show weight of a specific item
-      weight all               - Show weight of all items in your inventory
     """
 
     key = "weight"
@@ -18,62 +17,34 @@ class CmdWeight(Command):
 
     def func(self):
         caller = self.caller
-        target = self.args.strip()
+        target = self.lhs
 
         if not target:
-            # Show total inventory weight
-            total_weight = 0
-            items = []
-
-            for obj in caller.contents:
-                if hasattr(obj, 'get_weight'):
-                    weight = obj.get_weight()
-                    total_weight += weight
-                    items.append((obj, weight))
-
-            if not items:
-                caller.msg("Your inventory is empty.")
-                return
-
             lines = ["Your inventory weight:"]
-            for obj, weight in sorted(items, key=lambda x: x[1], reverse=True):
-                lines.append(f"  {obj.get_display_name(caller)}: {weight}g")
-            lines.append(f"Total: {total_weight}g")
+            if caller.contents:
+                total_weight = 0
+                for obj in caller.contents:
+                    if not hasattr(obj, 'total_weight'):
+                        continue
+                    lines.append(f"  {obj.get_display_name(caller)}: {obj.total_weight}g")
+                    total_weight += obj.total_weight
+                lines.append(f"Total: {total_weight}g")
+            else:
+                lines.append("Your inventory is empty.")
 
             caller.msg("\n".join(lines))
             return
 
-        if target.lower() == "all":
-            # Show all items with weights
-            items = []
-            for obj in caller.contents:
-                if hasattr(obj, 'get_weight'):
-                    weight = obj.get_weight()
-                    items.append((obj, weight))
-
-            if not items:
-                caller.msg("Your inventory is empty.")
-                return
-
-            lines = ["Items in your inventory:"]
-            for obj, weight in sorted(items, key=lambda x: x[1], reverse=True):
-                lines.append(f"  {obj.get_display_name(caller)}: {weight}g")
-
-            caller.msg("\n".join(lines))
-            return
-
-        # Show weight of specific item
-        obj = caller.search(target, quiet=True)
+        obj = caller.quiet_search(target)
         if not obj:
-            caller.msg(f"You don't have {target}.")
+            caller.msg(f"You can't find {target}.")
             return
 
-        if not hasattr(obj, 'get_weight'):
-            caller.msg(f"{obj.get_display_name(caller)} doesn't have a weight.")
+        if not hasattr(obj, 'total_weight'):
+            caller.msg(f"What do you mean?")
             return
 
-        weight = obj.get_weight()
-        caller.msg(f"{obj.get_display_name(caller)} weighs {weight}g.")
+        caller.msg(f"{obj.get_display_name(caller)} weighs {obj.total_weight}g.")
 
 
 class CmdSetWeight(Command):
@@ -88,27 +59,24 @@ class CmdSetWeight(Command):
 
     def func(self):
         caller = self.caller
+        item_key = self.lhs
+        weight = self.rhs
 
-        if not self.lhs or not self.rhs:
+        if not item_key or not weight:
             caller.msg("Usage: setweight <item> = <weight>")
             return
 
-        obj = caller.search(self.lhs, quiet=True)
+        obj = caller.quiet_search(item_key)
         if not obj:
-            return
-
-        try:
-            weight = int(self.rhs)
-            if weight < 0:
-                caller.msg("Weight cannot be negative.")
-                return
-        except ValueError:
-            caller.msg("Weight must be a number.")
+            caller.msg(f"You can't find {item_key}.")
             return
 
         if not hasattr(obj, 'set_weight'):
             caller.msg(f"{obj.get_display_name(caller)} doesn't support weight setting.")
             return
 
-        obj.set_weight(weight)
-        caller.msg(f"Set {obj.get_display_name(caller)}'s weight to {weight}g.")
+        try:
+            obj.set_weight(weight)
+            caller.msg(f"Set {obj.get_display_name(caller)}'s weight to {weight}g.")
+        except ValueError as e:
+            caller.msg(e)

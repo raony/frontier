@@ -28,12 +28,13 @@ from .resources import CmdCreateResource
 from .time import CmdSetDateTime, CmdSetTime
 from .gametime import CmdTime
 from .external import CmdMakeExternal
-from .equip import CmdEquip, CmdUnequip, CmdInventoryEnhanced
+from .equip import CmdEquip, CmdUnequip
 from .hex import CmdSetHex, CmdWeather
-from .hold import CmdHold, CmdRelease
+from .hold import CmdHold
 from .light import CmdDarkvision, CmdLight, CmdExtinguish
 from .kill import CmdKill, CmdRevive
 from .weight import CmdWeight, CmdSetWeight
+from .examine import CmdExamine
 
 
 class AliveCmdSet(default_cmds.CharacterCmdSet):
@@ -59,18 +60,15 @@ class AliveCmdSet(default_cmds.CharacterCmdSet):
         self.add(CmdSkills())
         self.add(CmdForage())
         # Override default inventory while alive to include equipped section
-        self.add(CmdInventoryEnhanced())
         self.add(CmdEquip())
         self.add(CmdUnequip())
-        self.add(CmdHold())
-        self.add(CmdRelease())
         self.add(CmdLight())
         self.add(CmdExtinguish())
         self.add(CmdTime())
         self.add(CmdWeight())
+        self.add(CmdExamine())
         # Holding commands
         self.add(CmdHold())
-        self.add(CmdRelease())
 
 
 class CharacterCmdSet(default_cmds.CharacterCmdSet):

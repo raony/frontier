@@ -8,7 +8,10 @@ with a location in the game world (like Characters, Rooms, Exits).
 
 """
 
+from evennia import AttributeProperty
 from evennia.objects.objects import DefaultObject
+from typing import Self
+from .weight import WeightMixin
 
 
 class ObjectParent:
@@ -35,37 +38,14 @@ class ObjectParent:
         except Exception:
             return 0
 
+    def quiet_search(self, *args, **kwargs) -> Self | None:
+        """Search for an object in the object's location.
 
-class WeightMixin:
-    """Mixin for objects that have weight.
-
-    Sets a default persistent `db.weight` on creation. Objects can override
-    `weight_default` to change the default weight in grams. Use together with
-    `Object` or other typeclasses.
-    """
-
-    weight_default: int = 100  # Default weight in grams
-
-    def at_object_creation(self):
-        try:
-            super().at_object_creation()  # type: ignore[misc]
-        except Exception:
-            pass
-        weight = int(getattr(self, "weight_default", 100) or 100)
-        weight = max(0, weight)  # Weight cannot be negative
-        self.db.weight = weight
-
-    def get_weight(self) -> int:
-        """Return the weight of this object in grams."""
-        try:
-            return int(getattr(self.db, "weight", 0) or 0)
-        except Exception:
-            return 0
-
-    def set_weight(self, weight: int) -> None:
-        """Set the weight of this object in grams."""
-        weight = max(0, int(weight))  # Ensure non-negative integer
-        self.db.weight = weight
+        Args:
+            search_key: The key of the object to search for.
+        """
+        result = self.search(*args, quiet=True, **kwargs)
+        return result[0] if result else None
 
 
 class Object(WeightMixin, ObjectParent, DefaultObject):
@@ -258,9 +238,6 @@ class Object(WeightMixin, ObjectParent, DefaultObject):
      at_desc(looker=None)
 
     """
-
-    pass
-
 
 class LightSourceMixin:
     """Mixin for objects that emit light.
