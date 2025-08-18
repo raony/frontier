@@ -31,37 +31,21 @@ class LivingStateMixin:
             # Dead: add dead tag
             self.tags.add("dead", category="living_state")
 
-    def is_living_tag(self) -> bool:
+    def is_living(self) -> bool:
         """Check if character is alive using tags."""
         # Alive = has living_being tag AND does NOT have dead tag
         return (self.tags.has("living_being", category="living_state") and
                 not self.tags.has("dead", category="living_state"))
 
-    def is_dead_tag(self) -> bool:
+    def is_dead(self) -> bool:
         """Check if character is dead using tags."""
         # Dead = has living_being tag AND has dead tag
         return (self.tags.has("living_being", category="living_state") and
                 self.tags.has("dead", category="living_state"))
 
-    def is_living_being_tag(self) -> bool:
+    def is_living_being(self) -> bool:
         """Check if character is a living being (alive or dead)."""
         return self.tags.has("living_being", category="living_state")
-
-    def is_living_state(self) -> bool:
-        """Check if character is living (tag-based)."""
-        return self.is_living_tag()
-
-    def is_dead_state(self) -> bool:
-        """Check if character is dead (tag-based)."""
-        return self.is_dead_tag()
-
-    def is_living(self) -> bool:
-        """Check if character is living (tag-based)."""
-        return self.is_living_tag()
-
-    def is_dead(self) -> bool:
-        """Check if character is dead (tag-based)."""
-        return self.is_dead_tag()
 
     def at_object_creation(self):
         """Ensure consistent initial living state."""
@@ -87,6 +71,15 @@ class LivingMixin(LivingStateMixin):
     # Skills stored as mapping {skill_key: level_label}
     skills = AttributeProperty(default=dict)
 
+    def _switch_command_sets(self, alive: bool):
+        """Switch between alive and dead command sets."""
+        if alive:
+            self.cmdset.remove(DeadCmdSet)
+            self.cmdset.add(AliveCmdSet, persistent=True)
+        else:
+            self.cmdset.remove(AliveCmdSet)
+            self.cmdset.add(DeadCmdSet, persistent=True)
+
     def at_death(self):
         """Handle death of this entity."""
         if self.location:
@@ -98,9 +91,8 @@ class LivingMixin(LivingStateMixin):
         self.set_living_state(False)  # This sets dead tag
         self.is_resting = False
         self.stop_metabolism_script()
-        # Remove alive-only commands and add dead cmdset
-        self.cmdset.remove(AliveCmdSet)
-        self.cmdset.add(DeadCmdSet, persistent=True)
+        # Switch to dead command set
+        self._switch_command_sets(False)
 
     def at_pre_move(self, destination, **kwargs):
         """Prevent dead characters from moving under their own power."""
@@ -112,16 +104,7 @@ class LivingMixin(LivingStateMixin):
     def at_init(self):
         """Called whenever the typeclass is cached from memory."""
         super().at_init()
-        if self.is_dead():
-            from commands.default_cmdsets import AliveCmdSet
-            from commands.dead_cmdset import DeadCmdSet
-            self.cmdset.remove(AliveCmdSet)
-            self.cmdset.add(DeadCmdSet, persistent=True)
-        else:
-            from commands.default_cmdsets import AliveCmdSet
-            from commands.dead_cmdset import DeadCmdSet
-            self.cmdset.remove(DeadCmdSet)
-            self.cmdset.add(AliveCmdSet, persistent=True)
+        self._switch_command_sets(not self.is_dead())
         self.update_living_status()
 
 
@@ -132,9 +115,8 @@ class LivingMixin(LivingStateMixin):
         self.set_living_state(True)
         self.is_resting = False
         self.start_metabolism_script()
-        # Remove dead cmdset and add alive cmdset
-        self.cmdset.remove(DeadCmdSet)
-        self.cmdset.add(AliveCmdSet, persistent=True)
+        # Switch to alive command set
+        self._switch_command_sets(True)
 
     def reset_survival_stats(self):
         """Reset all survival stats to 0 and clear message levels."""
@@ -162,77 +144,54 @@ class LivingMixin(LivingStateMixin):
             return "Your needs are reset and you feel refreshed."
 
     # Hunger/thirst/tiredness management helpers
-    def _hunger_level(self) -> int:
-        """Return the current hunger level step."""
-        hunger = self.hunger or 0
-        if hunger >= 60:
+    def _get_level(self, stat_value: float) -> int:
+        """Return the level step for a given stat value."""
+        value = stat_value or 0
+        if value >= 60:
             return 3
-        if hunger >= 30:
+        if value >= 30:
             return 2
-        if hunger >= 7:
+        if value >= 7:
             return 1
         return 0
+
+    def _notify_stat_change(self, stat_name: str, level: int, messages: list) -> None:
+        """Send notification messages when stat levels change."""
+        last = getattr(self.ndb, f"{stat_name}_msg_level", None)
+        if level != last:
+            if 0 <= level < len(messages):
+                self.msg(messages[level])
+            setattr(self.ndb, f"{stat_name}_msg_level", level)
+
+    def _hunger_level(self) -> int:
+        """Return the current hunger level step."""
+        return self._get_level(self.hunger)
 
     def _notify_hunger(self) -> None:
         """Send hunger warning messages when levels change."""
         level = self._hunger_level()
-        last = getattr(self.ndb, "hunger_msg_level", None)
-        if level != last:
-            if level == 1:
-                self.msg("You feel hungry.")
-            elif level == 2:
-                self.msg("You're starving.")
-            elif level == 3:
-                self.msg("You're gonna die.")
-            self.ndb.hunger_msg_level = level
+        messages = ["", "You feel hungry.", "You're starving.", "You're gonna die."]
+        self._notify_stat_change("hunger", level, messages)
 
     def _thirst_level(self) -> int:
         """Return the current thirst level step."""
-        thirst = self.thirst or 0
-        if thirst >= 60:
-            return 3
-        if thirst >= 30:
-            return 2
-        if thirst >= 7:
-            return 1
-        return 0
+        return self._get_level(self.thirst)
 
     def _notify_thirst(self) -> None:
         """Send thirst warning messages when levels change."""
         level = self._thirst_level()
-        last = getattr(self.ndb, "thirst_msg_level", None)
-        if level != last:
-            if level == 1:
-                self.msg("You feel thirsty.")
-            elif level == 2:
-                self.msg("You're starving for water.")
-            elif level == 3:
-                self.msg("You're gonna die of thirst.")
-            self.ndb.thirst_msg_level = level
+        messages = ["", "You feel thirsty.", "You're starving for water.", "You're gonna die of thirst."]
+        self._notify_stat_change("thirst", level, messages)
 
     def _tiredness_level(self) -> int:
         """Return the current tiredness level step."""
-        tiredness = self.tiredness or 0
-        if tiredness >= 60:
-            return 3
-        if tiredness >= 30:
-            return 2
-        if tiredness >= 7:
-            return 1
-        return 0
+        return self._get_level(self.tiredness)
 
     def _notify_tiredness(self) -> None:
         """Send tiredness warning messages when levels change."""
         level = self._tiredness_level()
-        last = getattr(self.ndb, "tiredness_msg_level", None)
-        if level != last:
-            if level == 1:
-                self.msg("You feel tired.")
-            elif level == 2:
-                self.msg("You are exhausted.")
-            elif level == 3:
-                self.msg("You're about to collapse.")
-            self.ndb.tiredness_msg_level = level
+        messages = ["", "You feel tired.", "You are exhausted.", "You're about to collapse."]
+        self._notify_stat_change("tiredness", level, messages)
 
     # Public-facing label helpers
     def get_hunger_label(self) -> str:
@@ -254,11 +213,7 @@ class LivingMixin(LivingStateMixin):
         """Check if this entity should die based on vital stats."""
         if self.is_dead():
             return
-        if (
-            (self.hunger or 0) >= 100
-            or (self.thirst or 0) >= 100
-            or (self.tiredness or 0) >= 100
-        ):
+        if any((getattr(self, stat, 0) or 0) >= 100 for stat in ["hunger", "thirst", "tiredness"]):
             self.at_death()
 
     # Metabolism API
@@ -294,42 +249,50 @@ class LivingMixin(LivingStateMixin):
             script.delete()
 
     # Metabolism stat increase methods
+    def _increase_stat(self, stat_name: str, amount: float, notify_method) -> None:
+        """Increase a stat by amount, not going above 100."""
+        current_value = getattr(self, stat_name, 0) or 0
+        new_value = min(current_value + amount, 100)
+        setattr(self, stat_name, new_value)
+        notify_method()
+
     def increase_hunger(self) -> None:
         """Increase hunger by metabolism rate."""
-        self.hunger = min(100, (self.hunger or 0) + self.metabolism)
-        self._notify_hunger()
+        self._increase_stat("hunger", self.metabolism, self._notify_hunger)
 
     def increase_thirst(self) -> None:
         """Increase thirst by metabolism rate."""
-        self.thirst = min(100, (self.thirst or 0) + self.metabolism)
-        self._notify_thirst()
+        self._increase_stat("thirst", self.metabolism, self._notify_thirst)
 
     def increase_tiredness(self, amount: float = None) -> None:
         """Increase tiredness by amount or metabolism rate if not specified."""
         if amount is None:
             amount = self.metabolism
-        self.tiredness = min(100, (self.tiredness or 0) + amount)
-        self._notify_tiredness()
+        self._increase_stat("tiredness", amount, self._notify_tiredness)
+
+    def _decrease_stat(self, stat_name: str, amount: float, notify_method) -> None:
+        """Decrease a stat by amount, not going below zero."""
+        current_value = getattr(self, stat_name, 0) or 0
+        new_value = max(current_value - amount, 0)
+        setattr(self, stat_name, new_value)
+        notify_method()
+        self.update_living_status()
 
     def decrease_hunger(self, amount: float = 1.0) -> None:
         """Decrease hunger by amount, not going below zero."""
-        self.hunger = max((self.hunger or 0) - amount, 0)
-        self._notify_hunger()
-        self.update_living_status()
+        self._decrease_stat("hunger", amount, self._notify_hunger)
 
     def decrease_thirst(self, amount: float = 1.0) -> None:
         """Decrease thirst by amount, not going below zero."""
-        self.thirst = max((self.thirst or 0) - amount, 0)
-        self._notify_thirst()
-        self.update_living_status()
+        self._decrease_stat("thirst", amount, self._notify_thirst)
 
     def decrease_tiredness(self, amount: float = 1.0) -> None:
         """Decrease tiredness by amount, not going below zero."""
-        self.tiredness = max((self.tiredness or 0) - amount, 0)
-        self._notify_tiredness()
-        self.update_living_status()
+        self._decrease_stat("tiredness", amount, self._notify_tiredness)
 
     # Skills helpers
+    VALID_SKILL_LEVELS = {"untrained", "novice", "journeyman", "master"}
+
     def get_skill_level_label(self, skill_key: str) -> str:
         """Return the textual skill level for a given skill key.
 
@@ -337,13 +300,11 @@ class LivingMixin(LivingStateMixin):
         """
         skills_map = self.skills or {}
         level = (skills_map.get(skill_key) or "untrained").lower()
-        if level not in {"untrained", "novice", "journeyman", "master"}:
-            level = "untrained"
-        return level
+        return level if level in self.VALID_SKILL_LEVELS else "untrained"
 
     def set_skill_level_label(self, skill_key: str, level_label: str) -> None:
         """Set the textual skill level for a given skill key."""
-        if level_label not in {"untrained", "novice", "journeyman", "master"}:
+        if level_label not in self.VALID_SKILL_LEVELS:
             raise ValueError("Invalid skill level label")
         skills_map = self.skills or {}
         skills_map[skill_key] = level_label

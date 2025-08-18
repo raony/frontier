@@ -1,0 +1,11 @@
+---
+alwaysApply: true
+---
+
+### Running Tests
+- **Primary command**: `evennia test --settings settings.py .` from game directory
+- **Environment setup**: Always activate virtualenv first: `source .venv/bin/activate`
+- **Full test suite**: Run from project root with `evennia test --settings settings.py .`
+- **Specific test file**: `evennia test --settings settings.py tests.test_filename`
+- **Specific test class**: `evennia test --settings settings.py tests.test_filename.TestClassName`
+- **Specific test method**: `evennia test --settings settings.py tests.test_filename.TestClassName.test_method_name`

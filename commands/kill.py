@@ -45,7 +45,7 @@ class CmdKill(MuxCommand):
             return
 
         # Check if target is a living being
-        if not hasattr(target, 'is_living_being_tag'):
+        if not hasattr(target, 'is_living_being'):
             caller.msg(f"{target.get_display_name(caller)} is not a living being.")
             return
 
@@ -109,7 +109,7 @@ class CmdRevive(MuxCommand):
             return
 
         # Check if target is a living being
-        if not hasattr(target, 'is_living_being_tag'):
+        if not hasattr(target, 'is_living_being'):
             caller.msg(f"{target.get_display_name(caller)} is not a living being.")
             return
 

@@ -20,10 +20,6 @@ class TestTagLivingState(EvenniaTest):
 
     def test_initial_living_state(self):
         """Test that characters start as living."""
-        # Check tag-based state
-        self.assertTrue(self.char.is_living_tag())
-        self.assertFalse(self.char.is_dead_tag())
-
         # Check living state methods
         self.assertTrue(self.char.is_living())
         self.assertFalse(self.char.is_dead())
@@ -36,13 +32,13 @@ class TestTagLivingState(EvenniaTest):
         """Test setting character to alive state."""
         # First set to dead
         self.char.set_living_state(False)
-        self.assertFalse(self.char.is_living_tag())
-        self.assertTrue(self.char.is_dead_tag())
+        self.assertFalse(self.char.is_living())
+        self.assertTrue(self.char.is_dead())
 
         # Then set back to alive
         self.char.set_living_state(True)
-        self.assertTrue(self.char.is_living_tag())
-        self.assertFalse(self.char.is_dead_tag())
+        self.assertTrue(self.char.is_living())
+        self.assertFalse(self.char.is_dead())
 
         # Check tags
         self.assertTrue(self.char.tags.has("living_being", category="living_state"))
@@ -52,8 +48,8 @@ class TestTagLivingState(EvenniaTest):
         """Test setting character to dead state."""
         # Set to dead
         self.char.set_living_state(False)
-        self.assertFalse(self.char.is_living_tag())
-        self.assertTrue(self.char.is_dead_tag())
+        self.assertFalse(self.char.is_living())
+        self.assertTrue(self.char.is_dead())
 
         # Check tags
         self.assertTrue(self.char.tags.has("living_being", category="living_state"))
@@ -62,21 +58,21 @@ class TestTagLivingState(EvenniaTest):
     def test_additive_tags(self):
         """Test that living_being and dead tags work additively."""
         # Start alive
-        self.assertTrue(self.char.is_living_tag())
-        self.assertFalse(self.char.is_dead_tag())
-        self.assertTrue(self.char.is_living_being_tag())
+        self.assertTrue(self.char.is_living())
+        self.assertFalse(self.char.is_dead())
+        self.assertTrue(self.char.is_living_being())
 
         # Set to dead
         self.char.set_living_state(False)
-        self.assertFalse(self.char.is_living_tag())
-        self.assertTrue(self.char.is_dead_tag())
-        self.assertTrue(self.char.is_living_being_tag())
+        self.assertFalse(self.char.is_living())
+        self.assertTrue(self.char.is_dead())
+        self.assertTrue(self.char.is_living_being())
 
         # Set back to alive
         self.char.set_living_state(True)
-        self.assertTrue(self.char.is_living_tag())
-        self.assertFalse(self.char.is_dead_tag())
-        self.assertTrue(self.char.is_living_being_tag())
+        self.assertTrue(self.char.is_living())
+        self.assertFalse(self.char.is_dead())
+        self.assertTrue(self.char.is_living_being())
 
         # Verify living_being tag always exists
         self.assertTrue(self.char.tags.has("living_being", category="living_state"))
@@ -87,10 +83,6 @@ class TestTagLivingState(EvenniaTest):
         """Test that at_death() properly sets living state."""
         # Call at_death
         self.char.at_death()
-
-        # Check tag-based state
-        self.assertFalse(self.char.is_living_tag())
-        self.assertTrue(self.char.is_dead_tag())
 
         # Check living state methods
         self.assertFalse(self.char.is_living())
@@ -115,8 +107,8 @@ class TestTagLivingState(EvenniaTest):
         new_char = create_object(Character, key="NewChar", location=self.room1)
 
         # Should start as living
-        self.assertTrue(new_char.is_living_tag())
-        self.assertFalse(new_char.is_dead_tag())
+        self.assertTrue(new_char.is_living())
+        self.assertFalse(new_char.is_dead())
 
         # Should have living_being tag
         self.assertTrue(new_char.tags.has("living_being", category="living_state"))
@@ -156,9 +148,9 @@ class TestTagLivingState(EvenniaTest):
         dead_char.set_living_state(False)
 
         # All should be living beings
-        self.assertTrue(alive_char.is_living_being_tag())
-        self.assertTrue(dead_char.is_living_being_tag())
-        self.assertTrue(self.char.is_living_being_tag())
+        self.assertTrue(alive_char.is_living_being())
+        self.assertTrue(dead_char.is_living_being())
+        self.assertTrue(self.char.is_living_being())
 
         # Find all living beings (regardless of state)
         living_beings = search_tag("living_being", category="living_state")

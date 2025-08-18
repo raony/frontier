@@ -114,8 +114,8 @@ class MetabolismScript(DefaultScript):
 
     def at_repeat(self):
         """Increase hunger, thirst and tiredness each tick."""
-        # Use tag-based living state check
-        if not self.obj.is_living_tag():
+        # Use living state check
+        if not self.obj.is_living():
             return
         self.obj.increase_hunger()
         self.obj.increase_thirst()
