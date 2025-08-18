@@ -24,12 +24,15 @@ class WeightMixin:
 
     def set_weight(self, weight: int) -> None:
         """Set the weight of this object in grams."""
+        if weight is None:
+            raise ValueError("Weight cannot be None.")
+
         try:
             weight = int(weight)
             if weight < 0:
                 raise ValueError("Weight cannot be negative.")
             self.weight = weight
-        except ValueError:
+        except (ValueError, TypeError):
             raise ValueError("Weight must be an integer.")
 
     def get_display_footer(self, looker, **kwargs):

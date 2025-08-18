@@ -9,3 +9,5 @@ alwaysApply: true
 - **Specific test file**: `evennia test --settings settings.py tests.test_filename`
 - **Specific test class**: `evennia test --settings settings.py tests.test_filename.TestClassName`
 - **Specific test method**: `evennia test --settings settings.py tests.test_filename.TestClassName.test_method_name`
+
+NEVER RUN TESTS with -v because this only shows the version of the framework

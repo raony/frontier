@@ -59,13 +59,21 @@ class TestWeightSystem(EvenniaTest):
             self.test_obj.set_weight("invalid")
 
         with self.assertRaises(ValueError):
-            self.test_obj.set_weight(3.14)
-
-        with self.assertRaises(ValueError):
             self.test_obj.set_weight(None)
 
         # Weight should remain unchanged
         self.assertEqual(self.test_obj.weight, 100)
+
+    def test_set_weight_float_converts_to_int(self):
+        """Test that setting float weight converts to integer."""
+        self.test_obj.set_weight(3.14)
+        self.assertEqual(self.test_obj.weight, 3)
+
+        self.test_obj.set_weight(5.9)
+        self.assertEqual(self.test_obj.weight, 5)
+
+        # Weight should be updated, not remain unchanged
+        self.assertNotEqual(self.test_obj.weight, 100)
 
     def test_total_weight_single_object(self):
         """Test total_weight for objects without contents."""
