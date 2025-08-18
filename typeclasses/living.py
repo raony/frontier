@@ -102,6 +102,30 @@ class LivingMixin(LivingStateMixin):
         self.cmdset.remove(AliveCmdSet)
         self.cmdset.add(DeadCmdSet, persistent=True)
 
+    def at_pre_move(self, destination, **kwargs):
+        """Prevent dead characters from moving under their own power."""
+        if self.is_dead():
+            self.msg("You are dead and cannot move.")
+            return False
+        return super().at_pre_move(destination, **kwargs)
+
+    def at_init(self):
+        """Called whenever the typeclass is cached from memory."""
+        super().at_init()
+        if self.is_dead():
+            from commands.default_cmdsets import AliveCmdSet
+            from commands.dead_cmdset import DeadCmdSet
+            self.cmdset.remove(AliveCmdSet)
+            self.cmdset.add(DeadCmdSet, persistent=True)
+        else:
+            from commands.default_cmdsets import AliveCmdSet
+            from commands.dead_cmdset import DeadCmdSet
+            self.cmdset.remove(DeadCmdSet)
+            self.cmdset.add(AliveCmdSet, persistent=True)
+        self.update_living_status()
+
+
+
     def revive(self):
         """Revive this entity from death."""
         # Use the same revive logic as @revive command

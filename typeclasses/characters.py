@@ -30,36 +30,6 @@ class Character(LivingMixin, HolderMixin, WearerMixin, ObjectParent, DefaultChar
     def get_tag_objs(self, *args, **kwargs):
         return self.tags.get(*args, **kwargs, return_tagobj=True)
 
-    def at_pre_move(self, destination, **kwargs):
-        """Prevent dead characters from moving under their own power."""
-        if self.is_dead():
-            self.msg("You are dead and cannot move.")
-            return False
-        return super().at_pre_move(destination, **kwargs)
-
-    def at_init(self):
-        """Called whenever the typeclass is cached from memory."""
-        super().at_init()
-        if self.is_dead():
-            from commands.default_cmdsets import AliveCmdSet
-            from commands.dead_cmdset import DeadCmdSet
-            self.cmdset.remove(AliveCmdSet)
-            self.cmdset.add(DeadCmdSet, persistent=True)
-        else:
-            from commands.default_cmdsets import AliveCmdSet
-            from commands.dead_cmdset import DeadCmdSet
-            self.cmdset.remove(DeadCmdSet)
-            self.cmdset.add(AliveCmdSet, persistent=True)
-        self.update_living_status()
-
-    def at_death(self):
-        """Handle character-specific death effects."""
-        super().at_death()
-        from commands.default_cmdsets import AliveCmdSet
-        from commands.dead_cmdset import DeadCmdSet
-        self.cmdset.remove(AliveCmdSet)
-        self.cmdset.add(DeadCmdSet, persistent=True)
-
     # --- Perception / Look -------------------------------------------------
     def at_look(self, target, **kwargs):
         """Gate visibility based on ambient light vs character threshold."""
