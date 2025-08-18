@@ -68,8 +68,7 @@ class LivingMixin(LivingStateMixin):
     is_resting = AttributeProperty(default=False)
     metabolism = AttributeProperty(default=1.0)
     light_threshold = AttributeProperty(default=20)
-    # Skills stored as mapping {skill_key: level_label}
-    skills = AttributeProperty(default=dict)
+
 
     def _switch_command_sets(self, alive: bool):
         """Switch between alive and dead command sets."""
@@ -289,23 +288,3 @@ class LivingMixin(LivingStateMixin):
     def decrease_tiredness(self, amount: float = 1.0) -> None:
         """Decrease tiredness by amount, not going below zero."""
         self._decrease_stat("tiredness", amount, self._notify_tiredness)
-
-    # Skills helpers
-    VALID_SKILL_LEVELS = {"untrained", "novice", "journeyman", "master"}
-
-    def get_skill_level_label(self, skill_key: str) -> str:
-        """Return the textual skill level for a given skill key.
-
-        Levels are textual among {untrained, novice, journeyman, master}. Defaults to untrained.
-        """
-        skills_map = self.skills or {}
-        level = (skills_map.get(skill_key) or "untrained").lower()
-        return level if level in self.VALID_SKILL_LEVELS else "untrained"
-
-    def set_skill_level_label(self, skill_key: str, level_label: str) -> None:
-        """Set the textual skill level for a given skill key."""
-        if level_label not in self.VALID_SKILL_LEVELS:
-            raise ValueError("Invalid skill level label")
-        skills_map = self.skills or {}
-        skills_map[skill_key] = level_label
-        self.skills = skills_map

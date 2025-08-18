@@ -5,7 +5,40 @@ reloading the server. Characters store their personal skill levels as
 Attributes (a mapping from skill keys to level labels).
 """
 
+from evennia import AttributeProperty
 from evennia.objects.objects import DefaultObject
+
+
+class SkillableMixin:
+    """Mixin for entities that can have skills.
+
+    This mixin provides skill management functionality for any object that
+    needs to track skill levels. Skills are stored as a mapping from skill
+    keys to level labels.
+    """
+
+    # Skills stored as mapping {skill_key: level_label}
+    skills = AttributeProperty(default=dict)
+
+    # Valid skill levels
+    VALID_SKILL_LEVELS = {"untrained", "novice", "journeyman", "master"}
+
+    def get_skill_level_label(self, skill_key: str) -> str:
+        """Return the textual skill level for a given skill key.
+
+        Levels are textual among {untrained, novice, journeyman, master}. Defaults to untrained.
+        """
+        skills_map = self.skills or {}
+        level = (skills_map.get(skill_key) or "untrained").lower()
+        return level if level in self.VALID_SKILL_LEVELS else "untrained"
+
+    def set_skill_level_label(self, skill_key: str, level_label: str) -> None:
+        """Set the textual skill level for a given skill key."""
+        if level_label not in self.VALID_SKILL_LEVELS:
+            raise ValueError("Invalid skill level label")
+        skills_map = self.skills or {}
+        skills_map[skill_key] = level_label
+        self.skills = skills_map
 
 
 class Skill(DefaultObject):

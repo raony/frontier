@@ -14,9 +14,10 @@ from .objects import ObjectParent
 from .equipment import WearerMixin
 from .living import LivingMixin
 from .holding import HolderMixin
+from .skills import SkillableMixin
 
 
-class Character(LivingMixin, HolderMixin, WearerMixin, ObjectParent, DefaultCharacter):
+class Character(LivingMixin, HolderMixin, WearerMixin, SkillableMixin, ObjectParent, DefaultCharacter):
     """Represents the in-game character entity.
 
     Three persistent Attributes are introduced on all characters:
