@@ -11,6 +11,12 @@ class WeightMixin:
 
     weight = AttributeProperty(default=100)
 
+    def at_object_creation(self):
+        """Set the weight based on weight_default if defined."""
+        super().at_object_creation()
+        if hasattr(self, 'weight_default'):
+            self.weight = self.weight_default
+
     @property
     def total_weight(self) -> int:
         """Return the total weight of this object and its contents in grams."""

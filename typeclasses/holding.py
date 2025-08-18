@@ -1,6 +1,7 @@
 """Holding system for game entities."""
 
 from django.utils import tree
+from evennia import AttributeProperty
 from evennia.utils.utils import lazy_property
 from evennia.help.models import Tag
 from .objects import Object
@@ -25,6 +26,10 @@ class AlreadyHoldingError(Exception):
     """Exception raised when the slot is already holding an item."""
     pass
 
+class TooHeavyError(Exception):
+    """Exception raised when an item is too heavy to hold."""
+    pass
+
 
 class HoldableMixin:
     def at_object_creation(self):
@@ -34,8 +39,20 @@ class HoldableMixin:
     def get_display_name(self, looker=None, **kwargs):
         name = super().get_display_name(looker, **kwargs)
         if self.tags.has("held", category="holding"):
-            return f"{name} ({self.location.get_display_holding(self)})"
+            name = f"{name} ({self.location.get_display_holding(self)})"
+        if self.total_weight > 0:
+            name = f"{name} {self.get_display_weight(looker)}"
         return name
+
+    def get_display_weight(self, looker, **kwargs):
+        if not hasattr(looker, 'holding_strength'):
+            return ''
+        if self.total_weight <= looker.holding_strength:
+            return '░'
+        elif self.total_weight <= looker.holding_strength * len(looker.held_items.slots):
+            return '▒'
+        else:
+            return '█'
 
 class HoldableItem(HoldableMixin, Object):
     """Base typeclass for items that can be held in hands."""
@@ -77,6 +94,12 @@ class HeldItemsHandler:
         if not item.tags.has("holdable", category="holding"):
             raise NotHoldableError
 
+        # Check if item is too heavy for the available slots
+        total_weight = item.total_weight
+        max_weight = len(slots) * self.holder.holding_strength
+        if total_weight > max_weight:
+            raise TooHeavyError
+
         current_slots = self.get_slots_for(item)
         if set(current_slots) == set(slots):
             return False
@@ -107,6 +130,8 @@ class HeldItemsHandler:
 class HolderMixin:
     """Mixin for entities that can hold objects in their hands."""
 
+    holding_strength = AttributeProperty(default=10000)
+
     @lazy_property
     def held_items(self) -> HeldItemsHandler:
         return HeldItemsHandler(self)
@@ -118,6 +143,7 @@ class HolderMixin:
 
     def at_pre_object_leave(self, obj, target_location, **kwargs):
         self.held_items.remove(obj)
+        self.equipment.remove(obj)
         return super().at_pre_object_leave(obj, target_location, **kwargs)
 
     def get_display_holding(self, item: Object) -> str:

@@ -7,7 +7,7 @@ from .command import Command
 
 
 class CmdEquip(Command):
-    """Equip an item you are carrying.
+    """Equip an item using the tag-based system.
 
     Usage:
       equip <item>
@@ -20,41 +20,37 @@ class CmdEquip(Command):
 
     def func(self):
         caller = self.caller
-        if not self.args:
-            caller.msg("Equip what?")
-            return
-        obj = caller.search(self.args, candidates=caller.contents)
+        target_name = self.lhs
+
+        obj = caller.quiet_search(target_name)
         if not obj:
+            caller.msg(f"You don't have {target_name}.")
             return
-        caller.equip(obj)
+
+        if obj.location != caller:
+            caller.execute_cmd(f"get {obj.get_display_name(caller)}")
+
+        caller.msg(f"You equip {obj.get_display_name()}.")
+        caller.equipment.add(obj)
 
 
 class CmdUnequip(Command):
-    """Unequip an item by slot or by name.
+    """Unequip an item.
 
     Usage:
-      unequip <slot>
-      remove <item>
+      unequip <item>
     """
 
     key = "unequip"
-    aliases = ["remove"]
     locks = "cmd:all()"
 
     def func(self):
         caller = self.caller
-        if not self.args:
-            caller.msg("Unequip what? Specify a slot or item name.")
-            return
-        # Try by slot name without triggering double messages
-        slot_obj = None
-        if hasattr(caller, "get_equipped_in_slot"):
-            slot_obj = caller.get_equipped_in_slot(self.args)
-        if slot_obj:
-            caller.unequip(self.args)
-            return
-        # Try by object name from inventory
-        obj = caller.search(self.args, candidates=caller.contents)
+        target_name = self.lhs
+
+        obj = caller.quiet_search(target_name)
         if not obj:
-            return
-        caller.unequip(obj)
+            caller.msg(f"You don't have {target_name}.")
+
+        caller.equipment.remove(obj)
+        caller.msg(f"You unequip {obj.get_display_name()}.")

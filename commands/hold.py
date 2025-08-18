@@ -5,7 +5,7 @@ Holdables are separate from equippable wear slots. Items must have
 """
 
 from .command import Command
-from typeclasses.holding import AlreadyHoldingError, NoSlotsError, NotHoldableError, InvalidSlotError
+from typeclasses.holding import AlreadyHoldingError, NoSlotsError, NotHoldableError, InvalidSlotError, TooHeavyError
 
 
 class CmdHold(Command):
@@ -64,3 +64,5 @@ class CmdHold(Command):
             caller.msg("Your hands are full.")
         except NotHoldableError:
             caller.msg(f"You can't hold {obj.get_display_name(caller)}.")
+        except TooHeavyError:
+            caller.msg(f"{obj.get_display_name(caller)} is too heavy for you to hold.")

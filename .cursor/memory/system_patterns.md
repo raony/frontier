@@ -65,11 +65,18 @@
 - When attaching/removing CmdSets, use `persistent=True` (not `permanent=True`), per Evennia's updated API/deprecation.
 - When normalizing legacy Attribute data, do it on-demand and guard writes to avoid altering Attributes during sensitive initialization.
 
-### Equipment System Patterns
-- Slots are defined centrally in `typeclasses/equipment.py`.
-- Items expose `equipable_slot` via either `obj.db.equipable` or mixins like `EquippableHead`.
-- Characters maintain `db.equipment` as `{slot: object_id or None}`; never store object instances.
-- Keep mapping consistent when items leave inventory (clear slot on `at_object_leave`).
+### Equipment System Patterns (Updated)
+- **Tag-based approach**: Items use `tags.add("wearable", category="equipment")` via `WearableMixin`
+- **Slot management**: Characters use `category="equipment_slot"` tags for all equipment slots
+- **Worn state**: Items use `tags.add("worn", category="equipment")` when equipped
+- **Slot specification**: Items use `category="wearing_slot"` tags for their equipment slot
+- **Automatic cleanup**: Items lose worn status when moved from inventory via `at_pre_object_leave`
+- **API**: `WornItemsHandler` manages slot allocation and validation
+- **Commands**: `equip_tag <item> to <slot>`, `unequip_tag <slot>`, `equipment_tag`, `equipment_compare`
+- **Display**: Equipped items show slot information in their names
+- **Dual system**: Maintains both attribute-based and tag-based approaches for comparison
+- **Weight limits**: `holding_strength` (default 1000g per slot) limits total weight per slot
+- **Exceptions**: `TooHeavyError` raised when item weight exceeds slot capacity
 
 ### Holding System Patterns (Updated)
 - **Tag-based approach**: Items use `tags.add("holdable", category="holding")` via `HoldableMixin`
@@ -79,6 +86,8 @@
 - **API**: `HeldItemsHandler` manages slot allocation and validation
 - **Commands**: `hold <item>` with slot specification (`/main`, `/off`, `/both`)
 - **Display**: Held items show slot information in their names
+- **Weight limits**: `holding_strength` (default 1000g per slot) limits total weight per slot
+- **Exceptions**: `TooHeavyError` raised when item weight exceeds slot capacity
 
 ### Tag System Patterns
 - **Use Django Tags for categorical and state properties**

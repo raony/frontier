@@ -1,6 +1,6 @@
 from evennia.utils.test_resources import EvenniaTest
 from evennia import create_object
-from typeclasses.holding import HoldableItem, NoSlotsError, AlreadyHoldingError, NotInInventoryError, NotHoldableError
+from typeclasses.holding import HoldableItem, AlreadyHoldingError, NotInInventoryError, NotHoldableError, TooHeavyError
 from typeclasses.objects import Object
 
 
@@ -62,3 +62,35 @@ class TestHolding(EvenniaTest):
         self.assertTrue(self.char1.held_items.add(self.item1_char1_inv, slots=["main", "off"]))
         self.assertFalse(self.char1.held_items.add(self.item1_char1_inv, slots=["main", "off"]))
         self.assertTrue(self.char1.held_items.add(self.item1_char1_inv, slots=["main"]))
+
+    def test_holding_strength_default(self):
+        """Test that characters have a default holding strength of 10kg per slot."""
+        self.assertEqual(self.char1.holding_strength, 10000)
+
+    def test_holding_strength_validation(self):
+        heavy_item = create_object(HoldableItem, key="heavy_item", location=self.char1)
+        heavy_item.set_weight(15000)
+
+        with self.assertRaises(TooHeavyError):
+            self.char1.held_items.add(heavy_item, slots=["main"])
+
+        self.assertTrue(self.char1.held_items.add(heavy_item, slots=["main", "off"]))
+        self.char1.held_items.remove(heavy_item)
+
+        very_heavy_item = create_object(HoldableItem, key="very_heavy_item", location=self.char1)
+        very_heavy_item.set_weight(30000)
+
+        with self.assertRaises(TooHeavyError):
+            self.char1.held_items.add(very_heavy_item, slots=["main", "off"])
+
+    def test_holding_strength_with_contents(self):
+        container = create_object(HoldableItem, key="container", location=self.char1)
+        container.set_weight(50)
+
+        heavy_content = create_object(Object, key="heavy_content", location=container)
+        heavy_content.set_weight(15000)
+
+        with self.assertRaises(TooHeavyError):
+            self.char1.held_items.add(container, slots=["main"])
+
+        self.assertTrue(self.char1.held_items.add(container, slots=["main", "off"]))

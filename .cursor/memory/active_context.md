@@ -2,6 +2,58 @@
 
 ## Recent Changes
 
+### Equipment System Tag Implementation (Completed)
+- **Implemented tag-based equipment system** alongside existing attribute-based system for comparison
+- **Added `WearableMixin`** to `typeclasses/equipment.py` - provides tag-based equipment functionality
+- **Created `WornItemsHandler`** for managing worn items using tags:
+  - Uses `category="equipment"` for wearable and worn states
+  - Uses `category="wearing_slot"` for slot tags (head, body, legs, waist, hands, feet)
+  - Uses `category="equipment_slot"` for character equipment slots
+- **Updated all equipment item typeclasses** in `typeclasses/items.py` to include `WearableMixin`
+- **Enhanced character equipment API** with tag-based methods:
+  - `equip_tag(item, slot)` - Equip item using tag system
+  - `unequip_tag(slot_or_item)` - Unequip item using tag system
+  - `get_equipment_display_lines_tag()` - Get equipment display using tags
+  - `get_equipped_in_slot_tag(slot)` - Get item in slot using tags
+- **Added new commands** for tag-based equipment system:
+  - `equip_tag <item> to <slot>` - Equip item using tag system
+  - `unequip_tag <slot>` - Unequip item using tag system
+  - `equipment_tag` - Show equipment using tag system
+  - `equipment_compare` - Compare both systems side by side
+- **Comprehensive test coverage** in `tests/test_equipment_tags.py` with 10/10 tests passing
+
+### Equipment System API (Dual System)
+- **Attribute-based system** (existing):
+  - `equip(item)` - Equip item to default slot
+  - `unequip(slot_or_item)` - Unequip item
+  - `get_equipment_display_lines()` - Get equipment display
+  - `get_equipped_in_slot(slot)` - Get item in slot
+- **Tag-based system** (new):
+  - `equip_tag(item, slot)` - Equip item to specific slot
+  - `unequip_tag(slot_or_item)` - Unequip item
+  - `get_equipment_display_lines_tag()` - Get equipment display
+  - `get_equipped_in_slot_tag(slot)` - Get item in slot
+
+### Tag Categories for Equipment
+- **`"wearable"`** in category `"equipment"` - Items that can be equipped
+- **`"worn"`** in category `"equipment"` - Items currently equipped
+- **`"head"`, `"body"`, `"legs"`, `"waist"`, `"hands"`, `"feet"`** in category `"wearing_slot"` - Item's equipment slot
+- **`"head"`, `"body"`, `"legs"`, `"waist"`, `"hands"`, `"feet"`** in category `"equipment_slot"` - Character's available slots
+
+### Usage Examples
+```python
+# Tag-based equipment system
+char.equip_tag(helmet, "head")           # Equip helmet to head slot
+char.unequip_tag("head")                  # Unequip head slot
+char.get_equipment_display_lines_tag()    # Get equipment display
+
+# Commands
+equip_tag helmet to head                  # Equip helmet to head
+unequip_tag head                          # Unequip head slot
+equipment_tag                             # Show equipment (tag system)
+equipment_compare                         # Compare both systems
+```
+
 ### Holding System Tag Conversion (Completed)
 - **Converted holding system to use Django Tags** instead of AttributeProperty
 - **Updated `HoldableMixin`** to use `tags.add("holdable", category="holding")` on object creation
@@ -56,29 +108,36 @@ obj.weight_default = 200 # Set default for new instances
 ```
 
 ## Current Focus
+- Equipment system successfully implemented with dual approach (tags + attributes)
 - Holding system successfully converted to tag-based approach
 - Weight system is now fully implemented and tested
 - All existing items have appropriate default weights
 - Commands are available for players and builders
 - System follows Evennia patterns with persistent attributes and tags
-- All tests passing (65/65)
+- All equipment tests passing (10/10), overall tests: 86/88 passing
 
 ## Next Steps
+- Fix failing tests (light system and weight system)
 - Consider weight-based carrying capacity limits
 - Add weight to character encumbrance calculations
 - Integrate weight with movement/travel systems
 - Add weight-based crafting requirements
 - Continue tag system conversion for other boolean properties
+- Evaluate performance differences between tag and attribute systems
 
 ## Related Files
+- `typeclasses/equipment.py` - WearableMixin and WornItemsHandler
+- `typeclasses/characters.py` - Updated with tag-based equipment methods
+- `typeclasses/items.py` - All equipment items now include WearableMixin
+- `commands/equip.py` - New tag-based equipment commands
+- `commands/default_cmdsets.py` - Added new equipment commands
+- `tests/test_equipment_tags.py` - Comprehensive equipment tag system tests
 - `typeclasses/holding.py` - Updated holding system with tag-based approach
 - `typeclasses/objects.py` - WeightMixin and base Object class
 - `typeclasses/food.py` - Food weight defaults
-- `typeclasses/items.py` - Equipment weight defaults
 - `typeclasses/liquid.py` - Container weight defaults
 - `commands/weight.py` - Weight commands
 - `commands/hold.py` - Hold command (updated for tag system)
-- `commands/default_cmdsets.py` - Command registration
 - `tests/test_weight_system.py` - Weight system tests
 - `tests/test_holding.py` - Updated holding system tests
 - `tests/test_light.py` - Light system tests (renamed from test_hold_and_light.py)
@@ -181,16 +240,19 @@ obj.weight_default = 200 # Set default for new instances
 
 ## Project Status
 - **Core systems implemented and tested**
+- **Equipment system implemented with dual approach (tags + attributes)**
 - **Holding system converted to tag-based approach**
 - **Weight system completed**
 - **All major gameplay mechanics functional**
 - **Ready for content creation and refinement**
-- **All tests passing (65/65)**
+- **Equipment tests: 10/10 passing, Overall: 86/88 passing**
 
 ## Next Development Priorities
-1. **Weight-based carrying capacity**
-2. **Advanced crafting system**
-3. **Combat mechanics**
-4. **NPC and AI systems**
-5. **World generation and content**
-6. **Continue tag system conversion for other properties**
+1. **Fix failing tests** (light system, weight system)
+2. **Weight-based carrying capacity**
+3. **Advanced crafting system**
+4. **Combat mechanics**
+5. **NPC and AI systems**
+6. **World generation and content**
+7. **Continue tag system conversion for other properties**
+8. **Performance comparison between tag and attribute systems**
