@@ -35,6 +35,7 @@ from .light import CmdDarkvision, CmdLight, CmdExtinguish
 from .kill import CmdKill, CmdRevive
 from .weight import CmdWeight, CmdSetWeight
 from .examine import CmdExamine
+from .store import CmdStore
 
 
 class AliveCmdSet(default_cmds.CharacterCmdSet):
@@ -68,6 +69,8 @@ class AliveCmdSet(default_cmds.CharacterCmdSet):
         self.add(CmdExamine())
         # Holding commands
         self.add(CmdHold())
+        # Container commands
+        self.add(CmdStore())
 
 
 class CharacterCmdSet(default_cmds.CharacterCmdSet):

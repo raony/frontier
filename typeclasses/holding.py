@@ -83,30 +83,38 @@ class HeldItemsHandler:
     def all(self) -> list[Object]:
         return [obj for obj in self.holder.contents if obj.tags.has("held", category="holding")]
 
+    def is_valid_slot(self, slots: list[str]) -> bool:
+        return all(slot in self.slots for slot in slots)
+
+    def is_in_inventory(self, item: Object) -> bool:
+        return item.location == self.holder
+
+    def is_holdable(self, item: Object) -> bool:
+        return item.tags.has("holdable", category="holding")
+
+    def is_too_heavy(self, item: Object, slots: list[str]) -> bool:
+        return item.total_weight > len(slots) * self.holder.holding_strength
+
+    def is_already_holding(self, item: Object, slots: list[str]) -> bool:
+        return set(slots) == set(self.get_slots_for(item))
+
+    def is_slots_available(self, item: Object, slots: list[str]) -> bool:
+        available_slots = self.available_slots + self.get_slots_for(item)
+        return all(slot in available_slots for slot in slots)
+
+    def can_hold(self, item: Object, slots: list[str]) -> bool:
+        return (
+            self.is_valid_slot(slots)
+            and self.is_in_inventory(item)
+            and self.is_holdable(item)
+            and not self.is_too_heavy(item, slots)
+            and not self.is_already_holding(item, slots)
+            and self.is_slots_available(item, slots)
+        )
+
     def add(self, item: Object, slots: list[str]) -> bool:
-        valid_slots = self.slots
-        if not all(slot in valid_slots for slot in slots):
-            raise InvalidSlotError
-
-        if item.location != self.holder:
-            raise NotInInventoryError
-
-        if not item.tags.has("holdable", category="holding"):
-            raise NotHoldableError
-
-        # Check if item is too heavy for the available slots
-        total_weight = item.total_weight
-        max_weight = len(slots) * self.holder.holding_strength
-        if total_weight > max_weight:
-            raise TooHeavyError
-
-        current_slots = self.get_slots_for(item)
-        if set(current_slots) == set(slots):
+        if not self.can_hold(item, slots):
             return False
-
-        used_slots = [slot for slot in self.used_slots if slot not in current_slots]
-        if any(slot in used_slots for slot in slots):
-            raise AlreadyHoldingError
 
         item.tags.remove(category="holding_slot")
         for slot in slots:

@@ -2,6 +2,59 @@
 
 ## Recent Changes
 
+### Container System Implementation (Completed)
+- **Created `ContainerMixin`** in `typeclasses/container.py` - provides container functionality using Django tags
+- **Added `Container` class** that inherits from `ContainerMixin` and `Object` for ready-to-use containers
+- **Container identification**: Uses `tags.add("container", category="container")` for identification
+- **Capacity management**: Supports both item count limits and weight limits
+- **Container features**:
+  - Item count capacity (default 10 items)
+  - Weight capacity (default 5000g)
+  - Lock/unlock functionality
+  - Container descriptions
+  - Nested container support
+  - Container status reporting
+  - Container display formatting
+- **Container API methods**:
+  - `is_container()` - Check if object is a container
+  - `can_hold_item(item)` - Check if container can hold item
+  - `get_container_status()` - Get detailed container status
+  - `get_container_display()` - Get formatted container display
+  - `empty_container()` - Empty all contents
+  - `search_container()` - Search within container
+- **Comprehensive test coverage** in `tests/test_container_system.py` with 16/16 tests passing
+
+### Container System API
+- **Container identification**: `obj.tags.has("container", category="container")`
+- **Capacity checking**: `container.can_hold_item(item)` - checks both count and weight limits
+- **Status reporting**: `container.get_container_status()` - returns dict with items/weight info
+- **Display integration**: Container info automatically included in object descriptions
+- **Weight integration**: Works seamlessly with existing weight system
+- **Default settings**: 10 items, 5000g weight limit, 200g container weight
+
+### Usage Examples
+```python
+# Create a container
+container = create_object(Container, key="chest", location=room)
+
+# Check container capacity
+if container.can_hold_item(item):
+    item.move_to(container)
+
+# Get container status
+status = container.get_container_status()
+print(f"Items: {status['items']['current']}/{status['items']['maximum']}")
+
+# Empty container
+container.empty_container(character)
+
+# Custom container class
+class TreasureChest(ContainerMixin, Object):
+    container_capacity_default = 5
+    container_weight_limit_default = 2000
+    weight_default = 500
+```
+
 ### Equipment System Tag Implementation (Completed)
 - **Implemented tag-based equipment system** alongside existing attribute-based system for comparison
 - **Added `WearableMixin`** to `typeclasses/equipment.py` - provides tag-based equipment functionality
@@ -108,13 +161,14 @@ obj.weight_default = 200 # Set default for new instances
 ```
 
 ## Current Focus
+- Container system successfully implemented with tag-based approach
 - Equipment system successfully implemented with dual approach (tags + attributes)
 - Holding system successfully converted to tag-based approach
 - Weight system is now fully implemented and tested
 - All existing items have appropriate default weights
 - Commands are available for players and builders
 - System follows Evennia patterns with persistent attributes and tags
-- All equipment tests passing (10/10), overall tests: 86/88 passing
+- All container tests passing (16/16), overall tests: 99/99 passing
 
 ## Next Steps
 - Fix failing tests (light system and weight system)

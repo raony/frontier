@@ -6,6 +6,8 @@ Holdables are separate from equippable wear slots. Items must have
 
 from .command import Command
 from typeclasses.holding import AlreadyHoldingError, NoSlotsError, NotHoldableError, InvalidSlotError, TooHeavyError
+from typeclasses.container import is_container
+from evennia.help.models import Tag
 
 
 class CmdHold(Command):
@@ -33,12 +35,12 @@ class CmdHold(Command):
         else:
             slot_keys = ['main', 'off'] if switch == 'both' else [switch]
 
-        obj = caller.quiet_search(item_key)
+        obj = caller.search_item(item_key)
         if not obj:
-            return caller.msg(f"You don't have {item_key}.")
+            return caller.msg(f"You can't find {item_key}.")
 
-        if obj.location != caller:
-            caller.execute_cmd(f"get {obj.get_display_name(caller)}")
+        if not caller.held_items.is_holdable(obj):
+            return caller.msg(f"You can't hold {obj.get_display_name(caller)}.")
 
         if not slot_keys:
             current_slots = caller.held_items.get_slots_for(obj)
@@ -51,18 +53,28 @@ class CmdHold(Command):
             else:
                 slot_keys = [current_slots[0]]
 
-        try:
-            name = obj.get_display_name(caller)
-            if caller.held_items.add(obj, slots=slot_keys):
-                slot_display = caller.get_display_holding(obj)
-                caller.msg(f"You hold {name} in your {slot_display}.")
+        if caller.held_items.is_too_heavy(obj, slot_keys):
+            return caller.msg(f"{obj.get_display_name(caller)} is too heavy for you to hold.")
+
+        if caller.held_items.is_already_holding(obj, slot_keys):
+            return caller.msg(f"You are already holding {obj.get_display_name(caller)}.")
+
+        if not caller.held_items.is_slots_available(obj, slot_keys):
+            return caller.msg(f"You don't have enough free hands.")
+
+        if obj.location != caller:
+            obj.move_to(caller, quiet=True)
+
+        if caller.held_items.can_hold(obj, slot_keys):
+            if len(slot_keys) == 1:
+                slot_display = Tag.objects.get(db_key=slot_keys[0], db_category="holding_slot").db_data
             else:
-                caller.msg(f"You are already holding {name}.")
-        except InvalidSlotError:
-            caller.msg(f"What is {slot_keys[0]}?")
-        except (NoSlotsError, AlreadyHoldingError):
-            caller.msg("Your hands are full.")
-        except NotHoldableError:
+                slot_display = "both hands"
+            caller.location.msg_contents(
+                f"$You() $conj(hold) $you(obj) with {slot_display}",
+                from_obj=caller,
+                mapping={"obj": obj}
+            )
+            caller.held_items.add(obj, slots=slot_keys)
+        else:
             caller.msg(f"You can't hold {obj.get_display_name(caller)}.")
-        except TooHeavyError:
-            caller.msg(f"{obj.get_display_name(caller)} is too heavy for you to hold.")

@@ -5,63 +5,9 @@ from commands.default_cmdsets import AliveCmdSet
 from commands.dead_cmdset import DeadCmdSet
 
 
-class LivingStateMixin:
-    """Mixin for managing living/dead state using additive tags.
+class LivingMixin:
+    """Mixin for managing living/dead state using additive tags."""
 
-    This approach uses two tags:
-    - "living_being": indicates the object is a living entity
-    - "dead": indicates the living being is dead
-
-    States:
-    - Alive: has "living_being" tag, does NOT have "dead" tag
-    - Dead: has both "living_being" AND "dead" tags
-    - Not living: has neither tag
-    """
-
-    def set_living_state(self, alive: bool):
-        """Set living state using additive tags."""
-        # Ensure living_being tag exists (all characters are living beings)
-        if not self.tags.has("living_being", category="living_state"):
-            self.tags.add("living_being", category="living_state")
-
-        if alive:
-            # Alive: remove dead tag
-            self.tags.remove("dead", category="living_state")
-        else:
-            # Dead: add dead tag
-            self.tags.add("dead", category="living_state")
-
-    def is_living(self) -> bool:
-        """Check if character is alive using tags."""
-        # Alive = has living_being tag AND does NOT have dead tag
-        return (self.tags.has("living_being", category="living_state") and
-                not self.tags.has("dead", category="living_state"))
-
-    def is_dead(self) -> bool:
-        """Check if character is dead using tags."""
-        # Dead = has living_being tag AND has dead tag
-        return (self.tags.has("living_being", category="living_state") and
-                self.tags.has("dead", category="living_state"))
-
-    def is_living_being(self) -> bool:
-        """Check if character is a living being (alive or dead)."""
-        return self.tags.has("living_being", category="living_state")
-
-    def at_object_creation(self):
-        """Ensure consistent initial living state."""
-        try:
-            super().at_object_creation()
-        except Exception:
-            pass
-        # Set default living state if none exists
-        if not self.tags.has("living_being", category="living_state"):
-            self.tags.add("living_being", category="living_state")
-
-
-class LivingMixin(LivingStateMixin):
-    """Mixin for living entities with metabolism and survival needs."""
-
-    # Survival attributes
     hunger = AttributeProperty(default=0.0)
     thirst = AttributeProperty(default=0.0)
     tiredness = AttributeProperty(default=0.0)
@@ -69,53 +15,54 @@ class LivingMixin(LivingStateMixin):
     metabolism = AttributeProperty(default=1.0)
     light_threshold = AttributeProperty(default=20)
 
+    def is_living(self) -> bool:
+        """Check if character is alive using tags."""
+        return not self.tags.has("dead", category="living_state")
 
-    def _switch_command_sets(self, alive: bool):
-        """Switch between alive and dead command sets."""
-        if alive:
-            self.cmdset.remove(DeadCmdSet)
-            self.cmdset.add(AliveCmdSet, persistent=True)
-        else:
-            self.cmdset.remove(AliveCmdSet)
-            self.cmdset.add(DeadCmdSet, persistent=True)
+    def is_dead(self) -> bool:
+        """Check if character is dead using tags."""
+        return self.tags.has("dead", category="living_state")
 
-    def at_death(self):
+    def at_object_creation(self):
+        """Ensure consistent initial living state."""
+        super().at_object_creation()
+        self.tags.add("living_being", category="living_state")
+
+    def clear_cmdset(self):
+        self.cmdset.remove(AliveCmdSet)
+
+    def load_cmdset(self):
+        if self.cmdset.has(AliveCmdSet):
+            return
+
+        self.cmdset.add(AliveCmdSet)
+
+    def die(self):
         """Handle death of this entity."""
-        if self.location:
-            self.location.msg_contents(
-                "$You() collapse lifelessly.",
-                from_obj=self,
-            )
-        # Set living state using tags
-        self.set_living_state(False)  # This sets dead tag
+        self.location.msg_contents(
+            "$You() collapse lifelessly.",
+            from_obj=self,
+        )
+        self.tags.add("dead", category="living_state")
         self.is_resting = False
         self.stop_metabolism_script()
-        # Switch to dead command set
-        self._switch_command_sets(False)
-
-    def at_pre_move(self, destination, **kwargs):
-        """Prevent dead characters from moving under their own power."""
-        if self.is_dead():
-            self.msg("You are dead and cannot move.")
-            return False
-        return super().at_pre_move(destination, **kwargs)
+        self.clear_cmdset()
+        self.cmdset.add(DeadCmdSet)
 
     def at_init(self):
         """Called whenever the typeclass is cached from memory."""
         super().at_init()
-        self._switch_command_sets(not self.is_dead())
+        self.load_cmdset()
         self.update_living_status()
 
-
+        self.ndb
 
     def revive(self):
         """Revive this entity from death."""
-        # Use the same revive logic as @revive command
-        self.set_living_state(True)
+        self.tags.remove("dead", category="living_state")
         self.is_resting = False
         self.start_metabolism_script()
-        # Switch to alive command set
-        self._switch_command_sets(True)
+        self.load_cmdset()
 
     def reset_survival_stats(self):
         """Reset all survival stats to 0 and clear message levels."""
@@ -123,12 +70,9 @@ class LivingMixin(LivingStateMixin):
         self.thirst = 0
         self.tiredness = 0
         self.is_resting = False
-
-        # Clear threshold message trackers
-        if hasattr(self, "ndb"):
-            self.ndb.hunger_msg_level = 0
-            self.ndb.thirst_msg_level = 0
-            self.ndb.tiredness_msg_level = 0
+        self.ndb.hunger_msg_level = 0
+        self.ndb.thirst_msg_level = 0
+        self.ndb.tiredness_msg_level = 0
 
     def reset_and_revive(self):
         """Reset survival stats and revive if dead."""
@@ -138,8 +82,7 @@ class LivingMixin(LivingStateMixin):
             self.revive()
             return "You have been revived and your needs are reset."
         else:
-            if hasattr(self, "start_metabolism_script"):
-                self.start_metabolism_script()
+            self.start_metabolism_script()
             return "Your needs are reset and you feel refreshed."
 
     # Hunger/thirst/tiredness management helpers
@@ -213,7 +156,7 @@ class LivingMixin(LivingStateMixin):
         if self.is_dead():
             return
         if any((getattr(self, stat, 0) or 0) >= 100 for stat in ["hunger", "thirst", "tiredness"]):
-            self.at_death()
+            self.die()
 
     # Metabolism API
     def get_metabolism_interval(self) -> int:
