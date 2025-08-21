@@ -6,7 +6,7 @@ ContainerMixin functionality.
 
 from .command import Command
 from typeclasses.container import is_container
-from world.msgs import VisualMsg
+from world.living.perception import MsgObj
 
 
 class CmdStore(Command):
@@ -76,5 +76,5 @@ class CmdStore(Command):
             msg_content,
             from_obj=caller,
             mapping={"obj": item, "container": container},
-            msg_obj=VisualMsg(msg_content, sound="You hear something move.").to_dict()
+            msg_obj=MsgObj(visual=msg_content, sound="You hear something move.").to_dict()
         )

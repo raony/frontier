@@ -1,17 +1,11 @@
-"""Living/death state management for game entities."""
-
-from evennia import AttributeProperty
 from commands.default_cmdsets import AliveCmdSet
-from commands.dead_cmdset import DeadCmdSet
+from typeclasses.objects import WeightMixin
 from world.living.metabolism import MetabolismMixin
+from world.living.perception import PerceptionMixin
 from world.utils import null_func
 
 
-class LivingMixin(MetabolismMixin):
-    """Mixin for managing living/dead state using additive tags."""
-
-    light_threshold = AttributeProperty(default=20)
-
+class LivingMixin(MetabolismMixin, PerceptionMixin, WeightMixin):
     @property
     def is_dead(self) -> bool:
         return self.tags.has("dead", category="living_state")
@@ -26,7 +20,7 @@ class LivingMixin(MetabolismMixin):
         if self.cmdset.has(AliveCmdSet):
             return
 
-        self.cmdset.add(AliveCmdSet)
+        self.cmdset.add(AliveCmdSet, persistent=True)
 
     def die(self):
         getattr(super(), "die", null_func)()
@@ -37,7 +31,6 @@ class LivingMixin(MetabolismMixin):
         self.tags.add("dead", category="living_state")
         self.cmdset.clear()
         self.cmdset.remove_default()
-        self.cmdset.add(DeadCmdSet)
 
     def revive(self):
         getattr(super(), "revive", null_func)()
@@ -45,11 +38,7 @@ class LivingMixin(MetabolismMixin):
         self.load_cmdset()
 
     def reset_and_revive(self):
-        """Reset survival stats and revive if dead."""
         self.reset_survival_stats()
 
         if self.is_dead:
             self.revive()
-            return "You have been revived and your needs are reset."
-        else:
-            return "Your needs are reset and you feel refreshed."

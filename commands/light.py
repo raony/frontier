@@ -65,16 +65,11 @@ class CmdDarkvision(Command):
 
     def func(self):
         caller = self.caller
-        if not hasattr(caller, "light_threshold"):
+        if not hasattr(caller, "vision"):
             caller.msg("You don't have light perception.")
             return
 
-        current = int(caller.light_threshold)
-        if current > 0:
-            # Enable darkvision by setting threshold to 0
-            caller.light_threshold = 0
-            caller.msg("Darkvision enabled. You can now see in complete darkness.")
-        else:
-            # Disable darkvision by restoring normal threshold
-            caller.light_threshold = 20
-            caller.msg("Darkvision disabled. You now require light to see.")
+        caller.vision.enable()
+        caller.vision.light_threshold = 0
+
+        caller.msg("Darkvision enabled. You can now see in complete darkness.")

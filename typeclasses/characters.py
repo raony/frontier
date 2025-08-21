@@ -8,55 +8,20 @@ creation commands.
 
 """
 
-from evennia.objects.objects import DefaultCharacter
-
-from .objects import Object, ObjectParent
-from .equipment import WearerMixin
-from .living import LivingMixin
-from .holding import HolderMixin
-from .skills import SkillableMixin
-from .container import is_container
-from world.msgs import SoundMsg, MsgObj
+from commands.default_cmdsets import CharacterCmdSet
+from typeclasses.objects import Object
+from typeclasses.container import is_container
+from world.living.people import Person
+from world.utils import null_func
 
 
-class Character(LivingMixin, HolderMixin, WearerMixin, SkillableMixin, ObjectParent, DefaultCharacter):
-    """Represents the in-game character entity.
+class Character(Person):
+    """Represents the in-game character entity."""
 
-    Three persistent Attributes are introduced on all characters:
-    ``hunger``, ``thirst`` and ``tiredness``. They are integers tracking
-    how hungry, thirsty or tired a character is. Newly created characters
-    start at ``0`` for all values.
-    """
-
-    is_pc = True
-
-    def get_tag_objs(self, *args, **kwargs):
-        return self.tags.get(*args, **kwargs, return_tagobj=True)
-
-    def at_msg_receive(self, text=None, from_obj=None, **kwargs):
-        raw_msg_obj = kwargs.pop("msg_obj", None)
-        if raw_msg_obj:
-            msg_obj = MsgObj.from_dict(raw_msg_obj)
-        else:
-            msg_obj = None
-
-        if msg_obj and msg_obj.is_visual():
-            if self.is_dead():
-                return False
-
-            if self.is_too_dark():
-                self.msg(msg_obj.sound, from_obj=from_obj, **kwargs, msg_obj= SoundMsg(msg_obj.sound).to_dict())
-                return False
-
-        return super().at_msg_receive(text, from_obj, **kwargs)
-
-    def is_too_dark(self):
-        return self.location.get_light_level(looker=self) < self.light_threshold
-
-    def at_look(self, target, **kwargs):
-        if self.is_too_dark():
-            return "It's too dark to see anything."
-        return super().at_look(target, **kwargs)
+    def load_cmdset(self):
+        getattr(super(), "load_cmdset", null_func)()
+        if not self.cmdset.has(CharacterCmdSet):
+            self.cmdset.add(CharacterCmdSet, persistent=True)
 
     def quiet_search_item(self, key:str, **kwargs) -> Object | None:
         return self.quiet_search(key, **kwargs)

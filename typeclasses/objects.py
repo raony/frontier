@@ -8,7 +8,6 @@ with a location in the game world (like Characters, Rooms, Exits).
 
 """
 
-from evennia import AttributeProperty
 from evennia.objects.objects import DefaultObject
 from typing import Self
 from .weight import WeightMixin
@@ -24,19 +23,6 @@ class ObjectParent:
     take precedence.
 
     """
-
-    def get_light_level(self, looker=None) -> int:
-        """Return this object's own light contribution (0..100).
-
-        Default implementation uses the Attribute `db.light_level` if present,
-        otherwise 0. Rooms should override to include ambient light sources
-        (e.g., sunlight) and combine with contained light sources.
-        """
-        try:
-            level = int(getattr(self.db, "light_level", 0) or 0)
-            return max(0, min(level, 100))
-        except Exception:
-            return 0
 
     def quiet_search(self, *args, **kwargs) -> Self | None:
         """Search for an object in the object's location.
