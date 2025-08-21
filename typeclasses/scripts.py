@@ -103,31 +103,6 @@ class Script(DefaultScript):
     pass
 
 
-class MetabolismScript(DefaultScript):
-    """Regularly increase hunger, thirst and tiredness on a living object."""
-
-    def at_script_creation(self):
-        """Called once when first created."""
-        self.key = "metabolism_script"
-        self.persistent = True
-        self.interval = self.obj.get_metabolism_interval()
-
-    def at_repeat(self):
-        """Increase hunger, thirst and tiredness each tick."""
-        # Use living state check
-        if not self.obj.is_living():
-            return
-        self.obj.increase_hunger()
-        self.obj.increase_thirst()
-        if getattr(self.obj, "is_resting", False):
-            tiredness = self.obj.tiredness or 0
-            recovery = 1 + tiredness / 20
-            self.obj.decrease_tiredness(recovery)
-        else:
-            self.obj.increase_tiredness()  # Uses default metabolism rate
-        # update interval in case metabolism changed
-        self.interval = self.obj.get_metabolism_interval()
-
 
 class ItemConsumptionScript(DefaultScript):
     """Regularly consume fuel/charges on an object when it's ON.

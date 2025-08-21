@@ -34,7 +34,11 @@ class Character(LivingMixin, HolderMixin, WearerMixin, SkillableMixin, ObjectPar
         return self.tags.get(*args, **kwargs, return_tagobj=True)
 
     def at_msg_receive(self, text=None, from_obj=None, **kwargs):
-        msg_obj = MsgObj.from_dict(kwargs.pop("msg_obj", None))
+        raw_msg_obj = kwargs.pop("msg_obj", None)
+        if raw_msg_obj:
+            msg_obj = MsgObj.from_dict(raw_msg_obj)
+        else:
+            msg_obj = None
 
         if msg_obj and msg_obj.is_visual():
             if self.is_dead():
@@ -49,10 +53,7 @@ class Character(LivingMixin, HolderMixin, WearerMixin, SkillableMixin, ObjectPar
     def is_too_dark(self):
         return self.location.get_light_level(looker=self) < self.light_threshold
 
-    # --- Perception / Look -------------------------------------------------
     def at_look(self, target, **kwargs):
-        """Gate visibility based on ambient light vs character threshold."""
-        # Check if we can see details in current light
         if self.is_too_dark():
             return "It's too dark to see anything."
         return super().at_look(target, **kwargs)

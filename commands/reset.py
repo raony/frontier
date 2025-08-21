@@ -22,17 +22,4 @@ class CmdResetChar(Command):
         if not caller:
             return
 
-        # Reset survival stats to 0
-        caller.hunger = 0
-        caller.thirst = 0
-        caller.tiredness = 0
-
-        # Clear threshold message trackers
-        if hasattr(caller, "ndb"):
-            caller.ndb.hunger_msg_level = 0
-            caller.ndb.thirst_msg_level = 0
-            caller.ndb.tiredness_msg_level = 0
-
-        # Use the living module functionality
-        message = caller.reset_and_revive()
-        caller.msg(message)
+        caller.msg(caller.reset_and_revive())

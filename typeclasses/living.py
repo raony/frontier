@@ -3,231 +3,53 @@
 from evennia import AttributeProperty
 from commands.default_cmdsets import AliveCmdSet
 from commands.dead_cmdset import DeadCmdSet
+from world.living.metabolism import MetabolismMixin
+from world.utils import null_func
 
 
-class LivingMixin:
+class LivingMixin(MetabolismMixin):
     """Mixin for managing living/dead state using additive tags."""
 
-    hunger = AttributeProperty(default=0.0)
-    thirst = AttributeProperty(default=0.0)
-    tiredness = AttributeProperty(default=0.0)
-    is_resting = AttributeProperty(default=False)
-    metabolism = AttributeProperty(default=1.0)
     light_threshold = AttributeProperty(default=20)
 
-    def is_living(self) -> bool:
-        """Check if character is alive using tags."""
-        return not self.tags.has("dead", category="living_state")
-
+    @property
     def is_dead(self) -> bool:
-        """Check if character is dead using tags."""
         return self.tags.has("dead", category="living_state")
 
     def at_object_creation(self):
-        """Ensure consistent initial living state."""
         super().at_object_creation()
         self.tags.add("living_being", category="living_state")
 
-    def clear_cmdset(self):
-        self.cmdset.remove(AliveCmdSet)
-
     def load_cmdset(self):
+        getattr(super(), "load_cmdset", null_func)()
+
         if self.cmdset.has(AliveCmdSet):
             return
 
         self.cmdset.add(AliveCmdSet)
 
     def die(self):
-        """Handle death of this entity."""
+        getattr(super(), "die", null_func)()
         self.location.msg_contents(
             "$You() collapse lifelessly.",
             from_obj=self,
         )
         self.tags.add("dead", category="living_state")
-        self.is_resting = False
-        self.stop_metabolism_script()
-        self.clear_cmdset()
+        self.cmdset.clear()
+        self.cmdset.remove_default()
         self.cmdset.add(DeadCmdSet)
 
-    def at_init(self):
-        """Called whenever the typeclass is cached from memory."""
-        super().at_init()
-        self.load_cmdset()
-        self.update_living_status()
-
-        self.ndb
-
     def revive(self):
-        """Revive this entity from death."""
+        getattr(super(), "revive", null_func)()
         self.tags.remove("dead", category="living_state")
-        self.is_resting = False
-        self.start_metabolism_script()
         self.load_cmdset()
-
-    def reset_survival_stats(self):
-        """Reset all survival stats to 0 and clear message levels."""
-        self.hunger = 0
-        self.thirst = 0
-        self.tiredness = 0
-        self.is_resting = False
-        self.ndb.hunger_msg_level = 0
-        self.ndb.thirst_msg_level = 0
-        self.ndb.tiredness_msg_level = 0
 
     def reset_and_revive(self):
         """Reset survival stats and revive if dead."""
         self.reset_survival_stats()
 
-        if self.is_dead():
+        if self.is_dead:
             self.revive()
             return "You have been revived and your needs are reset."
         else:
-            self.start_metabolism_script()
             return "Your needs are reset and you feel refreshed."
-
-    # Hunger/thirst/tiredness management helpers
-    def _get_level(self, stat_value: float) -> int:
-        """Return the level step for a given stat value."""
-        value = stat_value or 0
-        if value >= 60:
-            return 3
-        if value >= 30:
-            return 2
-        if value >= 7:
-            return 1
-        return 0
-
-    def _notify_stat_change(self, stat_name: str, level: int, messages: list) -> None:
-        """Send notification messages when stat levels change."""
-        last = getattr(self.ndb, f"{stat_name}_msg_level", None)
-        if level != last:
-            if 0 <= level < len(messages):
-                self.msg(messages[level])
-            setattr(self.ndb, f"{stat_name}_msg_level", level)
-
-    def _hunger_level(self) -> int:
-        """Return the current hunger level step."""
-        return self._get_level(self.hunger)
-
-    def _notify_hunger(self) -> None:
-        """Send hunger warning messages when levels change."""
-        level = self._hunger_level()
-        messages = ["", "You feel hungry.", "You're starving.", "You're gonna die."]
-        self._notify_stat_change("hunger", level, messages)
-
-    def _thirst_level(self) -> int:
-        """Return the current thirst level step."""
-        return self._get_level(self.thirst)
-
-    def _notify_thirst(self) -> None:
-        """Send thirst warning messages when levels change."""
-        level = self._thirst_level()
-        messages = ["", "You feel thirsty.", "You're starving for water.", "You're gonna die of thirst."]
-        self._notify_stat_change("thirst", level, messages)
-
-    def _tiredness_level(self) -> int:
-        """Return the current tiredness level step."""
-        return self._get_level(self.tiredness)
-
-    def _notify_tiredness(self) -> None:
-        """Send tiredness warning messages when levels change."""
-        level = self._tiredness_level()
-        messages = ["", "You feel tired.", "You are exhausted.", "You're about to collapse."]
-        self._notify_stat_change("tiredness", level, messages)
-
-    # Public-facing label helpers
-    def get_hunger_label(self) -> str:
-        """Return a user-facing hunger label without numbers."""
-        level = self._hunger_level()
-        return ["sated", "hungry", "starving", "starving to death"][level]
-
-    def get_thirst_label(self) -> str:
-        """Return a user-facing thirst label without numbers."""
-        level = self._thirst_level()
-        return ["quenched", "thirsty", "parched", "dying of thirst"][level]
-
-    def get_tiredness_label(self) -> str:
-        """Return a user-facing tiredness label without numbers."""
-        level = self._tiredness_level()
-        return ["rested", "tired", "exhausted", "about to collapse"][level]
-
-    def update_living_status(self) -> None:
-        """Check if this entity should die based on vital stats."""
-        if self.is_dead():
-            return
-        if any((getattr(self, stat, 0) or 0) >= 100 for stat in ["hunger", "thirst", "tiredness"]):
-            self.die()
-
-    # Metabolism API
-    def get_metabolism_interval(self) -> int:
-        """Return metabolism tick interval in seconds."""
-        try:
-            metabolism = float(getattr(self, "metabolism", 1.0) or 1.0)
-            # Base interval is 600 seconds, modified by metabolism rate
-            return max(10, int(600 / metabolism))
-        except Exception:
-            return 600
-
-    def start_metabolism_script(self) -> None:
-        """Start the metabolism script if not already running."""
-        existing = self.scripts.get("metabolism_script")
-        if existing:
-            script = existing[0]
-            if not script.is_active:
-                script.start()
-            return
-        script = self.scripts.add(
-            "typeclasses.scripts.MetabolismScript",
-            key="metabolism_script",
-        )
-        if script:
-            script.interval = self.get_metabolism_interval()
-            script.persistent = True
-
-    def stop_metabolism_script(self) -> None:
-        """Stop and remove the metabolism script."""
-        for script in self.scripts.get("metabolism_script"):
-            script.stop()
-            script.delete()
-
-    # Metabolism stat increase methods
-    def _increase_stat(self, stat_name: str, amount: float, notify_method) -> None:
-        """Increase a stat by amount, not going above 100."""
-        current_value = getattr(self, stat_name, 0) or 0
-        new_value = min(current_value + amount, 100)
-        setattr(self, stat_name, new_value)
-        notify_method()
-
-    def increase_hunger(self) -> None:
-        """Increase hunger by metabolism rate."""
-        self._increase_stat("hunger", self.metabolism, self._notify_hunger)
-
-    def increase_thirst(self) -> None:
-        """Increase thirst by metabolism rate."""
-        self._increase_stat("thirst", self.metabolism, self._notify_thirst)
-
-    def increase_tiredness(self, amount: float = None) -> None:
-        """Increase tiredness by amount or metabolism rate if not specified."""
-        if amount is None:
-            amount = self.metabolism
-        self._increase_stat("tiredness", amount, self._notify_tiredness)
-
-    def _decrease_stat(self, stat_name: str, amount: float, notify_method) -> None:
-        """Decrease a stat by amount, not going below zero."""
-        current_value = getattr(self, stat_name, 0) or 0
-        new_value = max(current_value - amount, 0)
-        setattr(self, stat_name, new_value)
-        notify_method()
-        self.update_living_status()
-
-    def decrease_hunger(self, amount: float = 1.0) -> None:
-        """Decrease hunger by amount, not going below zero."""
-        self._decrease_stat("hunger", amount, self._notify_hunger)
-
-    def decrease_thirst(self, amount: float = 1.0) -> None:
-        """Decrease thirst by amount, not going below zero."""
-        self._decrease_stat("thirst", amount, self._notify_thirst)
-
-    def decrease_tiredness(self, amount: float = 1.0) -> None:
-        """Decrease tiredness by amount, not going below zero."""
-        self._decrease_stat("tiredness", amount, self._notify_tiredness)
