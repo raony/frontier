@@ -13,16 +13,11 @@ class CmdStand(Command):
 
     def func(self):
         caller = self.caller
-        if not caller:
-            return
         if not getattr(caller, "is_resting", False):
             caller.msg("You are already standing.")
             return
-        caller.is_resting = False
-        caller.msg("You stand up.")
-        location = caller.location
-        if location:
-            location.msg_contents(
-                f"{caller.get_display_name(location)} gets back up.",
-                exclude=caller,
-            )
+        caller.stop_resting()
+        caller.location.msg_contents(
+            f"$You() $conj(stand) up.",
+            from_obj=caller
+        )
