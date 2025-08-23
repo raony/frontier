@@ -9,8 +9,8 @@ with a location in the game world (like Characters, Rooms, Exits).
 """
 
 from evennia.objects.objects import DefaultObject
-from typing import Self
-from .weight import WeightMixin
+from world.physical.weight import WeightMixin
+from world.living.food import FoodMixin
 
 
 class ObjectParent:
@@ -24,7 +24,7 @@ class ObjectParent:
 
     """
 
-    def quiet_search(self, *args, **kwargs) -> Self | None:
+    def quiet_search(self, *args, **kwargs):
         """Search for an object in the object's location.
 
         Args:
@@ -225,57 +225,8 @@ class Object(WeightMixin, ObjectParent, DefaultObject):
 
     """
 
-class LightSourceMixin:
-    """Mixin for objects that emit light.
-
-    Sets a default persistent `db.light_level` on creation. Objects can override
-    `light_level_default` to change brightness (0..100). Use together with
-    `Object` or other typeclasses.
-    """
-
-    light_level_default: int = 30
-
-    def at_object_creation(self):
-        try:
-            super().at_object_creation()  # type: ignore[misc]
-        except Exception:
-            pass
-        level = int(getattr(self, "light_level_default", 0) or 0)
-        level = max(0, min(level, 100))
-        self.db.light_level = level
-        self.db.is_lightsource = True
+    default_weight = 100
 
 
-    # --- Equipment helpers -------------------------------------------------
-    @property
-    def equipable_slot(self):
-        """Return the canonical slot this object can be equipped to, if any.
-
-        Items can define either `db.equipable` or `db.equipable_slot` as the slot
-        name (one of: head, body, legs, waist, hands, feet). This property returns
-        the normalized slot string or None if not equipable.
-        """
-        from .equipment import normalize_slot
-
-        # Support both attribute names
-        value = getattr(self.db, "equipable", None)
-        if not value:
-            value = getattr(self.db, "equipable_slot", None)
-        return normalize_slot(value)
-
-    def is_equipable(self) -> bool:
-        """True if this object can be equipped to a known slot."""
-        return self.equipable_slot is not None
-
-
-from .liquid import LiquidContainerMixin
-
-
-class WaterSource(LiquidContainerMixin, Object):
-    """An object representing a source of drinkable water."""
-
-    def at_object_creation(self):
-        super().at_object_creation()
-        self.db.is_water_source = True
-        self.db.liquid = "water"
-        self.locks.add("get:false()")
+class Food(FoodMixin, Object):
+    pass

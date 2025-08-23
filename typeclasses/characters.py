@@ -13,15 +13,27 @@ from typeclasses.objects import Object
 from typeclasses.container import is_container
 from world.living.people import Person
 from world.utils import null_func
+from world.living.commands import LivingBuilderCmdSet
 
 
 class Character(Person):
     """Represents the in-game character entity."""
 
+    def at_post_puppet(self, **kwargs):
+        if self.account.permissions.check("Builder"):
+            self.cmdset.add(LivingBuilderCmdSet)
+
+    def at_post_unpuppet(self, **kwargs):
+        self.cmdset.remove(LivingBuilderCmdSet)
+
     def load_cmdset(self):
         getattr(super(), "load_cmdset", null_func)()
         if not self.cmdset.has(CharacterCmdSet):
-            self.cmdset.add(CharacterCmdSet, persistent=True)
+            self.cmdset.add_default(CharacterCmdSet, persistent=True)
+
+    def clear_cmdset(self):
+        getattr(super(), "clear_cmdset", null_func)()
+        self.cmdset.remove_default()
 
     def quiet_search_item(self, key:str, **kwargs) -> Object | None:
         return self.quiet_search(key, **kwargs)

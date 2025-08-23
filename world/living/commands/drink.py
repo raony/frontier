@@ -1,4 +1,4 @@
-from evennia.commands.command import Command
+from commands.command import Command
 
 class CmdDrink(Command):
     """Drink from a nearby water source."""

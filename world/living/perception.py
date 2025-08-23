@@ -117,8 +117,9 @@ class PerceptionMixin:
 
 
 class LightManager:
-    def __init__(self, obj):
+    def __init__(self, obj, level=0):
         self.obj = obj
+        self.level = level
 
     def _load(self):
         self._light_level = self.obj.attributes.get("light_level", default=0, category="vision")

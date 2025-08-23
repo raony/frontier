@@ -8,9 +8,11 @@ Rooms are simple containers that has no location of their own.
 from evennia.objects.objects import DefaultRoom
 from evennia.contrib.base_systems import custom_gametime as gametime
 import evennia
+from evennia.utils.utils import lazy_property
 
 # Hex tile typeclass
 from .hextile import HexTile
+from world.living.perception import LightManager
 
 from .objects import ObjectParent
 
@@ -154,6 +156,10 @@ class ExternalRoom(Room):
     DAWN_END_HOUR: int = 7
     DUSK_START_HOUR: int = 18
     DUSK_END_HOUR: int = 20
+
+    @property
+    def light(self):
+        return LightManager(self, 100)
 
     def at_object_creation(self):
         super().at_object_creation()

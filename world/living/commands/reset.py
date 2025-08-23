@@ -1,7 +1,6 @@
 """Reset character survival stats and revive command."""
 
-from attr import has
-from .command import Command
+from commands.command import Command
 
 
 class CmdResetChar(Command):

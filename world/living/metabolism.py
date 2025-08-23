@@ -172,6 +172,9 @@ class MetabolismMixin:
         if any(handler.value >= 100 for handler in self.metabolism_handlers):
             self.die()
 
+    def eat(self, food, calories):
+        self.hunger.decrease(calories)
+
 class MetabolismScript(DefaultScript):
     """Regularly increase hunger, thirst and tiredness on a living object."""
 

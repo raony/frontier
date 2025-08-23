@@ -15,62 +15,12 @@ own cmdsets by inheriting from them or directly from `evennia.CmdSet`.
 """
 
 from evennia import default_cmds
-from .drink import CmdDrink
-from .eat import CmdEat
-from .liquid import CmdFill, CmdEmpty
-from .rest import CmdRest
-from .reset import CmdResetChar
-from .stand import CmdStand
-from .status import CmdStatus
 from .skills import CmdSkills, CmdCreateSkill, CmdSetSkill
-from .forage import CmdForage
 from .resources import CmdCreateResource
 from .time import CmdSetDateTime, CmdSetTime
-from .gametime import CmdTime
 from .external import CmdMakeExternal
-from .equip import CmdEquip
 from .hex import CmdSetHex, CmdWeather
-from .hold import CmdHold
-from .light import CmdDarkvision, CmdLight, CmdExtinguish
-from .kill import CmdKill, CmdRevive
-from .weight import CmdWeight, CmdSetWeight
-from .examine import CmdExamine
-from .store import CmdStore
-
-
-class AliveCmdSet(default_cmds.CharacterCmdSet):
-    """
-    Commands available only to living characters.
-    """
-
-    key = "AliveCharacter"
-
-    def at_cmdset_creation(self):
-        """
-        Populates the cmdset
-        """
-        super().at_cmdset_creation()
-        # Movement and interaction commands live here (implicitly via default parent)
-        self.add(CmdEat())
-        self.add(CmdFill())
-        self.add(CmdEmpty())
-        self.add(CmdDrink())
-        self.add(CmdRest())
-        self.add(CmdStand())
-        self.add(CmdStatus())
-        self.add(CmdSkills())
-        self.add(CmdForage())
-        # Override default inventory while alive to include equipped section
-        self.add(CmdEquip())
-        self.add(CmdLight())
-        self.add(CmdExtinguish())
-        self.add(CmdTime())
-        self.add(CmdWeight())
-        self.add(CmdExamine())
-        # Holding commands
-        self.add(CmdHold())
-        # Container commands
-        self.add(CmdStore())
+from .weight import CmdSetWeight
 
 
 class CharacterCmdSet(default_cmds.CharacterCmdSet):
@@ -81,7 +31,6 @@ class CharacterCmdSet(default_cmds.CharacterCmdSet):
     def at_cmdset_creation(self):
         super().at_cmdset_creation()
         # Admin maintenance command - available even when dead (locks restrict use)
-        self.add(CmdResetChar())
         self.add(CmdCreateSkill())
         self.add(CmdSetSkill())
         self.add(CmdCreateResource())
@@ -91,10 +40,8 @@ class CharacterCmdSet(default_cmds.CharacterCmdSet):
         # Builder utilities
         self.add(CmdSetHex())
         self.add(CmdWeather())
-        self.add(CmdDarkvision())
-        self.add(CmdKill())
-        self.add(CmdRevive())
         self.add(CmdSetWeight())
+        self.add(CmdSkills())
 
 
 class AccountCmdSet(default_cmds.AccountCmdSet):

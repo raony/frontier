@@ -40,16 +40,16 @@ class HoldableMixin:
         name = super().get_display_name(looker, **kwargs)
         if self.tags.has("held", category="holding"):
             name = f"{name} ({self.location.get_display_holding(self)})"
-        if self.total_weight > 0:
+        if self.weight.total > 0:
             name = f"{name} {self.get_display_weight(looker)}"
         return name
 
     def get_display_weight(self, looker, **kwargs):
         if not hasattr(looker, 'holding_strength'):
             return ''
-        if self.total_weight <= looker.holding_strength:
+        if self.weight.total <= looker.holding_strength:
             return '░'
-        elif self.total_weight <= looker.holding_strength * len(looker.held_items.slots):
+        elif self.weight.total <= looker.holding_strength * len(looker.held_items.slots):
             return '▒'
         else:
             return '█'
@@ -93,7 +93,7 @@ class HeldItemsHandler:
         return item.tags.has("holdable", category="holding")
 
     def is_too_heavy(self, item: Object, slots: list[str]) -> bool:
-        return item.total_weight > len(slots) * self.holder.holding_strength
+        return item.weight.total > len(slots) * self.holder.holding_strength
 
     def is_already_holding(self, item: Object, slots: list[str]) -> bool:
         return set(slots) == set(self.get_slots_for(item))
