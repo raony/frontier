@@ -175,6 +175,11 @@ class MetabolismMixin:
     def eat(self, food, calories):
         self.hunger.decrease(calories)
 
+    def drink(self, liquid):
+        hydration = liquid.weight.value / 50
+        liquid.delete()
+        self.thirst.decrease(hydration)
+
 class MetabolismScript(DefaultScript):
     """Regularly increase hunger, thirst and tiredness on a living object."""
 

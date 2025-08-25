@@ -31,6 +31,7 @@ class Water(Object):
         else:
             drained = self.copy(new_key=self.key, new_location=self.location)
             drained.weight.value = amount
+            self.weight.value -= amount
             return drained
 
     def mix(self, liquid):

@@ -1,8 +1,7 @@
 ---
-description: using telnet tool to test MUD commands and functionality
+description: when manually testing something
 alwaysApply: false
 ---
-
 When testing MUD commands and functionality, use the telnet tool to connect to the live game server and verify implementations work correctly.
 
 ## Setup Process
@@ -30,6 +29,13 @@ connect owner 123
 
 ## Testing Commands
 
+### CRITICAL: Reload Server After Code Changes
+**ALWAYS run `reload` command in-game after making code changes to ensure new code is loaded:**
+```
+reload
+```
+The server needs to be reloaded to pick up any Python code modifications.
+
 ### Available Commands at Login Screen
 - `help` - shows available commands
 - `connect <username> <password>` - login format
@@ -37,11 +43,21 @@ connect owner 123
 - `look` - re-show connection screen
 
 ### In-Game Testing Process
-1. **Check environment**: `look` to see current room and available objects
-2. **Check inventory**: `inventory` to see what items you have
-3. **Test command functionality**: Execute the command being tested
-4. **Test error conditions**: Try invalid arguments, missing objects, wrong types
-5. **Verify state changes**: Check inventory/environment after commands
+1. **Reload server**: `reload` after any code changes
+2. **Check environment**: `look` to see current room and available objects
+3. **Check inventory**: `inventory` to see what items you have
+4. **Test command functionality**: Execute the command being tested
+5. **Debug with examine**: `examine` or `ex` for detailed object inspection
+6. **Test error conditions**: Try invalid arguments, missing objects, wrong types
+7. **Verify state changes**: Check inventory/environment after commands
+
+### Debug Commands
+- `examine <object>` or `ex <object>` - Get detailed object information including:
+  - Object ID and typeclass
+  - Persistent attributes with categories and types
+  - Contents and location
+  - Locks and permissions
+- `ex #<id>` - Examine object by specific ID number
 
 ### Common Test Cases for Commands
 - **No arguments**: Test command with no parameters
@@ -52,14 +68,18 @@ connect owner 123
 
 ## Example Testing Session
 ```
-look                    # Check environment
-inventory              # Check starting items
-eat apple              # Test successful usage
-eat apple              # Test multiple bites
-eat banana             # Test non-existent item
-eat cantil             # Test non-food item
-eat                    # Test no arguments
-eat apple              # Test fully consumed item
+reload                 # ALWAYS reload after code changes
+look                   # Check environment
+inventory             # Check starting items
+ex cantil             # Debug container details
+ex #55                # Debug specific object by ID
+drink cantil          # Test successful usage
+ex cantil             # Verify state changes
+drink cantil          # Test multiple uses
+drink banana          # Test non-existent item
+drink apple           # Test non-liquid item
+drink                 # Test no arguments
+drink cantil          # Test empty container
 ```
 
 ## Telnet Tool Commands
