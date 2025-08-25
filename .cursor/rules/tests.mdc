@@ -2,6 +2,17 @@
 alwaysApply: true
 ---
 
+When working with unit tests, test files, or any testing-related activities, ALWAYS read and follow the comprehensive testing guidelines in `.cursor/memory/evennia-testing-how-to.md`.
+
+This memory file contains essential information for:
+- Available test helper objects from `EvenniaTest` (char1, char2, room1, obj1, etc.)
+- Proper test organization patterns (tests/ subpackages close to code)
+- Test base classes (`EvenniaTest`, `EvenniaCommandTest`, `EvenniaTestCase`)
+- Command testing with `.call()` method
+- Test writing patterns and best practices
+- Directory structure examples
+- Common assert methods and testing strategies
+
 ### Running Tests
 - **Primary command**: `evennia test --settings settings.py .` from game directory
 - **Environment setup**: Always activate virtualenv first: `source .venv/bin/activate`
@@ -11,3 +22,5 @@ alwaysApply: true
 - **Specific test method**: `evennia test --settings settings.py tests.test_filename.TestClassName.test_method_name`
 
 NEVER RUN TESTS with -v because this only shows the version of the framework
+
+Reference the testing memory file before writing any new tests or modifying existing test classes to ensure consistency with established patterns and make full use of Evennia's testing helpers.
