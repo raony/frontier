@@ -1,0 +1,25 @@
+---
+alwaysApply: true
+---
+Do NOT add inline comments or section comments to code unless explicitly requested by the user.
+
+Avoid adding comments like:
+- `# Argument validation`
+- `# Object search`
+- `# Perform action`
+- `# Check if...`
+- `# Get the...`
+
+The code should be self-documenting through:
+- Clear variable names
+- Descriptive function names
+- Logical code structure
+- Good docstrings
+
+Only add comments when:
+- The user specifically asks for comments
+- Complex business logic needs explanation
+- There are non-obvious implementation details
+- Documenting why something is done a certain way (not what is being done)
+
+Keep the code clean and readable without unnecessary commentary.
