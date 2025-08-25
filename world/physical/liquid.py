@@ -5,6 +5,11 @@ class Water(Object):
     type = AttributeProperty(default="water", category="physical")
     potable = AttributeProperty(default=True, category="physical")
 
+    def at_object_creation(self):
+        super().at_object_creation()
+        # Make water ungettable - it can only be interacted with via containers
+        self.locks.add("get:false()")
+
     def get_display_name(self, looker, **kwargs):
         if kwargs.get("command_narration"):
             return super().get_display_name(looker, **kwargs)
