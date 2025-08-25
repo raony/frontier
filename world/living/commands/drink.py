@@ -1,6 +1,7 @@
 from commands.command import Command
 from world.physical.liquid import LiquidContainer, Water
 from world.utils import DisplayNameWrapper
+from world.living.perception import MsgObj
 
 
 class CmdDrink(Command):
@@ -43,8 +44,10 @@ class CmdDrink(Command):
 
         caller.drink(liquid.drain(hydration_amount))
 
+        msg_content = "$You() $conj(drink) from $obj(container)."
         caller.location.msg_contents(
-            "$You() $conj(drink) from $obj(container).",
+            msg_content,
             from_obj=caller,
             mapping={"container": DisplayNameWrapper(obj, command_narration=True)},
+            msg_obj=MsgObj(visual=msg_content, sound="You hear drinking sounds.").to_dict()
         )

@@ -2,6 +2,7 @@ from commands.command import Command
 from world.physical.liquid import LiquidContainer, LiquidContainerMixin
 from typeclasses.rooms import Room
 from world.utils import DisplayNameWrapper
+from world.living.perception import MsgObj
 
 class CmdEmpty(Command):
     """Empty a liquid container.
@@ -42,13 +43,15 @@ class CmdEmpty(Command):
         if dest.is_full:
             return caller.msg(f"{self.get_display_name(dest)} is full.")
 
+        msg_content = f"$You() empty the $obj(source) into the {'floor' if dest.is_typeclass(Room, exact=False) else '$obj(dest)'}"
         caller.location.msg_contents(
-            f"$You() empty the $obj(source) into the {'floor' if dest.is_typeclass(Room, exact=False) else '$obj(dest)'}",
+            msg_content,
             from_obj=caller,
             mapping={
                 "source": DisplayNameWrapper(source, command_narration=True),
                 "dest": DisplayNameWrapper(dest, command_narration=True),
-            }
+            },
+            msg_obj=MsgObj(visual=msg_content, sound="You hear liquid splashing.").to_dict()
         )
 
         dest.fill(source.liquid)

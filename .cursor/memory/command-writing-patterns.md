@@ -66,11 +66,12 @@ if not arg1_name:
 
 ### Standard Object Search Pattern
 ```python
-# Search for objects using caller.search_item()
+# ALWAYS use caller.search_item() - this is the established pattern
 obj = caller.search_item(obj_name)
 if not obj:
     return caller.msg(f"You don't see {obj_name}.")
 
+# NEVER use caller.search() with candidates - use search_item instead
 # For optional objects (like destination)
 if dest_name:
     dest = caller.search_item(dest_name)
@@ -353,7 +354,7 @@ def test_command_error_conditions(self):
 
 1. **Always get `caller = self.caller` first**
 2. **Use `self.lhs` and `self.rhs` for `=` syntax parsing**
-3. **Use `caller.search_item()` for object search**
+3. **ALWAYS use `caller.search_item()` for object search - NEVER use `caller.search()` with candidates**
 4. **Use `self.get_display_name(obj)` for object names in messages**
 5. **Use `DisplayNameWrapper` with `command_narration=True` in `msg_contents`**
 6. **Use early returns for error conditions**

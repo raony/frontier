@@ -1,4 +1,5 @@
 from commands.command import Command
+from world.living.perception import MsgObj
 
 
 class CmdStand(Command):
@@ -17,7 +18,9 @@ class CmdStand(Command):
             caller.msg("You are already standing.")
             return
         caller.stop_resting()
+        msg_content = "$You() $conj(stand) up."
         caller.location.msg_contents(
-            f"$You() $conj(stand) up.",
-            from_obj=caller
+            msg_content,
+            from_obj=caller,
+            msg_obj=MsgObj(visual=msg_content, sound="You hear something move.").to_dict()
         )
