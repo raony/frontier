@@ -21,7 +21,7 @@ from .time import CmdSetDateTime, CmdSetTime
 from .external import CmdMakeExternal
 from .hex import CmdSetHex, CmdWeather
 from .weight import CmdSetWeight
-from world.physical.commands import CmdFill, CmdEmpty
+from world.physical.commands import CmdFill, CmdEmpty, CmdStore
 
 
 class CharacterCmdSet(default_cmds.CharacterCmdSet):
@@ -45,6 +45,7 @@ class CharacterCmdSet(default_cmds.CharacterCmdSet):
         self.add(CmdSkills())
         self.add(CmdFill())
         self.add(CmdEmpty())
+        self.add(CmdStore())
 
 
 class AccountCmdSet(default_cmds.AccountCmdSet):

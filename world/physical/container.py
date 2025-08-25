@@ -30,7 +30,7 @@ class ContainerMixin:
 
     def is_too_heavy(self, added_item) -> bool:
         """Return True if the container is too heavy."""
-        return self.total_weight + added_item.weight > self.container_weight_limit
+        return self.weight.total + added_item.weight.total > self.container_weight_limit
 
     def can_hold_item(self, item) -> bool:
         """Check if this container can hold the given item."""
