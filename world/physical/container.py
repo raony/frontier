@@ -1,7 +1,7 @@
 """Container mixin for objects that can hold other objects."""
 
 from evennia import AttributeProperty
-from .objects import Object
+from typeclasses.objects import Object
 
 def is_container(obj) -> bool:
     """Return True if the object is a container."""

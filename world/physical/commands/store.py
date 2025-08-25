@@ -4,9 +4,10 @@ This command allows characters to store items in containers using the
 ContainerMixin functionality.
 """
 
-from .command import Command
-from typeclasses.container import is_container
+from commands.command import Command
+from world.physical.container import is_container
 from world.living.perception import MsgObj
+from world.utils import DisplayNameWrapper
 
 
 class CmdStore(Command):
@@ -38,36 +39,36 @@ class CmdStore(Command):
             caller.msg("Store in what?")
             return
 
-        item = caller.quiet_search(item_key)
+        item = caller.search_item(item_key)
         if not item:
             caller.msg(f"You don't have {item_key}.")
             return
 
-        container = caller.quiet_search(container_key)
+        container = caller.search_item(container_key)
         if not container:
             caller.msg(f"You don't see {container_key}.")
             return
 
         if not is_container(container):
-            return caller.msg(f"{container.get_display_name(caller)} is not a container.")
+            return caller.msg(f"{self.get_display_name(container)} is not a container.")
 
         if container.location != caller.location and container.location != caller:
-            return caller.msg(f"You can't reach {container.get_display_name(caller)}.")
+            return caller.msg(f"You can't reach {self.get_display_name(container)}.")
 
         if not container.can_hold_item(item):
             if container.is_container_locked():
-                return caller.msg(f"{container.get_display_name(caller)} is locked.")
+                return caller.msg(f"{self.get_display_name(container)} is locked.")
 
             if len(container.contents) >= container.get_container_capacity():
-                return caller.msg(f"{container.get_display_name(caller)} is full.")
+                return caller.msg(f"{self.get_display_name(container)} is full.")
 
             if hasattr(item, 'weight') and hasattr(container, 'get_container_weight_limit'):
                 current_weight = sum(obj.weight for obj in container.contents if hasattr(obj, 'weight'))
                 if current_weight + item.weight > container.get_container_weight_limit():
-                    caller.msg(f"{container.get_display_name(caller)} is too heavy to hold {item.get_display_name(caller)}.")
+                    caller.msg(f"{self.get_display_name(container)} is too heavy to hold {self.get_display_name(item)}.")
                     return
 
-            caller.msg(f"You can't store {item.get_display_name(caller)} in {container.get_display_name(caller)}.")
+            caller.msg(f"You can't store {self.get_display_name(item)} in {self.get_display_name(container)}.")
             return
 
         item.move_to(container)
@@ -75,6 +76,9 @@ class CmdStore(Command):
         caller.location.msg_contents(
             msg_content,
             from_obj=caller,
-            mapping={"obj": item, "container": container},
+            mapping={
+                "obj": DisplayNameWrapper(item, command_narration=True),
+                "container": DisplayNameWrapper(container, command_narration=True),
+            },
             msg_obj=MsgObj(visual=msg_content, sound="You hear something move.").to_dict()
         )

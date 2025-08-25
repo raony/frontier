@@ -323,6 +323,32 @@ def test_command_error_conditions(self):
     # Assert error message shown
 ```
 
+## When Applying Standards to Existing Commands
+
+### **What to Change (Architecture)**
+1. **Object Search Method**: `caller.quiet_search()` → `caller.search_item()`
+2. **Display Names**: `obj.get_display_name(caller)` → `self.get_display_name(obj)`
+3. **Message Mapping**: Add `DisplayNameWrapper(obj, command_narration=True)` to mapping
+4. **Import Statements**: Add `from world.utils import DisplayNameWrapper`
+
+### **What NOT to Change (Preserve Working Logic)**
+1. **Error Messages**: Keep existing error message text exactly as written
+2. **Unique Syntax**: Preserve special command patterns (e.g., switch-based syntax)
+3. **Specialized Systems**: Keep MsgObj, perception features, sound effects
+4. **Validation Logic**: Don't change working container/liquid/game mechanics
+5. **Command Structure**: Preserve unique argument parsing if it works
+
+### **Understanding Specialized Systems**
+- **MsgObj**: Provides multi-sensory feedback (visual + sound) for immersion
+- **Perception System**: Some commands use sophisticated sensory feedback
+- **Container System**: Has complex validation that should be preserved
+- **Liquid System**: Uses drain/fill mechanics that work correctly
+
+### **Architectural vs. Content Changes**
+- **Architectural**: How objects are searched, displayed, and mapped
+- **Content**: What messages say, game logic, validation rules
+- **Rule**: Change architecture, preserve content that works
+
 ## Key Rules Summary
 
 1. **Always get `caller = self.caller` first**
@@ -333,7 +359,7 @@ def test_command_error_conditions(self):
 6. **Use early returns for error conditions**
 7. **Always validate arguments, objects, and states before action**
 8. **Use `caller.location.msg_contents()` for broadcasting actions**
-9. **Follow the established error message patterns**
-10. **Include comprehensive docstrings with usage examples**
+9. **PRESERVE working error messages and game logic**
+10. **PRESERVE specialized systems like MsgObj and perception features**
 
-These patterns ensure consistency, readability, and proper integration with the Evennia framework and the Frontier game's display and messaging systems.
+These patterns ensure consistency, readability, and proper integration with the Evennia framework and the Frontier game's display and messaging systems while preserving working functionality.
