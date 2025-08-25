@@ -21,10 +21,10 @@ class WeightHandler:
         return self.value + sum(item.weight.total for item in self.obj.contents)
 
     def _load(self):
-        self._weight = self.obj.attributes.get("db_weight", default=0, category="physical")
+        self._weight = self.obj.attributes.get("weight", default=0, category="physical")
 
     def _save(self):
-        self.obj.attributes.add("db_weight", self._weight, category="physical")
+        self.obj.attributes.add("weight", self._weight, category="physical")
         self._load()
 
     def decrease(self, proportion):

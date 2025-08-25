@@ -19,11 +19,11 @@ from world.living.commands import LivingBuilderCmdSet
 class Character(Person):
     """Represents the in-game character entity."""
 
-    def at_post_puppet(self, **kwargs):
+    def at_post_puppet(self, *args, **kwargs):
         if self.account.permissions.check("Builder"):
             self.cmdset.add(LivingBuilderCmdSet)
 
-    def at_post_unpuppet(self, **kwargs):
+    def at_post_unpuppet(self, *args, **kwargs):
         self.cmdset.remove(LivingBuilderCmdSet)
 
     def load_cmdset(self):

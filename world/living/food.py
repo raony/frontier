@@ -9,9 +9,15 @@ class FoodHandler:
         self._load()
 
     def _load(self):
-        self._calories = self.obj.attributes.get("db_calories", default=10, category="food")
-        self._total_calories = self.obj.attributes.get("db_total_calories", default=10, category="food")
-        self._waste_proportion = self.obj.attributes.get("db_waste_proportion", default=0.1, category="food")
+        self._calories = self.obj.attributes.get("calories", default=10, category="food")
+        self._total_calories = self.obj.attributes.get("total_calories", default=10, category="food")
+        self._waste_proportion = self.obj.attributes.get("waste_proportion", default=0.1, category="food")
+
+    def _save(self, attr=None):
+        attrs = ["calories", "total_calories", "waste_proportion"] if attr is None else [attr]
+        for attr in attrs:
+            self.obj.attributes.add(f"{attr}", getattr(self, attr), category="food")
+        self._load()
 
     @property
     def calories(self):
@@ -20,7 +26,7 @@ class FoodHandler:
     @calories.setter
     def calories(self, value):
         self._calories = value
-        self.obj.attributes.add("db_calories", self.calories, category="food")
+        self._save("calories")
 
     @property
     def total_calories(self):
@@ -29,7 +35,7 @@ class FoodHandler:
     @total_calories.setter
     def total_calories(self, value):
         self._total_calories = value
-        self.obj.attributes.add("db_total_calories", self.total_calories, category="food")
+        self._save("total_calories")
 
     @property
     def waste_proportion(self):
@@ -38,7 +44,7 @@ class FoodHandler:
     @waste_proportion.setter
     def waste_proportion(self, value):
         self._waste_proportion = value
-        self.obj.attributes.add("db_waste_proportion", self.waste_proportion, category="food")
+        self._save("waste_proportion")
 
     @property
     def eaten_percentage(self):
@@ -54,20 +60,21 @@ class FoodHandler:
             weight_eaten = (1 - self.waste_proportion) * bite_size
             eater.eat(self, calories=calories)
             self.calories -= calories
-            self.obj.weight.decrease(weight_eaten)
+            if hasattr(self.obj, "weight"):
+                self.obj.weight.decrease(weight_eaten)
             self.waste_proportion = self.waste_proportion/(1 - weight_eaten)
             return calories
         return 0
+
+    def reset(self):
+        self.calories = self.total_calories
+        self.waste_proportion = 0.1
 
 
 class FoodMixin:
     @lazy_property
     def food(self) -> FoodHandler:
         return FoodHandler(self)
-
-    def reset_food(self):
-        self.food.calories = self.food.total_calories
-        self.weight.value = self.default_weight
 
     def get_display_name(self, looker):
         name = super().get_display_name(looker)
