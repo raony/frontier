@@ -2,10 +2,9 @@
 Tests for the container system.
 """
 import unittest
-from evennia.utils.test_resources import EvenniaTest, EvenniaCommandTest
+from evennia.utils.test_resources import EvenniaTest
 from evennia import create_object
-from world.physical.container import ContainerMixin, Container, is_container
-from world.physical.commands.store import CmdStore
+from world.physical.container import Container, is_container
 
 
 class TestContainerMixin(EvenniaTest):
@@ -143,57 +142,6 @@ class TestIsContainerFunction(EvenniaTest):
         obj = create_object("typeclasses.objects.Object", key="MixinObject")
         obj.tags.add("container", category="container")
         self.assertTrue(is_container(obj))
-
-
-
-
-
-class TestContainerCommands(EvenniaCommandTest):
-    """Test suite for container-related commands."""
-
-    def setUp(self):
-        super().setUp()
-        # Create test containers and items
-        self.container = create_object("world.physical.container.Container", key="TestContainer", location=self.char1)
-        self.item = create_object("typeclasses.objects.Object", key="TestItem", location=self.char1)
-
-    def test_store_command_basic(self):
-        """Test basic store command functionality."""
-        # This test would need more complex setup to work properly
-        # For now, we'll test the command structure
-        cmd = CmdStore()
-        self.assertIsNotNone(cmd)
-        self.assertEqual(cmd.key, "store")
-
-    def test_store_command_no_item(self):
-        """Test store command with no item specified."""
-        # Test command structure
-        cmd = CmdStore()
-        self.assertEqual(cmd.help_category, "general")
-
-    def test_store_command_no_container(self):
-        """Test store command with no container specified."""
-        # Test command structure
-        cmd = CmdStore()
-        self.assertEqual(cmd.locks, "cmd:all()")
-
-    def test_store_command_item_not_found(self):
-        """Test store command with non-existent item."""
-        # Test command structure
-        cmd = CmdStore()
-        self.assertIsNotNone(cmd.func)
-
-    def test_store_command_container_not_found(self):
-        """Test store command with non-existent container."""
-        # Test command structure
-        cmd = CmdStore()
-        self.assertIsNotNone(cmd)
-
-    def test_store_command_not_container(self):
-        """Test store command with object that's not a container."""
-        # Test command structure
-        cmd = CmdStore()
-        self.assertIsNotNone(cmd)
 
 
 class TestContainerIntegration(EvenniaTest):

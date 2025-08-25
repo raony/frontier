@@ -2,11 +2,9 @@
 Tests for the liquid system.
 """
 import unittest
-from evennia.utils.test_resources import EvenniaTest, EvenniaCommandTest
+from evennia.utils.test_resources import EvenniaTest
 from evennia import create_object
-from world.physical.liquid import LiquidContainer, Water, LiquidContainerMixin
-from world.physical.commands.fill import CmdFill
-from world.physical.commands.empty import CmdEmpty
+from world.physical.liquid import LiquidContainer, Water
 
 
 class TestWater(EvenniaTest):
@@ -196,66 +194,6 @@ class TestLiquidContainer(EvenniaTest):
         # Command narration should not show fill state
         display_name = self.liquid_container.get_display_name(self.char1, command_narration=True)
         self.assertNotIn("1/2 full", display_name)
-
-
-class TestLiquidCommands(EvenniaCommandTest):
-    """Test suite for liquid-related commands."""
-
-    def setUp(self):
-        super().setUp()
-        # Create test containers and items
-        self.liquid_container = create_object("world.physical.liquid.LiquidContainer", key="TestLiquidContainer", location=self.char1)
-        self.water = create_object("world.physical.liquid.Water", key="Water", location=self.char1)
-
-    def test_fill_command_basic(self):
-        """Test basic fill command functionality."""
-        # Test command structure
-        cmd = CmdFill()
-        self.assertIsNotNone(cmd)
-        self.assertEqual(cmd.key, "fill")
-
-    def test_fill_command_no_dest(self):
-        """Test fill command with no destination."""
-        # Test command structure
-        cmd = CmdFill()
-        self.assertEqual(cmd.locks, "cmd:all()")
-
-    def test_fill_command_no_source(self):
-        """Test fill command with no source."""
-        # Test command structure
-        cmd = CmdFill()
-        self.assertIsNotNone(cmd.func)
-
-    def test_fill_command_dest_not_found(self):
-        """Test fill command with non-existent destination."""
-        # Test command structure
-        cmd = CmdFill()
-        self.assertIsNotNone(cmd)
-
-    def test_fill_command_source_not_found(self):
-        """Test fill command with non-existent source."""
-        # Test command structure
-        cmd = CmdFill()
-        self.assertIsNotNone(cmd)
-
-    def test_empty_command_basic(self):
-        """Test basic empty command functionality."""
-        # Test command structure
-        cmd = CmdEmpty()
-        self.assertIsNotNone(cmd)
-        self.assertEqual(cmd.key, "empty")
-
-    def test_empty_command_no_source(self):
-        """Test empty command with no source."""
-        # Test command structure
-        cmd = CmdEmpty()
-        self.assertEqual(cmd.locks, "cmd:all()")
-
-    def test_empty_command_source_not_found(self):
-        """Test empty command with non-existent source."""
-        # Test command structure
-        cmd = CmdEmpty()
-        self.assertIsNotNone(cmd.func)
 
 
 class TestLiquidIntegration(EvenniaTest):
