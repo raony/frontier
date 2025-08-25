@@ -1,0 +1,86 @@
+---
+description: using telnet tool to test MUD commands and functionality
+alwaysApply: false
+---
+
+When testing MUD commands and functionality, use the telnet tool to connect to the live game server and verify implementations work correctly.
+
+## Setup Process
+
+1. **Set LLM Identity** (required before connecting):
+```
+mcp_telnet_set_llm_identity:
+- name: "Claude"
+- provider: "Anthropic"
+- version: "3.5 Sonnet"
+- capabilities: ["code_analysis", "game_testing", "command_execution"]
+```
+
+2. **Connect to MUD Server**:
+```
+mcp_telnet_connect_telnet:
+- host: "localhost"
+- port: 4000
+```
+
+3. **Login as Owner**:
+```
+connect owner 123
+```
+
+## Testing Commands
+
+### Available Commands at Login Screen
+- `help` - shows available commands
+- `connect <username> <password>` - login format
+- `create <username> <password>` - create new account
+- `look` - re-show connection screen
+
+### In-Game Testing Process
+1. **Check environment**: `look` to see current room and available objects
+2. **Check inventory**: `inventory` to see what items you have
+3. **Test command functionality**: Execute the command being tested
+4. **Test error conditions**: Try invalid arguments, missing objects, wrong types
+5. **Verify state changes**: Check inventory/environment after commands
+
+### Common Test Cases for Commands
+- **No arguments**: Test command with no parameters
+- **Invalid object**: Test with non-existent object names
+- **Wrong object type**: Test with objects that don't support the action
+- **State validation**: Test with objects in invalid states (empty, full, etc.)
+- **Multiple uses**: Test repeated usage to verify state tracking
+
+## Example Testing Session
+```
+look                    # Check environment
+inventory              # Check starting items
+eat apple              # Test successful usage
+eat apple              # Test multiple bites
+eat banana             # Test non-existent item
+eat cantil             # Test non-food item
+eat                    # Test no arguments
+eat apple              # Test fully consumed item
+```
+
+## Telnet Tool Commands
+- `mcp_telnet_send_command` - Send commands to the MUD
+- `mcp_telnet_get_buffer` - Get current response buffer
+- `mcp_telnet_disconnect_telnet` - Disconnect from server
+- `mcp_telnet_connection_status` - Check connection status
+
+## What to Verify
+- ✅ Command executes without errors
+- ✅ Error messages match expected patterns
+- ✅ Object display names appear correctly
+- ✅ Broadcast messages work properly (visible to room)
+- ✅ State changes persist correctly
+- ✅ Edge cases handled gracefully
+
+## Benefits of Live Testing
+- Verifies DisplayNameWrapper works correctly
+- Confirms msg_contents broadcasting functions
+- Tests actual game object interaction
+- Validates error handling in real environment
+- Ensures command integration with live game state
+
+Always test commands in the live environment after implementation to catch issues that unit tests might miss.
