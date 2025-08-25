@@ -10,7 +10,7 @@ creation commands.
 
 from commands.default_cmdsets import CharacterCmdSet
 from typeclasses.objects import Object
-from typeclasses.container import is_container
+from world.physical.container import is_container
 from world.living.people import Person
 from world.utils import null_func
 from world.living.commands import LivingBuilderCmdSet

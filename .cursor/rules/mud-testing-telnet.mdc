@@ -96,10 +96,9 @@ drink cantil          # Test empty container
 - ✅ Edge cases handled gracefully
 
 ## Testing Limitations
-- **Multi-character testing**: Avoid testing how other characters see messages since this requires multiple simultaneous connections
-- **Broadcast message testing**: Focus on testing that commands execute successfully rather than verifying room message reception
-- **MsgObj sound effects**: Cannot easily test auditory components without multiple players
-- **Single-connection focus**: Test from one character's perspective only
+- **Multi-character testing**: Requires multiple simultaneous connections - possible but complex
+- **Single-connection focus**: Primary testing should be from one character's perspective
+- **MsgObj sound effects**: Can be tested with multi-character setup when available
 
 ## Benefits of Live Testing
 - Verifies DisplayNameWrapper works correctly
@@ -114,5 +113,12 @@ drink cantil          # Test empty container
 - **Object manipulation**: Verify items move correctly, containers work, attributes persist
 - **System integration**: Ensure new architecture works with existing game systems
 - **Error validation**: Test all error conditions thoroughly
+
+### Multi-Character Testing (When Available)
+When testing with multiple characters (e.g., for `MsgObj` sound feedback):
+- One character performs actions while another observes
+- Ideal for testing: sound effects, visual message distribution, perception systems
+- Successfully tested: `rest`, `stand`, `drink`, `store`, `fill`, `empty` commands with appropriate sound feedback
+- Testing in dark rooms (like Limbo) helps isolate auditory feedback
 
 Always test commands in the live environment after implementation to catch issues that unit tests might miss, but focus on single-character testing scenarios.
