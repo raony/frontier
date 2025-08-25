@@ -6,6 +6,8 @@ Commands describe the input the account can do to the game.
 """
 
 from evennia.commands.default.muxcommand import MuxCommand as BaseCommand
+from world.living.perception import MsgObj
+from world.utils import DisplayNameWrapper
 
 # from evennia import default_cmds
 
@@ -33,6 +35,34 @@ class Command(BaseCommand):
 
     def get_display_name(self, obj):
         return obj.get_display_name(self.caller, command_narration=True)
+
+    def send_room_message(self, msg_content, mapping=None, sound=None):
+        """
+        Send a message to everyone in the caller's location with optional sound feedback.
+
+        Args:
+            msg_content (str): The visual message content
+            mapping (dict, optional): Mapping for message substitutions - objects will be auto-wrapped with DisplayNameWrapper
+            sound (str, optional): Sound effect for the message
+        """
+        kwargs = {
+            "from_obj": self.caller,
+        }
+
+        if mapping:
+            # Auto-wrap objects in DisplayNameWrapper for command narration
+            wrapped_mapping = {}
+            for key, obj in mapping.items():
+                if hasattr(obj, 'get_display_name'):
+                    wrapped_mapping[key] = DisplayNameWrapper(obj, command_narration=True)
+                else:
+                    wrapped_mapping[key] = obj
+            kwargs["mapping"] = wrapped_mapping
+
+        if sound:
+            kwargs["msg_obj"] = MsgObj(visual=msg_content, sound=sound).to_dict()
+
+        self.caller.location.msg_contents(msg_content, **kwargs)
 
 # -------------------------------------------------------------
 #

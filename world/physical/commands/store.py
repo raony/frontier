@@ -6,8 +6,6 @@ ContainerMixin functionality.
 
 from commands.command import Command
 from world.physical.container import is_container
-from world.living.perception import MsgObj
-from world.utils import DisplayNameWrapper
 
 
 class CmdStore(Command):
@@ -72,13 +70,8 @@ class CmdStore(Command):
             return
 
         item.move_to(container)
-        msg_content = "$You() $conj(store) $you(obj) in $you(container)"
-        caller.location.msg_contents(
-            msg_content,
-            from_obj=caller,
-            mapping={
-                "obj": DisplayNameWrapper(item, command_narration=True),
-                "container": DisplayNameWrapper(container, command_narration=True),
-            },
-            msg_obj=MsgObj(visual=msg_content, sound="You hear something move.").to_dict()
+        self.send_room_message(
+            "$You() $conj(store) $you(obj) in $you(container)",
+            mapping={"obj": item, "container": container},
+            sound="You hear something move."
         )

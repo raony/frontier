@@ -1,8 +1,6 @@
 from commands.command import Command
 from world.physical.liquid import LiquidContainer, LiquidContainerMixin
 from typeclasses.rooms import Room
-from world.utils import DisplayNameWrapper
-from world.living.perception import MsgObj
 
 class CmdEmpty(Command):
     """Empty a liquid container.
@@ -47,14 +45,13 @@ class CmdEmpty(Command):
         sound_effect = "You hear liquid splashing." if is_room_dest else "You hear liquid pouring."
         msg_content = f"$You() empty the $obj(source) into the {'floor' if is_room_dest else '$obj(dest)'}"
 
-        caller.location.msg_contents(
+        self.send_room_message(
             msg_content,
-            from_obj=caller,
             mapping={
-                "source": DisplayNameWrapper(source, command_narration=True),
-                "dest": DisplayNameWrapper(dest, command_narration=True),
+                "source": source,
+                "dest": dest,
             },
-            msg_obj=MsgObj(visual=msg_content, sound=sound_effect).to_dict()
+            sound=sound_effect
         )
 
         dest.fill(source.liquid)

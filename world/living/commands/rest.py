@@ -1,5 +1,4 @@
 from commands.command import Command
-from world.living.perception import MsgObj
 
 
 class CmdRest(Command):
@@ -17,9 +16,7 @@ class CmdRest(Command):
             caller.msg("You are already resting. Use 'stand' to get up.")
             return
         caller.start_resting()
-        msg_content = "$You() $conj(lie) down to rest."
-        caller.location.msg_contents(
-            msg_content,
-            from_obj=caller,
-            msg_obj=MsgObj(visual=msg_content, sound="You hear something move.").to_dict()
+        self.send_room_message(
+            "$You() $conj(lie) down to rest.",
+            sound="You hear something move."
         )

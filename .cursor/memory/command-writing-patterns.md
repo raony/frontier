@@ -136,7 +136,34 @@ caller.location.msg_contents(
 
 ## Message Broadcasting with msg_contents
 
-### Standard Broadcasting Pattern
+### send_room_message Method (Preferred)
+**Use `self.send_room_message()` for standardized room messages with sound feedback**
+
+Objects in mapping are automatically wrapped with `DisplayNameWrapper`:
+
+```python
+# Standard pattern with sound (objects auto-wrapped)
+self.send_room_message(
+    "$You() $conj(eat) $obj(item).",
+    mapping={"item": item},
+    sound="You hear eating sounds."
+)
+
+# Multiple objects (auto-wrapped)
+self.send_room_message(
+    "$You() $conj(fill) $obj(dest) from $obj(source).",
+    mapping={"dest": dest, "source": source},
+    sound="You hear liquid pouring."
+)
+
+# Without sound
+self.send_room_message(
+    "$You() perform action on $obj(target).",
+    mapping={"target": target}
+)
+```
+
+### Standard Broadcasting Pattern (Manual)
 ```python
 # Basic pattern for action messages
 caller.location.msg_contents(
@@ -356,10 +383,10 @@ def test_command_error_conditions(self):
 2. **Use `self.lhs` and `self.rhs` for `=` syntax parsing**
 3. **ALWAYS use `caller.search_item()` for object search - NEVER use `caller.search()` with candidates**
 4. **Use `self.get_display_name(obj)` for object names in messages**
-5. **Use `DisplayNameWrapper` with `command_narration=True` in `msg_contents`**
+5. **Use `self.send_room_message()` with simple object mapping (auto-wrapped)**
 6. **Use early returns for error conditions**
 7. **Always validate arguments, objects, and states before action**
-8. **Use `caller.location.msg_contents()` for broadcasting actions**
+8. **Use `self.send_room_message()` for standardized message broadcasting with sound**
 9. **PRESERVE working error messages and game logic**
 10. **PRESERVE specialized systems like MsgObj and perception features**
 

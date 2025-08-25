@@ -1,7 +1,5 @@
 from commands.command import Command
 from world.physical.liquid import LiquidContainer, Water
-from world.utils import DisplayNameWrapper
-from world.living.perception import MsgObj
 
 
 class CmdFill(Command):
@@ -43,13 +41,8 @@ class CmdFill(Command):
             source = source.liquid
 
         dest.fill(source)
-        msg_content = "$You() fill the $obj(dest) from $obj(source)."
-        caller.location.msg_contents(
-            msg_content,
-            from_obj=caller,
-            mapping={
-                "dest": DisplayNameWrapper(dest, command_narration=True),
-                "source": DisplayNameWrapper(source, command_narration=True),
-            },
-            msg_obj=MsgObj(visual=msg_content, sound="You hear liquid pouring.").to_dict()
+        self.send_room_message(
+            "$You() fill the $obj(dest) from $obj(source).",
+            mapping={"dest": dest, "source": source},
+            sound="You hear liquid pouring."
         )

@@ -1,8 +1,6 @@
 """Eat command for consuming Food objects."""
 
 from commands.command import Command
-from world.utils import DisplayNameWrapper
-from world.living.perception import MsgObj
 
 
 class CmdEat(Command):
@@ -41,10 +39,8 @@ class CmdEat(Command):
             return caller.msg(f"There's nothing left of {self.get_display_name(obj)} to eat.")
 
         obj.food.eat(caller)
-        msg_content = "$You() $conj(eat) a portion of $obj(food)."
-        caller.location.msg_contents(
-            msg_content,
-            from_obj=caller,
-            mapping={"food": DisplayNameWrapper(obj, command_narration=True)},
-            msg_obj=MsgObj(visual=msg_content, sound="You hear eating sounds.").to_dict()
+        self.send_room_message(
+            "$You() $conj(eat) a portion of $obj(food).",
+            mapping={"food": obj},
+            sound="You hear eating sounds."
         )
