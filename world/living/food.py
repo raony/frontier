@@ -76,8 +76,8 @@ class FoodMixin:
     def food(self) -> FoodHandler:
         return FoodHandler(self)
 
-    def get_display_name(self, looker):
-        name = super().get_display_name(looker)
+    def get_display_name(self, looker, **kwargs):
+        name = super().get_display_name(looker, **kwargs)
         if self.food.eaten_percentage == 0:
             return name
 

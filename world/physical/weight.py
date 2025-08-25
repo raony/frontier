@@ -42,8 +42,11 @@ class WeightMixin:
         super().at_object_creation()
         self.weight.value = self.default_weight
 
-    def get_display_name(self, looker):
-        name = super().get_display_name(looker)
+    def get_display_name(self, looker, **kwargs):
+        name = super().get_display_name(looker, **kwargs)
+
+        if kwargs.get("command_narration"):
+            return name
 
         if hasattr(looker, 'holding_strength'):
             if self.weight.total <= looker.holding_strength:

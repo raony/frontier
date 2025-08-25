@@ -8,7 +8,7 @@ Rooms are simple containers that has no location of their own.
 from evennia.objects.objects import DefaultRoom
 from evennia.contrib.base_systems import custom_gametime as gametime
 import evennia
-from evennia.utils.utils import lazy_property
+from world.physical.liquid import LiquidContainerMixin
 
 # Hex tile typeclass
 from .hextile import HexTile
@@ -17,7 +17,7 @@ from world.living.perception import LightManager
 from .objects import ObjectParent
 
 
-class Room(ObjectParent, DefaultRoom):
+class Room(LiquidContainerMixin, ObjectParent, DefaultRoom):
     """
     Rooms are like any Object, except their location is None
     (which is default). They also use basetype_setup() to

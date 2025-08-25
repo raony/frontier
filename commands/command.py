@@ -30,8 +30,9 @@ class Command(BaseCommand):
     #     - at_post_cmd(): Extra actions, often things done after
     #         every command, like prompts.
     #
-    pass
 
+    def get_display_name(self, obj):
+        return obj.get_display_name(self.caller, command_narration=True)
 
 # -------------------------------------------------------------
 #
