@@ -92,15 +92,27 @@ drink cantil          # Test empty container
 - ✅ Command executes without errors
 - ✅ Error messages match expected patterns
 - ✅ Object display names appear correctly
-- ✅ Broadcast messages work properly (visible to room)
 - ✅ State changes persist correctly
 - ✅ Edge cases handled gracefully
 
+## Testing Limitations
+- **Multi-character testing**: Avoid testing how other characters see messages since this requires multiple simultaneous connections
+- **Broadcast message testing**: Focus on testing that commands execute successfully rather than verifying room message reception
+- **MsgObj sound effects**: Cannot easily test auditory components without multiple players
+- **Single-connection focus**: Test from one character's perspective only
+
 ## Benefits of Live Testing
 - Verifies DisplayNameWrapper works correctly
-- Confirms msg_contents broadcasting functions
 - Tests actual game object interaction
 - Validates error handling in real environment
 - Ensures command integration with live game state
+- Confirms state persistence and object manipulation
+- Tests weight system integration and container mechanics
 
-Always test commands in the live environment after implementation to catch issues that unit tests might miss.
+## Testing Focus
+- **Single-character perspective**: Test command execution, error handling, and state changes
+- **Object manipulation**: Verify items move correctly, containers work, attributes persist
+- **System integration**: Ensure new architecture works with existing game systems
+- **Error validation**: Test all error conditions thoroughly
+
+Always test commands in the live environment after implementation to catch issues that unit tests might miss, but focus on single-character testing scenarios.
