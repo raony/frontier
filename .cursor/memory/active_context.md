@@ -160,15 +160,17 @@ obj.set_weight(500)      # Set weight to 500g
 obj.weight_default = 200 # Set default for new instances
 ```
 
-## Current Focus
+## Current Focus - World Package Architecture Migration
+- **World package reorganization completed** - Systems moved to specialized subpackages
+- **Living systems package** (`world/living/`) - metabolism, food, people, living commands
+- **Physical systems package** (`world/physical/`) - weight, liquids, physical commands
+- **Handler pattern adoption** - Complex attribute management through dedicated handler classes
+- **Modular command organization** - Commands grouped with related systems (`AliveCmdSet`, physical commands)
+- **Improved code organization** - Better separation of concerns and maintainability
 - Container system successfully implemented with tag-based approach
 - Equipment system successfully implemented with dual approach (tags + attributes)
 - Holding system successfully converted to tag-based approach
 - Weight system is now fully implemented and tested
-- All existing items have appropriate default weights
-- Commands are available for players and builders
-- System follows Evennia patterns with persistent attributes and tags
-- All container tests passing (16/16), overall tests: 99/99 passing
 
 ## Next Steps
 - Fix failing tests (light system and weight system)
@@ -180,6 +182,21 @@ obj.weight_default = 200 # Set default for new instances
 - Evaluate performance differences between tag and attribute systems
 
 ## Related Files
+
+### World Package Architecture
+- `world/living/base.py` - LivingMixin core functionality
+- `world/living/metabolism.py` - MetabolismMixin and handlers (hunger, thirst, tiredness)
+- `world/living/food.py` - FoodHandler and FoodMixin for consumables
+- `world/living/people.py` - Person class combining all living traits
+- `world/living/perception.py` - PerceptionMixin for sensory capabilities
+- `world/living/commands/__init__.py` - AliveCmdSet and LivingBuilderCmdSet
+- `world/living/commands/` - Living-specific commands (eat, drink, rest, stand, etc.)
+- `world/physical/weight.py` - WeightHandler and WeightMixin
+- `world/physical/liquid.py` - Water, LiquidContainer, and liquid systems
+- `world/physical/commands/` - Physical commands (fill, empty)
+- `world/utils.py` - Shared utilities (null_func)
+
+### Legacy Systems (Pre-Architecture)
 - `typeclasses/equipment.py` - WearableMixin and WornItemsHandler
 - `typeclasses/characters.py` - Updated with tag-based equipment methods
 - `typeclasses/items.py` - All equipment items now include WearableMixin
@@ -188,8 +205,6 @@ obj.weight_default = 200 # Set default for new instances
 - `tests/test_equipment_tags.py` - Comprehensive equipment tag system tests
 - `typeclasses/holding.py` - Updated holding system with tag-based approach
 - `typeclasses/objects.py` - WeightMixin and base Object class
-- `typeclasses/food.py` - Food weight defaults
-- `typeclasses/liquid.py` - Container weight defaults
 - `commands/weight.py` - Weight commands
 - `commands/hold.py` - Hold command (updated for tag system)
 - `tests/test_weight_system.py` - Weight system tests

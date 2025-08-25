@@ -6,9 +6,12 @@ This repository is an Evennia-based MUD (multi-user dungeon) game using Python a
 - `commands/`: Custom commands and command sets (e.g., `drink.py`, `eat.py`, `rest.py`, plus default/override cmdsets).
 - `typeclasses/`: Game entity classes extending Evennia defaults (e.g., `characters.py`, `rooms.py`, `exits.py`, `objects.py`, `scripts.py`).
 - `server/conf/`: Server configuration (settings, session hooks, parser hooks, portal/server services, web plugins).
-- `web/`: Django-side overrides for site, API, admin, and webclient; extends Evennia’s URLs, templates, and static assets.
-- `world/`: Game content and systems not covered elsewhere (help entries, prototypes, models/migrations, utilities like `hexmap.py`).
-- `tests/`: Unit tests using Evennia’s testing helpers (`EvenniaTest`).
+- `web/`: Django-side overrides for site, API, admin, and webclient; extends Evennia's URLs, templates, and static assets.
+- `world/`: Game content and systems organized into specialized packages:
+  - `world/living/`: Living being systems (metabolism, perception, food, people, and living-specific commands)
+  - `world/physical/`: Physical world systems (weight, liquids, containers, and physical commands)
+  - Core game content: help entries, prototypes, models/migrations, utilities like `hexmap.py`
+- `tests/`: Unit tests using Evennia's testing helpers (`EvenniaTest`).
 
 ## Entry points
 - Run migrations: `evennia migrate`

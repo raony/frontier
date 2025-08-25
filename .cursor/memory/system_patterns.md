@@ -33,6 +33,29 @@
 - `world/help_entries.py`: File-based help entries; activate via `settings.FILE_HELP_ENTRY_MODULES`.
 - `world/hexmap.py` + `world/models.py`: Hex map with DB persistence (`HexMap.load_all/save_all` backed by `HexTile`).
 
+## World Package Architecture
+The `world/` package is organized into specialized subpackages for better code organization:
+
+### Living Systems (`world/living/`)
+- **Base classes**: `LivingMixin` provides core living being functionality
+- **Metabolism**: `MetabolismMixin` with handlers for hunger, thirst, tiredness
+- **Food system**: `FoodHandler` and `FoodMixin` for consumable food items
+- **People**: `Person` class combining all living being traits
+- **Perception**: `PerceptionMixin` for sensory capabilities
+- **Commands**: Living-specific commands (`eat`, `drink`, `rest`, `stand`, etc.) grouped in `AliveCmdSet`
+
+### Physical Systems (`world/physical/`)
+- **Weight system**: `WeightHandler` and `WeightMixin` for object mass management
+- **Liquid system**: `Water`, `LiquidContainer`, and `LiquidContainerMixin` for liquid mechanics
+- **Commands**: Physical interaction commands (`fill`, `empty`) for liquid containers
+
+### Handler Pattern
+Both packages use a handler pattern for complex attribute management:
+- Handlers wrap objects and provide sophisticated property management
+- Use lazy loading with `@lazy_property` for performance
+- Persist data using Evennia attributes with categories
+- Provide clean APIs for complex state management
+
 ## Web/Django overrides
 - Extend Evennia URL patterns: `web/urls.py`, `web/website/urls.py`, `web/webclient/urls.py`.
 - Override templates/static by mirroring Evennia paths under `web/templates/` and `web/static/`.

@@ -1,0 +1,16 @@
+---
+description: editing or creating command classes
+alwaysApply: false
+---
+When working with command classes (files in `commands/` directory or any file containing Evennia command classes that inherit from `Command` or `MuxCommand`), ALWAYS read and follow the patterns documented in `.cursor/memory/command-writing-patterns.md`.
+
+This file contains essential patterns for:
+- Argument parsing using `self.lhs`, `self.rhs`, and `self.caller`
+- Object search with `caller.search_item()`
+- Display names using `self.get_display_name(obj)`
+- Message broadcasting with `caller.location.msg_contents()`
+- Using `DisplayNameWrapper` for object mapping
+- Error handling and validation patterns
+- Standard command structure and organization
+
+Reference this file before writing any new commands or modifying existing command classes to ensure consistency with established patterns.
