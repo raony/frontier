@@ -2,6 +2,7 @@ from .drink import CmdDrink
 from .eat import CmdEat
 from .rest import CmdRest
 from .stand import CmdStand
+from .status import CmdStatus
 from .kill import CmdKill
 from .reset import CmdResetChar
 from .darkvision import CmdDarkvision
@@ -20,6 +21,7 @@ class AliveCmdSet(default_cmds.CharacterCmdSet):
         self.add(CmdDrink())
         self.add(CmdRest())
         self.add(CmdStand())
+        self.add(CmdStatus())
 
 class LivingBuilderCmdSet(default_cmds.CharacterCmdSet):
 
@@ -31,4 +33,4 @@ class LivingBuilderCmdSet(default_cmds.CharacterCmdSet):
         self.add(CmdKill())
         self.add(CmdDarkvision())
 
-__all__ = ["CmdDrink", "CmdEat", "CmdRest", "CmdStand", "AliveCmdSet", "LivingBuilderCmdSet"]
+__all__ = ["CmdDrink", "CmdEat", "CmdRest", "CmdStand", "CmdStatus", "AliveCmdSet", "LivingBuilderCmdSet"]
