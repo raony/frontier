@@ -73,7 +73,7 @@ def is_living_being_tag(self) -> bool:
 Successfully converted the holding system to use Django Tags for better performance and consistency.
 
 **Implementation Details:**
-- **File**: `typeclasses/holding.py`
+- **File**: `world/equipment/holding.py`
 - **Mixin**: `HoldableMixin`
 - **Tags**:
   - `"holdable"` in category `"holding"` for items that can be held
@@ -336,7 +336,7 @@ class MyObject(Object):
 
 ## Related Files
 - `typeclasses/characters.py` - Living state tag implementation
-- `typeclasses/holding.py` - Holding system tag implementation
+- `world/equipment/holding.py` - Holding system tag implementation
 - `typeclasses/equipment.py` - Equipment system tag implementation
 - `typeclasses/items.py` - Equipment items with WearableMixin
 - `tests/test_tag_living_state.py` - Living state tag tests

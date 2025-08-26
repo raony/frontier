@@ -203,7 +203,7 @@ obj.weight_default = 200 # Set default for new instances
 - `commands/equip.py` - New tag-based equipment commands
 - `commands/default_cmdsets.py` - Added new equipment commands
 - `tests/test_equipment_tags.py` - Comprehensive equipment tag system tests
-- `typeclasses/holding.py` - Updated holding system with tag-based approach
+- `world/equipment/holding.py` - Updated holding system with tag-based approach
 - `typeclasses/objects.py` - WeightMixin and base Object class
 - `commands/weight.py` - Weight commands
 - `commands/hold.py` - Hold command (updated for tag system)

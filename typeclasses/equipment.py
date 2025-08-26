@@ -7,7 +7,7 @@ typeclasses and commands.
 
 from typing import List, Optional
 from evennia.utils.utils import lazy_property
-from .holding import NotInInventoryError
+from world.equipment import NotInInventoryError
 from .objects import Object
 
 class NotEquippableError(Exception):

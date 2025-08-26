@@ -4,7 +4,7 @@ from django.utils import tree
 from evennia import AttributeProperty
 from evennia.utils.utils import lazy_property
 from evennia.help.models import Tag
-from .objects import Object
+from typeclasses.objects import Object
 
 class NoSlotsError(Exception):
     """Exception raised when no slots are available."""

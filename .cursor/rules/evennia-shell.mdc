@@ -1,0 +1,7 @@
+---
+description:
+globs:
+alwaysApply: true
+---
+
+When trying to run arbitrary code with `python -c` use `evennia shell -c` instead. Make sure you have the .venv loaded before that.

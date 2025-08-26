@@ -5,8 +5,6 @@ Holdables are separate from equippable wear slots. Items must have
 """
 
 from .command import Command
-from typeclasses.holding import AlreadyHoldingError, NoSlotsError, NotHoldableError, InvalidSlotError, TooHeavyError
-from typeclasses.container import is_container
 from evennia.help.models import Tag
 
 
