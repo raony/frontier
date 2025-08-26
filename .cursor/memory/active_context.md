@@ -57,7 +57,7 @@ class TreasureChest(ContainerMixin, Object):
 
 ### Equipment System Tag Implementation (Completed)
 - **Implemented tag-based equipment system** alongside existing attribute-based system for comparison
-- **Added `WearableMixin`** to `typeclasses/equipment.py` - provides tag-based equipment functionality
+- **Added `WearableMixin`** to `world/equipment/equipment.py` - provides tag-based equipment functionality
 - **Created `WornItemsHandler`** for managing worn items using tags:
   - Uses `category="equipment"` for wearable and worn states
   - Uses `category="wearing_slot"` for slot tags (head, body, legs, waist, hands, feet)
@@ -197,7 +197,7 @@ obj.weight_default = 200 # Set default for new instances
 - `world/utils.py` - Shared utilities (null_func)
 
 ### Legacy Systems (Pre-Architecture)
-- `typeclasses/equipment.py` - WearableMixin and WornItemsHandler
+- `world/equipment/equipment.py` - WearableMixin and WornItemsHandler
 - `typeclasses/characters.py` - Updated with tag-based equipment methods
 - `typeclasses/items.py` - All equipment items now include WearableMixin
 - `commands/equip.py` - New tag-based equipment commands

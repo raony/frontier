@@ -11,7 +11,21 @@ The holding system allows characters to hold items in their hands. It includes:
 - **HoldableItem**: Base typeclass for holdable items
 - **HeldItemsHandler**: Handler for managing held items
 - **HolderMixin**: Mixin for entities that can hold objects
-- **Exception classes**: Various exceptions for error handling
+
+### equipment.py
+The equipment system for wearable items. It includes:
+
+- **EquippableMixin**: Mixin for items that can be equipped
+- **EquipmentHandler**: Handler for managing equipped items
+- **WearerMixin**: Mixin for entities that can wear items
+- **Equipment type classes**: Specific classes for different equipment slots
+
+### exceptions.py
+Centralized exception classes for the equipment system:
+
+- **NotInInventoryError**: Raised when an item is not in inventory
+- **NotEquippableError**: Raised when an item cannot be equipped
+- **AlreadyEquippedError**: Raised when an item is already equipped
 
 ### Key Features
 
@@ -37,6 +51,6 @@ class Weapon(HoldableMixin, ...):
 
 ## Related Files
 
-- `typeclasses/equipment.py` - Equipment system for wearable items
+- `world/equipment/equipment.py` - Equipment system for wearable items
 - `commands/hold.py` - Commands for holding/using items
 - `commands/equip.py` - Commands for equipping wearable items

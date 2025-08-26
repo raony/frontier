@@ -5,30 +5,7 @@ from evennia import AttributeProperty
 from evennia.utils.utils import lazy_property
 from evennia.help.models import Tag
 from typeclasses.objects import Object
-
-class NoSlotsError(Exception):
-    """Exception raised when no slots are available."""
-    pass
-
-class NotInInventoryError(Exception):
-    """Exception raised when an item is not in the inventory."""
-    pass
-
-class NotHoldableError(Exception):
-    """Exception raised when an item is not holdable."""
-    pass
-
-class InvalidSlotError(Exception):
-    """Exception raised when an invalid slot is provided."""
-    pass
-
-class AlreadyHoldingError(Exception):
-    """Exception raised when the slot is already holding an item."""
-    pass
-
-class TooHeavyError(Exception):
-    """Exception raised when an item is too heavy to hold."""
-    pass
+from .exceptions import NotInInventoryError
 
 
 class HoldableMixin:

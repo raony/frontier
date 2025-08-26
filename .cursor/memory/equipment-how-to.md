@@ -30,7 +30,7 @@ Characters can equip items into slots and inventory now shows equipped gear. Ite
 - `inventory|inv|i`: extended to include an "Equipped" section.
 
 ### Implementation notes
-- Slot constants and helpers: `typeclasses/equipment.py`.
+- Slot constants and helpers: `world/equipment/equipment.py`.
 - Holding system: `world/equipment/holding.py`.
 - Item slot detection: `Object.equipable_slot` (supports `db.equipable` or `db.equipable_slot`).
 - Commands in `commands/equip.py`. Registered in `commands/default_cmdsets.py`.

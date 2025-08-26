@@ -127,7 +127,7 @@ def remove(self, item: Object) -> bool:
 Successfully implemented a tag-based equipment system alongside the existing attribute-based system for comparison and evaluation.
 
 **Implementation Details:**
-- **File**: `typeclasses/equipment.py`
+- **File**: `world/equipment/equipment.py`
 - **Mixin**: `WearableMixin`
 - **Handler**: `WornItemsHandler`
 - **Tags**:
@@ -337,7 +337,7 @@ class MyObject(Object):
 ## Related Files
 - `typeclasses/characters.py` - Living state tag implementation
 - `world/equipment/holding.py` - Holding system tag implementation
-- `typeclasses/equipment.py` - Equipment system tag implementation
+- `world/equipment/equipment.py` - Equipment system tag implementation
 - `typeclasses/items.py` - Equipment items with WearableMixin
 - `tests/test_tag_living_state.py` - Living state tag tests
 - `tests/test_holding.py` - Holding system tag tests

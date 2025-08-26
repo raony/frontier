@@ -11,12 +11,26 @@ from .holding import (
     HoldableItem,
     HeldItemsHandler,
     HolderMixin,
-    NoSlotsError,
+)
+
+from .exceptions import (
     NotInInventoryError,
-    NotHoldableError,
-    InvalidSlotError,
-    AlreadyHoldingError,
-    TooHeavyError,
+    NotEquippableError,
+    AlreadyEquippedError,
+)
+
+from .equipment import (
+    EquippableMixin,
+    EquipmentHandler,
+    WearerMixin,
+    EquippableHead,
+    EquippableBody,
+    EquippableLegs,
+    EquippableWaist,
+    EquippableHands,
+    EquippableFeet,
+    EQUIPMENT_SLOTS,
+    normalize_slot,
 )
 
 __all__ = [
@@ -24,10 +38,18 @@ __all__ = [
     'HoldableItem',
     'HeldItemsHandler',
     'HolderMixin',
-    'NoSlotsError',
     'NotInInventoryError',
-    'NotHoldableError',
-    'InvalidSlotError',
-    'AlreadyHoldingError',
-    'TooHeavyError',
+    'NotEquippableError',
+    'AlreadyEquippedError',
+    'EquippableMixin',
+    'EquipmentHandler',
+    'WearerMixin',
+    'EquippableHead',
+    'EquippableBody',
+    'EquippableLegs',
+    'EquippableWaist',
+    'EquippableHands',
+    'EquippableFeet',
+    'EQUIPMENT_SLOTS',
+    'normalize_slot',
 ]

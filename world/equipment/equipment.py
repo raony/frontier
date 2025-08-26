@@ -7,20 +7,8 @@ typeclasses and commands.
 
 from typing import List, Optional
 from evennia.utils.utils import lazy_property
-from world.equipment import NotInInventoryError
-from .objects import Object
-
-class NotEquippableError(Exception):
-    """Exception raised when an item is not equippable."""
-    pass
-
-class AlreadyEquippedError(Exception):
-    """Exception raised when an item is already equipped."""
-    pass
-
-class WrongSlotError(Exception):
-    """Exception raised when an item is equipped to the wrong slot."""
-    pass
+from .exceptions import NotInInventoryError, NotEquippableError, AlreadyEquippedError
+from typeclasses.objects import Object
 
 
 # Canonical equipment slots
