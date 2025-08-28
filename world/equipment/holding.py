@@ -4,8 +4,6 @@ from django.utils import tree
 from evennia import AttributeProperty
 from evennia.utils.utils import lazy_property
 from evennia.help.models import Tag
-from typeclasses.objects import Object
-from .exceptions import NotInInventoryError
 
 
 class HoldableMixin:
@@ -31,12 +29,8 @@ class HoldableMixin:
         else:
             return '█'
 
-class HoldableItem(HoldableMixin, Object):
-    """Base typeclass for items that can be held in hands."""
-    pass
-
 class HeldItemsHandler:
-    def __init__(self, holder: Object):
+    def __init__(self, holder):
         self.holder = holder
 
     @property
@@ -57,29 +51,29 @@ class HeldItemsHandler:
         return self.available_slots[0] if self.available_slots else None
 
     @property
-    def all(self) -> list[Object]:
+    def all(self) -> list:
         return [obj for obj in self.holder.contents if obj.tags.has("held", category="holding")]
 
     def is_valid_slot(self, slots: list[str]) -> bool:
         return all(slot in self.slots for slot in slots)
 
-    def is_in_inventory(self, item: Object) -> bool:
+    def is_in_inventory(self, item) -> bool:
         return item.location == self.holder
 
-    def is_holdable(self, item: Object) -> bool:
+    def is_holdable(self, item) -> bool:
         return item.tags.has("holdable", category="holding")
 
-    def is_too_heavy(self, item: Object, slots: list[str]) -> bool:
+    def is_too_heavy(self, item, slots: list[str]) -> bool:
         return item.weight.total > len(slots) * self.holder.holding_strength
 
-    def is_already_holding(self, item: Object, slots: list[str]) -> bool:
+    def is_already_holding(self, item, slots: list[str]) -> bool:
         return set(slots) == set(self.get_slots_for(item))
 
-    def is_slots_available(self, item: Object, slots: list[str]) -> bool:
+    def is_slots_available(self, item, slots: list[str]) -> bool:
         available_slots = self.available_slots + self.get_slots_for(item)
         return all(slot in available_slots for slot in slots)
 
-    def can_hold(self, item: Object, slots: list[str]) -> bool:
+    def can_hold(self, item, slots: list[str]) -> bool:
         return (
             self.is_valid_slot(slots)
             and self.is_in_inventory(item)
@@ -89,7 +83,7 @@ class HeldItemsHandler:
             and self.is_slots_available(item, slots)
         )
 
-    def add(self, item: Object, slots: list[str]) -> bool:
+    def add(self, item, slots: list[str]) -> bool:
         if not self.can_hold(item, slots):
             return False
 
@@ -99,7 +93,7 @@ class HeldItemsHandler:
         item.tags.add("held", category="holding")
         return True
 
-    def remove(self, item: Object) -> bool:
+    def remove(self, item) -> bool:
         if not item or item.location != self.holder:
             return False
 
@@ -109,7 +103,7 @@ class HeldItemsHandler:
             return True
         return False
 
-    def get_slots_for(self, item: Object) -> list[str]:
+    def get_slots_for(self, item) -> list[str]:
         return item.tags.get(category="holding_slot", return_list=True)
 
 class HolderMixin:
@@ -131,7 +125,7 @@ class HolderMixin:
         self.equipment.remove(obj)
         return super().at_pre_object_leave(obj, target_location, **kwargs)
 
-    def get_display_holding(self, item: Object) -> str:
+    def get_display_holding(self, item) -> str:
         slots = self.held_items.get_slots_for(item)
         if len(slots) == 1:
             return Tag.objects.get(db_key=slots[0], db_category="holding_slot").db_data

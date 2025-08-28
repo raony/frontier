@@ -8,7 +8,6 @@ typeclasses and commands.
 from typing import List, Optional
 from evennia.utils.utils import lazy_property
 from .exceptions import NotInInventoryError, NotEquippableError, AlreadyEquippedError
-from typeclasses.objects import Object
 
 
 # Canonical equipment slots
@@ -97,7 +96,7 @@ class EquipmentHandler:
         """Get all currently worn items."""
         return [obj for obj in self.wearer.contents if obj.tags.has("equipped", category="equipment")]
 
-    def get_item_in_slot(self, slot: str) -> Object | None:
+    def get_item_in_slot(self, slot: str) -> object | None:
         for obj in self.all:
             if obj.tags.has(slot, category="equipment_slot"):
                 return obj
@@ -147,30 +146,3 @@ class WearerMixin:
         super().at_object_creation()
         for slot in EQUIPMENT_SLOTS:
             self.tags.add(slot, category="equipment_slot")
-
-
-
-# --- Item mixins ------------------------------------------------------------
-
-class EquippableHead(EquippableMixin):
-    default_slot_name = "head"
-
-
-class EquippableBody(EquippableMixin):
-    default_slot_name = "body"
-
-
-class EquippableLegs(EquippableMixin):
-    default_slot_name = "legs"
-
-
-class EquippableWaist(EquippableMixin):
-    default_slot_name = "waist"
-
-
-class EquippableHands(EquippableMixin):
-    default_slot_name = "hands"
-
-
-class EquippableFeet(EquippableMixin):
-    default_slot_name = "feet"

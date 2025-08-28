@@ -9,6 +9,8 @@ with a location in the game world (like Characters, Rooms, Exits).
 """
 
 from evennia.objects.objects import DefaultObject
+from world.equipment.equipment import EquippableMixin
+from world.equipment.holding import HoldableMixin
 from world.physical.weight import WeightMixin
 from world.living.food import FoodMixin
 
@@ -228,5 +230,15 @@ class Object(WeightMixin, ObjectParent, DefaultObject):
     default_weight = 100
 
 
-class Food(FoodMixin, Object):
+class Item(HoldableMixin, Object):
+    """Base class for all items."""
     pass
+
+
+class Food(FoodMixin, Item):
+    """Base class for all food items."""
+    pass
+
+
+class HeadItem(EquippableMixin, Item):
+    default_slot_name = "head"

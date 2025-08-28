@@ -8,7 +8,6 @@ This package contains equipment-related systems including:
 
 from .holding import (
     HoldableMixin,
-    HoldableItem,
     HeldItemsHandler,
     HolderMixin,
 )
@@ -23,19 +22,12 @@ from .equipment import (
     EquippableMixin,
     EquipmentHandler,
     WearerMixin,
-    EquippableHead,
-    EquippableBody,
-    EquippableLegs,
-    EquippableWaist,
-    EquippableHands,
-    EquippableFeet,
     EQUIPMENT_SLOTS,
     normalize_slot,
 )
 
 __all__ = [
     'HoldableMixin',
-    'HoldableItem',
     'HeldItemsHandler',
     'HolderMixin',
     'NotInInventoryError',
@@ -44,12 +36,6 @@ __all__ = [
     'EquippableMixin',
     'EquipmentHandler',
     'WearerMixin',
-    'EquippableHead',
-    'EquippableBody',
-    'EquippableLegs',
-    'EquippableWaist',
-    'EquippableHands',
-    'EquippableFeet',
     'EQUIPMENT_SLOTS',
     'normalize_slot',
 ]
