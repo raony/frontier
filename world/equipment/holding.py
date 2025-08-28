@@ -17,7 +17,7 @@ class HoldableMixin:
         name = super().get_display_name(looker, **kwargs)
         if self.tags.has("held", category="holding"):
             name = f"{name} ({self.location.get_display_holding(self)})"
-        if self.weight.total > 0:
+        if self.weight.total > 0 and hasattr(looker, 'holding_strength') and not kwargs.get("command_narration"):
             name = f"{name} {self.get_display_weight(looker)}"
         return name
 

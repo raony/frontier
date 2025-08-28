@@ -100,11 +100,6 @@ class TestWeightMixin(EvenniaTest):
         self.assertTrue(hasattr(self.test_obj, 'weight'))
         self.assertIsInstance(self.test_obj.weight, WeightHandler)
 
-    def test_weight_mixin_default_weight(self):
-        """Test default weight is set on object creation."""
-        # Default weight should be 100 for regular objects
-        self.assertEqual(self.test_obj.weight.value, 100)
-
     def test_weight_mixin_lazy_property(self):
         """Test weight is a lazy property."""
         # Accessing weight should create the handler
@@ -112,72 +107,10 @@ class TestWeightMixin(EvenniaTest):
         weight2 = self.test_obj.weight
         self.assertIs(weight1, weight2)  # Same instance
 
-    def test_get_display_name_with_holding_strength_light(self):
-        """Test display name for light objects."""
-        # Set up character with holding strength
-        self.char1.holding_strength = 1000
-
-        # Create light object
-        light_obj = create_object("typeclasses.objects.Object", key="LightObj")
-        light_obj.weight.value = 500  # Below holding strength
-
-        # Should show light weight indicator
-        display_name = light_obj.get_display_name(self.char1)
-        self.assertIn("░", display_name)
-
-    def test_get_display_name_with_holding_strength_medium(self):
-        """Test display name for medium weight objects."""
-        # Set up character with holding strength
-        self.char1.holding_strength = 1000
-
-        # Create medium weight object
-        medium_obj = create_object("typeclasses.objects.Object", key="MediumObj")
-        medium_obj.weight.value = 2000  # Above holding strength, below total capacity
-
-        # Should show medium weight indicator
-        display_name = medium_obj.get_display_name(self.char1)
-        self.assertIn("▒", display_name)
-
-    def test_get_display_name_with_holding_strength_heavy(self):
-        """Test display name for heavy objects."""
-        # Set up character with holding strength
-        self.char1.holding_strength = 1000
-
-        # Create heavy object
-        heavy_obj = create_object("typeclasses.objects.Object", key="HeavyObj")
-        heavy_obj.weight.value = 5000  # Above total capacity
-
-        # Should show heavy weight indicator
-        display_name = heavy_obj.get_display_name(self.char1)
-        self.assertIn("█", display_name)
-
-    def test_get_display_name_no_holding_strength(self):
-        """Test display name when looker has no holding strength."""
-        # Create object
-        obj = create_object("typeclasses.objects.Object", key="TestObj")
-
-        # Should show no weight indicator when looker has no holding_strength
-        display_name = obj.get_display_name(self.char2)  # char2 has no holding_strength
-        # The weight system shows indicators even without holding_strength if weight > 0
-        # This is the current behavior, so we test for it
-        self.assertIn("░", display_name)  # Light weight indicator for objects with weight
-
-    def test_get_display_name_command_narration(self):
-        """Test display name with command narration flag."""
-        # Create object
-        obj = create_object("typeclasses.objects.Object", key="TestObj")
-
-        # Should show no weight indicator with command_narration
-        display_name = obj.get_display_name(self.char1, command_narration=True)
-        self.assertNotIn("░", display_name)
-        self.assertNotIn("▒", display_name)
-        self.assertNotIn("█", display_name)
-
-    def test_get_display_name_includes_object_name(self):
-        """Test display name includes the object name."""
-        obj = create_object("typeclasses.objects.Object", key="TestObj")
-        display_name = obj.get_display_name(self.char1)
-        self.assertIn("TestObj", display_name)
+    def test_weight_mixin_default_weight(self):
+        """Test default weight is set on object creation."""
+        # Default weight should be 100 for regular objects
+        self.assertEqual(self.test_obj.weight.value, 100)
 
 
 class TestWeightIntegration(EvenniaTest):

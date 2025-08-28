@@ -160,6 +160,43 @@ obj.set_weight(500)      # Set weight to 500g
 obj.weight_default = 200 # Set default for new instances
 ```
 
+### Weight Display for Holdable Items (Completed)
+- **Modified `WeightMixin`** in `world/physical/weight.py` to NOT show weight indicators for any objects
+- **Enhanced `HoldableMixin`** in `world/equipment/holding.py` to show weight indicators with unicode block characters for holdable items ONLY
+- **Weight display logic**:
+  - Holdable items show weight indicators (░ ▒ █) based on weight relative to holding strength
+  - Non-holdable items do NOT show weight indicators
+  - Weight indicators respect `command_narration` flag (no display during command narration)
+  - Weight indicators only show when looker has `holding_strength` attribute
+- **Unicode block characters**:
+  - ░ (light) - Weight ≤ holding strength
+  - ▒ (medium) - Weight ≤ holding strength × number of slots
+  - █ (heavy) - Weight > holding strength × number of slots
+- **Test coverage**: Added comprehensive tests in `world/equipment/tests/test_holding.py` for holdable item weight display
+- **Integration**: Works seamlessly with existing weight system and holding system
+
+### Weight Display API
+- **Holdable items**: Automatically show weight indicators when displayed to characters with holding strength
+- **Non-holdable items**: Do NOT show weight indicators (clean, uncluttered display)
+- **Command narration**: Weight indicators are hidden during command narration for cleaner output
+- **Held status**: Holdable items show both weight indicators and held status (e.g., "Sword ░ (main hand)")
+
+### Usage Examples
+```python
+# Holdable items automatically show weight
+sword = create_object("world.equipment.holding.HoldableItem", key="Sword")
+sword.weight.value = 500  # Light weight
+
+# Display to character with holding strength
+display_name = sword.get_display_name(character)  # "Sword ░"
+display_name = sword.get_display_name(character, command_narration=True)  # "Sword" (no weight)
+
+# Non-holdable items do NOT show weight
+rock = create_object("typeclasses.objects.Object", key="Rock")
+rock.weight.value = 2000  # Medium weight
+display_name = rock.get_display_name(character)  # "Rock" (no weight indicator)
+```
+
 ## Current Focus - World Package Architecture Migration
 - **World package reorganization completed** - Systems moved to specialized subpackages
 - **Living systems package** (`world/living/`) - metabolism, food, people, living commands
