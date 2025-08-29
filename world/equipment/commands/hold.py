@@ -1,12 +1,4 @@
-"""Hold and release items in hands.
-
-Holdables are separate from equippable wear slots. Items must have
-`db.is_holdable=True` (e.g., via `HoldableMixin`) to be held.
-"""
-
-from .command import Command
-from evennia.help.models import Tag
-
+from commands.command import Command
 
 class CmdHold(Command):
     """Hold a carried item in your hand.
@@ -65,7 +57,7 @@ class CmdHold(Command):
 
         if caller.held_items.can_hold(obj, slot_keys):
             if len(slot_keys) == 1:
-                slot_display = Tag.objects.get(db_key=slot_keys[0], db_category="holding_slot").db_data
+                slot_display = slot_keys[0]
             else:
                 slot_display = "both hands"
             caller.location.msg_contents(

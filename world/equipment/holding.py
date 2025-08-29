@@ -1,10 +1,10 @@
 """Holding system for game entities."""
 
-from django.utils import tree
 from evennia import AttributeProperty
 from evennia.utils.utils import lazy_property
 from evennia.help.models import Tag
-
+from world.equipment.commands import HoldCmdSet
+from world.utils import null_func
 
 class HoldableMixin:
     def at_object_creation(self):
@@ -115,10 +115,19 @@ class HolderMixin:
     def held_items(self) -> HeldItemsHandler:
         return HeldItemsHandler(self)
 
+    def load_cmdset(self):
+        getattr(super(), "load_cmdset", null_func)()
+        if not self.cmdset.has(HoldCmdSet):
+            self.cmdset.add(HoldCmdSet, persistent=True)
+
+    def clear_cmdset(self):
+        getattr(super(), "clear_cmdset", null_func)()
+        self.cmdset.remove(HoldCmdSet)
+
     def at_object_post_creation(self):
         super().at_object_post_creation()
-        self.tags.add('main', category="holding_slot", data="main hand")
-        self.tags.add('off', category="holding_slot", data="off hand")
+        self.tags.add('main hand', category="holding_slot")
+        self.tags.add('off hand', category="holding_slot")
 
     def at_pre_object_leave(self, obj, target_location, **kwargs):
         self.held_items.remove(obj)
@@ -128,6 +137,6 @@ class HolderMixin:
     def get_display_holding(self, item) -> str:
         slots = self.held_items.get_slots_for(item)
         if len(slots) == 1:
-            return Tag.objects.get(db_key=slots[0], db_category="holding_slot").db_data
+            return slots[0]
         elif len(slots) == 2:
             return "both hands"

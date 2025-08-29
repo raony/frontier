@@ -100,11 +100,8 @@ class PerceptionMixin:
         raw_msg_obj = kwargs.pop("msg_obj", None)
         if raw_msg_obj:
             msg_obj = MsgObj.from_dict(raw_msg_obj)
-            if self.vision.can_receive_message(msg_obj):
-                text = msg_obj.visual
-            else:
+            if not self.vision.can_receive_message(msg_obj):
                 text = msg_obj.sound
-
         return super().msg(text, from_obj, **kwargs)
 
     def at_look(self, target, **kwargs):

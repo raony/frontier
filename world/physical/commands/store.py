@@ -6,6 +6,7 @@ ContainerMixin functionality.
 
 from commands.command import Command
 from world.physical.container import is_container
+from world.utils import DisplayNameWrapper
 
 
 class CmdStore(Command):
@@ -71,7 +72,7 @@ class CmdStore(Command):
 
         item.move_to(container)
         self.send_room_message(
-            "$You() $conj(store) $you(obj) in $you(container)",
+            "$You() $conj(store) $obj(obj) in $obj(container)",
             mapping={"obj": item, "container": container},
             sound="You hear something move."
         )

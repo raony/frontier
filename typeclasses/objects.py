@@ -13,6 +13,7 @@ from world.equipment.equipment import EquippableMixin
 from world.equipment.holding import HoldableMixin
 from world.physical.weight import WeightMixin
 from world.living.food import FoodMixin
+from world.physical.container import ContainerMixin
 
 
 class ObjectParent:
@@ -242,3 +243,9 @@ class Food(FoodMixin, Item):
 
 class HeadItem(EquippableMixin, Item):
     default_slot_name = "head"
+
+
+class ContainerItem(ContainerMixin, Item):
+    container_capacity_default = 10
+    container_weight_limit_default = 5000
+    weight_default = 200
