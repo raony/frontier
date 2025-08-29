@@ -6,7 +6,6 @@ ContainerMixin functionality.
 
 from commands.command import Command
 from world.physical.container import is_container
-from world.utils import DisplayNameWrapper
 
 
 class CmdStore(Command):

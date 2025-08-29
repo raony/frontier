@@ -8,7 +8,6 @@ Commands describe the input the account can do to the game.
 from evennia.commands.default.muxcommand import MuxCommand as BaseCommand
 from world.living.perception import MsgObj
 from world.utils import DisplayNameWrapper
-from evennia.utils import logger
 
 # from evennia import default_cmds
 
@@ -62,8 +61,6 @@ class Command(BaseCommand):
 
         if sound:
             kwargs["msg_obj"] = MsgObj(visual=msg_content, sound=sound).to_dict()
-
-        logger.info(f"Sending room message: {msg_content} with kwargs: {kwargs}")
 
         self.caller.location.msg_contents(msg_content, **kwargs)
 

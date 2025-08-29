@@ -22,8 +22,14 @@ class CmdHold(Command):
         switch = self.switches[0] if self.switches else None
         if not switch:
             slot_keys = []
+        elif switch == 'both':
+            slot_keys = ['main hand', 'off hand']
         else:
-            slot_keys = ['main', 'off'] if switch == 'both' else [switch]
+            available_slots = caller.held_items.slots
+            slot_keys = [slot for slot in available_slots if slot.lower().startswith(switch.lower())]
+
+            if not slot_keys:
+                return caller.msg(f"No holding slot found starting with '{switch}'.")
 
         obj = caller.search_item(item_key)
         if not obj:
