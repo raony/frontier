@@ -14,6 +14,7 @@ class CmdStore(Command):
 
     Usage:
       store/<container> <item>
+      store <item> (auto-finds suitable container)
     """
 
     key = "store"
@@ -22,53 +23,45 @@ class CmdStore(Command):
 
     def func(self):
         caller = self.caller
-
-        if not self.switches:
-            caller.msg("Usage: store/<container> <item>")
-            return
-
-        container_key = self.switches[0]
         item_key = self.lhs
 
         if not item_key:
-            caller.msg("Store what?")
-            return
-
-        if not container_key:
-            caller.msg("Store in what?")
-            return
+            return caller.msg("Store what?")
 
         item = caller.search_item(item_key)
         if not item:
-            caller.msg(f"You don't have {item_key}.")
-            return
+            return caller.msg(f"You don't have {item_key}.")
 
-        container = caller.search_item(container_key)
-        if not container:
-            caller.msg(f"You don't see {container_key}.")
-            return
+        if not self.switches:
+            container = self.find_suitable_container(caller, item)
+            if not container:
+                return caller.msg(f"You don't have any suitable containers to store {self.get_display_name(item)} in.")
+        else:
+            container_key = self.switches[0]
 
-        if not is_container(container):
-            return caller.msg(f"{self.get_display_name(container)} is not a container.")
+            container = caller.search_item(container_key)
+            if not container:
+                return caller.msg(f"You don't see {container_key}.")
 
-        if container.location != caller.location and container.location != caller:
-            return caller.msg(f"You can't reach {self.get_display_name(container)}.")
+            if container == item:
+                return caller.msg(f"You can't store {self.get_display_name(item)} in itself.")
 
-        if not container.can_hold_item(item):
-            if container.is_container_locked():
-                return caller.msg(f"{self.get_display_name(container)} is locked.")
+            if not is_container(container):
+                return caller.msg(f"{self.get_display_name(container)} is not a container.")
 
-            if len(container.contents) >= container.get_container_capacity():
-                return caller.msg(f"{self.get_display_name(container)} is full.")
+            if not container.can_hold_item(item):
+                if container.is_locked():
+                    return caller.msg(f"{self.get_display_name(container)} is locked.")
 
-            if hasattr(item, 'weight') and hasattr(container, 'get_container_weight_limit'):
-                current_weight = sum(obj.weight for obj in container.contents if hasattr(obj, 'weight'))
-                if current_weight + item.weight > container.get_container_weight_limit():
+                if container.is_full():
+                    return caller.msg(f"{self.get_display_name(container)} is full.")
+
+                if container.is_too_heavy(item):
                     caller.msg(f"{self.get_display_name(container)} is too heavy to hold {self.get_display_name(item)}.")
                     return
 
-            caller.msg(f"You can't store {self.get_display_name(item)} in {self.get_display_name(container)}.")
-            return
+                caller.msg(f"You can't store {self.get_display_name(item)} in {self.get_display_name(container)}.")
+                return
 
         item.move_to(container)
         self.send_room_message(
@@ -76,3 +69,10 @@ class CmdStore(Command):
             mapping={"obj": item, "container": container},
             sound="You hear something move."
         )
+
+    def find_suitable_container(self, caller, item):
+        """Find the first suitable container in the caller's inventory."""
+        for obj in caller.contents:
+            if is_container(obj) and obj.can_hold_item(item) and obj != item:
+                return obj
+        return None
