@@ -2,8 +2,7 @@
 Equip/unequip and enhanced inventory display.
 """
 
-from evennia import default_cmds
-from .command import Command
+from commands.command import Command
 
 
 class CmdEquip(Command):
@@ -32,25 +31,3 @@ class CmdEquip(Command):
 
         caller.msg(f"You equip {obj.get_display_name()}.")
         caller.equipment.add(obj)
-
-
-class CmdUnequip(Command):
-    """Unequip an item.
-
-    Usage:
-      unequip <item>
-    """
-
-    key = "unequip"
-    locks = "cmd:all()"
-
-    def func(self):
-        caller = self.caller
-        target_name = self.lhs
-
-        obj = caller.quiet_search(target_name)
-        if not obj:
-            caller.msg(f"You don't have {target_name}.")
-
-        caller.equipment.remove(obj)
-        caller.msg(f"You unequip {obj.get_display_name()}.")

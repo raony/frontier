@@ -123,6 +123,7 @@ class EquipmentHandler:
 
         item.tags.remove(category="equipment_slot")
         item.tags.remove(category="holding_slot")
+        item.tags.remove("held", category="holding")
         item.tags.add("equipped", category="equipment")
         item.tags.add(slot, category="equipment_slot")
         return True

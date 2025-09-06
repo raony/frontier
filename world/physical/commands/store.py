@@ -62,7 +62,7 @@ class CmdStore(Command):
                 caller.msg(f"You can't store {self.get_display_name(item)} in {self.get_display_name(container)}.")
                 return
 
-        item.move_to(container)
+        item.move_to(container, quiet=True)
         self.send_room_message(
             "$You() $conj(store) $obj(obj) in $obj(container)",
             mapping={"obj": item, "container": container},

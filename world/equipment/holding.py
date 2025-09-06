@@ -88,6 +88,8 @@ class HeldItemsHandler:
             return False
 
         item.tags.remove(category="holding_slot")
+        item.tags.remove(category="equipment_slot")
+        item.tags.remove("equipped", category="equipment")
         for slot in slots:
             item.tags.add(slot, category="holding_slot")
         item.tags.add("held", category="holding")
